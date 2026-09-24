@@ -4,14 +4,19 @@ export type Project = {
   description: string;
   tags: string[];
   image: string;
+  /** Extra screenshots shown in the preview modal. Falls back to `image` if omitted. */
+  screenshots?: string[];
+  /** Optional demo video (mp4 or YouTube/embeds URL) shown in the preview modal. */
+  demoVideoUrl?: string;
   links: { label: string; url: string }[];
   featured?: boolean;
+  /** Short award/result badge, e.g. "3rd Place". */
+  award?: string;
 };
 
-// The first two entries below are real, already-built projects (this chatbot
-// backend and its sibling Companies Act chatbot) — filled in from what's known
-// about them. Update the links once each is live. Add/replace the rest with
-// your own projects; anything in [brackets] is a placeholder.
+// The first entry below is real (this portfolio chatbot itself). The LMS entry
+// is a placeholder waiting on details you're providing. Add/replace the rest
+// with your own projects; anything in [brackets] is a placeholder.
 export const projects: Project[] = [
   {
     slug: "portfolio-chatbot",
@@ -30,33 +35,69 @@ export const projects: Project[] = [
     featured: true,
   },
   {
-    slug: "companies-act-chatbot",
-    title: "Companies Act 2016 AI Assistant",
+    slug: "apmoodle-lms",
+    title: "APMoodle",
     description:
-      "A Malaysian legal-domain RAG chatbot answering questions on the Companies Act 2016. " +
-      "Node-based workflow architecture: multi-namespace concurrent retrieval, cross-encoder " +
-      "reranking, hierarchical context assembly, and Gemini generation, with a full FastAPI " +
-      "backend, response caching, and circuit-breaker protection on AI calls. Deployed to " +
-      "production behind a Cloudflare Tunnel.",
-    tags: ["FastAPI", "Pinecone", "RAG", "Reranking", "Firebase"],
-    image: "/projects/companies-act-chatbot.svg",
-    links: [
-      { label: "Live site", url: "https://cca.yyc.my" },
-    ],
+      "A full-stack learning management system built with a team of five — modules, materials, " +
+      "quizzes, and real-time progress in one calm, fast platform. Students get a live dashboard " +
+      "(average/best scores, quiz history, trends), auto-graded multiple-choice quizzes, one-code " +
+      "module enrolment, and real-time announcements/chat with lecturers, complete with unread " +
+      "notification dots. I designed the Supabase (PostgreSQL) schema, built the ASP.NET backend " +
+      "and React frontend, implemented the real-time student–lecturer chat (polling every 5s), and " +
+      "wired up SMTP email for registration and password resets. Scored a 4.0.",
+    tags: ["ASP.NET", "Supabase", "PostgreSQL", "React", "Tailwind CSS", "SMTP"],
+    image: "/projects/placeholder.svg",
+    links: [{ label: "Live site", url: "https://apmoodle.onrender.com/" }],
     featured: true,
   },
   {
-    slug: "project-3",
-    title: "[Your Project Name]",
+    slug: "abang-karipap",
+    title: "ABANG KARIPAP",
     description:
-      "[One or two sentences: the problem it solves, your role, and the outcome. Be specific " +
-      "— a measurable result ('cut processing time by 40%', 'used by 200+ students') is far " +
-      "stronger than a feature list.]",
-    tags: ["[Tech 1]", "[Tech 2]", "[Tech 3]"],
+      "An AI-powered fake news detector built at KitaHack. Users paste text or upload an image " +
+      "and get a misinformation verdict with a confidence score and a plain-English explanation, " +
+      "powered by Google Gemini and the Google Vision API. React frontend, FastAPI backend, with " +
+      "optional sign-in and Firebase-backed history so you can revisit past checks.",
+    tags: ["React", "FastAPI", "Gemini", "Google Vision API", "Firebase"],
     image: "/projects/placeholder.svg",
-    links: [
-      { label: "GitHub", url: "https://github.com/[yourusername]/[repo]" },
-      { label: "Live demo", url: "[url or remove this link]" },
-    ],
+    links: [{ label: "Live demo", url: "https://karipapfakenews.netlify.app/" }],
+  },
+  {
+    slug: "secinsight-ai",
+    title: "SecInsight AI",
+    description:
+      "Built at the GTD x APU Hackathon (by Maybank), where it placed 3rd. SecInsight AI analyzes " +
+      "CVE CSV data and automatically generates plain-English vulnerability summaries, risk scores, " +
+      "priority levels, and remediation guidance using Google Gemini AI — turning raw vulnerability " +
+      "dumps into something a non-security team can act on.",
+    tags: ["Google Gemini", "CVE Data Analysis"],
+    image: "/projects/placeholder.svg",
+    links: [],
+    award: "3rd Place — GTD x APU Hackathon",
+  },
+  {
+    slug: "foodloop",
+    title: "FoodLoop",
+    description:
+      "Built at UM Hackathon. An AI-powered food redistribution platform using Z.AI GLM for " +
+      "intelligent donation matching — parsing unstructured donation descriptions, orchestrating a " +
+      "multi-step workflow, and automatically ranking NGOs by food type and distance. Session-based " +
+      "conversation handling on PostgreSQL, containerized with Docker, complete donation tracking " +
+      "from listing to pickup confirmation.",
+    tags: ["Z.AI GLM", "PostgreSQL", "Docker", "HTML/CSS"],
+    image: "/projects/placeholder.svg",
+    links: [],
+  },
+  {
+    slug: "care-ai",
+    title: "Care AI",
+    description:
+      "Built at the AWS CendekiAwan Hackathon. An AI-powered medical report interpretation platform " +
+      "that analyzes medical documents and transforms complex clinical terminology into plain-language " +
+      "explanations, risk insights, and personalized health recommendations using AWS PartyRock and " +
+      "LLM integration.",
+    tags: ["AWS PartyRock", "LLM Integration", "Medical NLP"],
+    image: "/projects/placeholder.svg",
+    links: [],
   },
 ];

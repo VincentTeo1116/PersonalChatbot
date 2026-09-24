@@ -1,0 +1,54 @@
+  AP Moodle (LMS project)
+  1. What's the actual name you want displayed (just "AP Moodle", or a fuller course-platform name)?
+- just 'APMoodle', for more info you might try to get to the website
+  2. Brief description — what does it do / what problem does it solve?
+- APMoodle brings modules, materials, quizzes and real-time progress into one calm, fast platform — so students learn quicker and lecturers teach smarter.
+- Your progress, visualized: Average & best scores, quiz history and score trends — on a dashboard that updates in real time.
+- Quizzes with instant results: Build multiple-choice quizzes; students take them online and get graded the moment they submit.
+-Join by code: Enrol into a module in seconds.
+- All materials: Files, links & notes in one place.
+- Announcements & chat: Keep everyone in the loop and let students reach lecturers directly, in real time.
+- Built for every role: Students, lecturers and admins each get a tailored experience — the tools they need, nothing they don't.
+  3. Your specific role/contribution in the group (e.g. backend, DB design, a specific feature)?
+- DB design (supabase), backend & frontend developer, additional features is the chatbot, enable the communication between student and lecturer, with real time updates (refresh within every 5 secs)
+- Gmail integration (enable the SMTP to send email to the user while registration, forgot password, etc.)
+  4. Tech stack (languages, framework, database, hosting)?
+- ASP.NET, supabase (PostgreSQL), HTML, CSS,(tailwind CSS), reactJS, onrender to host
+  5. Team size — want groupmates credited by name, or just "built with a team of N"?
+- 5 members, Ahmad Muhammad, Isaac Leong, Moses Tung, Max Yong, Vincent Teo 
+  6. Any standout result worth mentioning (grade, feature count, user base, etc.)?
+- get 4.0, 
+- "Wow" to the email and the real-time chat, some notifications for the announcement (due to got the red dots for unread announcement and the chat message)
+  7. GitHub repo link, if there's one to share alongside the live site?
+- NA
+
+  Education (you want AI/ML as the framing, not Software Engineering)
+  1. Full institution name(s) for the diploma and the degree?
+- Asia Pacific University of Technology & Innovation (APU)
+  2. Start/end years for each?
+- Diploma in Information Communication & Technology (ICT) in Software Engineering (July 2023 - Oct 2025)
+- Bachelor Degree in Computer Science (Artificial Intelligence) (Nov 2025 - Present)
+  3. How do you want your headline worded — "AI/ML Engineer", "Software Engineer specializing in AI/ML", or something
+     else?
+- Focused more on the AI/ML, may refer to the linkedIn (linkedin.com/in/kai-qi-vincent-teo-1596ab286)
+
+  4. Any AI/ML-specific coursework, final-year project/thesis topic, or achievement (Dean's list, competition, etc.)
+     worth highlighting?
+- may refer to the resume.pdf in the folder
+
+  Personal info
+  1. Name as you want it displayed?
+- Vincent Teo
+  2. Location (city, country) — or omit it?
+- Kuala Lumpur, Johor
+  3. A few raw bullet points about who you are / what drives you — I can turn that into the polished 2-4 sentence bio,
+     or you can write it yourself.
+- may refer to the resume.pdf in the folder
+  4. Contact: email to display, GitHub URL, LinkedIn URL, resume link (or skip)?
+- may refer to the resume.pdf in the folder 
+- for resume, raw file can? 
+  Skills
+  1. Specific AI/ML tools you use (PyTorch, TensorFlow, scikit-learn, pandas, Hugging Face, OpenCV, etc.)?
+- PyTorch, TensorFlow, scikit-learn, HuggingFace, OpenCV, YOLO, RAG, RandomForest, XGBoost
+  2. Anything to add/remove from the current lists (Languages, Frameworks, Tools & Infra)?
+- NA

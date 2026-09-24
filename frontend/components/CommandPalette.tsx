@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { Command } from "cmdk";
 import { profile } from "@/data/profile";
 import { projects } from "@/data/projects";
+import { research } from "@/data/research";
 
 const SECTIONS = [
   { id: "top", label: "Home" },
   { id: "about", label: "About & Education" },
   { id: "projects", label: "Projects" },
+  { id: "research", label: "Research" },
   { id: "hackathons", label: "Hackathons" },
   { id: "contact", label: "Contact" },
 ];
@@ -61,64 +63,79 @@ export default function CommandPalette() {
       className="fixed inset-0 z-[10000] flex items-start justify-center bg-black/60 backdrop-blur-sm px-4 pt-[12vh]"
       shouldFilter
     >
-      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-slate-900 shadow-2xl">
-        <div className="flex items-center gap-3 border-b border-white/10 px-4">
-          <span className="text-slate-500">{"⌘K"}</span>
+      <div className="animate-fade-in-scale w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
+        <div className="flex items-center gap-3 border-b border-border px-4">
+          <span className="text-text-subtle">{"⌘K"}</span>
           <Command.Input
             autoFocus
             placeholder="Jump to a section, project, or action…"
-            className="h-14 flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
+            className="h-14 flex-1 bg-transparent text-sm text-foreground placeholder:text-text-subtle outline-none"
           />
-          <kbd className="rounded border border-white/10 px-1.5 py-0.5 text-[10px] text-slate-500">esc</kbd>
+          <kbd className="rounded border border-border px-1.5 py-0.5 text-[10px] text-text-subtle">esc</kbd>
         </div>
 
         <Command.List className="max-h-[60vh] overflow-y-auto p-2">
-          <Command.Empty className="px-3 py-6 text-center text-sm text-slate-500">
+          <Command.Empty className="px-3 py-6 text-center text-sm text-text-subtle">
             No results found.
           </Command.Empty>
 
-          <Command.Group heading="Navigate" className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-slate-500">
+          <Command.Group heading="Navigate" className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-text-subtle">
             {SECTIONS.map((s) => (
               <Command.Item
                 key={s.id}
                 value={`navigate ${s.label}`}
                 onSelect={() => goTo(s.id)}
-                className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-slate-200 data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-white"
+                className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-text-secondary data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-foreground"
               >
                 {s.label}
               </Command.Item>
             ))}
           </Command.Group>
 
-          <Command.Separator className="my-1 h-px bg-white/5" />
+          <Command.Separator className="my-1 h-px bg-border" />
 
-          <Command.Group heading="Projects" className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-slate-500">
+          <Command.Group heading="Projects" className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-text-subtle">
             {projects.map((p) => (
               <Command.Item
                 key={p.slug}
                 value={`project ${p.title} ${p.tags.join(" ")}`}
                 onSelect={() => goTo(`project-${p.slug}`)}
-                className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-slate-200 data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-white"
+                className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-text-secondary data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-foreground"
               >
                 {p.title}
               </Command.Item>
             ))}
           </Command.Group>
 
-          <Command.Separator className="my-1 h-px bg-white/5" />
+          <Command.Separator className="my-1 h-px bg-border" />
 
-          <Command.Group heading="Actions" className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-slate-500">
+          <Command.Group heading="Research" className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-text-subtle">
+            {research.map((r) => (
+              <Command.Item
+                key={r.slug}
+                value={`research ${r.title}`}
+                onSelect={() => goTo(`research-${r.slug}`)}
+                className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-text-secondary data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-foreground"
+              >
+                {r.title}
+              </Command.Item>
+            ))}
+          </Command.Group>
+
+          <Command.Separator className="my-1 h-px bg-border" />
+
+          <Command.Group heading="Actions" className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-text-subtle">
             <Command.Item
               value="ask ai assistant chat"
               onSelect={openAssistant}
-              className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-slate-200 data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-white"
+              className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-text-secondary data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-foreground"
             >
               Ask my AI assistant
             </Command.Item>
             <Command.Item
               value="open terminal easter egg"
               onSelect={openTerminal}
-              className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-slate-200 data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-white"
+              className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-text-secondary data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-foreground"
             >
               Open terminal
             </Command.Item>
@@ -128,7 +145,7 @@ export default function CommandPalette() {
                 window.location.href = `mailto:${profile.contact.email}`;
                 close();
               }}
-              className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-slate-200 data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-white"
+              className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-text-secondary data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-foreground"
             >
               Email me
             </Command.Item>
@@ -138,7 +155,7 @@ export default function CommandPalette() {
                 window.open(profile.contact.github, "_blank", "noreferrer");
                 close();
               }}
-              className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-slate-200 data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-white"
+              className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-text-secondary data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-foreground"
             >
               Open GitHub
             </Command.Item>
@@ -148,7 +165,7 @@ export default function CommandPalette() {
                 window.open(profile.contact.linkedin, "_blank", "noreferrer");
                 close();
               }}
-              className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-slate-200 data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-white"
+              className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-text-secondary data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-foreground"
             >
               Open LinkedIn
             </Command.Item>

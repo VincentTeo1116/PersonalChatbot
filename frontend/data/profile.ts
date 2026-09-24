@@ -1,46 +1,57 @@
-// Edit this file with your real information. Anything in [brackets] is a
-// placeholder — replace it, then delete this comment.
-
 export const profile = {
-  name: "[Your Name]",
-  tagline: "Software Engineer, specialising in AI-powered applications",
-  location: "[City, Country]",
+  name: "Vincent Teo",
+  tagline: "Aspiring Software Engineer, specialising in AI/ML",
+  location: "Kuala Lumpur, Malaysia",
   heroSummary:
-    "I build full-stack products with a focus on practical AI — retrieval-augmented " +
-    "generation, LLM-powered assistants, and the everyday engineering that makes them " +
-    "reliable in production.",
+    "I build full-stack products with a focus on practical AI — from a real-time LMS serving " +
+    "APU students to hackathon platforms that turn CVE data, medical reports, and fake news " +
+    "into plain-English insights using RAG and LLM integrations (Gemini, AWS PartyRock, Z.AI GLM).",
   about:
-    "[2-4 sentences about who you are, what drives you as an engineer, and what kind of " +
-    "problems you like solving. Keep it personal and specific — avoid generic phrases like " +
-    "'passionate developer'. Mention something concrete: a project, a technology you love, " +
-    "or a moment that shaped your interest in software engineering.]",
+    "I'm a Computer Science (Artificial Intelligence) undergraduate at Asia Pacific University, " +
+    "having moved from a Software Engineering diploma into a deeper focus on AI/ML — currently " +
+    "holding a 4.00 CGPA. Outside class, I've trained people-counting models as a Software Intern " +
+    "at FootfallCam, built APMoodle (a full-stack LMS with real-time chat and live progress " +
+    "tracking) with a team of five, and shipped four hackathon projects in under a year — including " +
+    "an AI CVE-summarising assistant that won 3rd place at the GTD x APU Hackathon. I also tutor " +
+    "kids aged 8–17 in programming, which keeps me honest about explaining things simply.",
 
   education: [
     {
       degree: "Bachelor's Degree, Computer Science (Artificial Intelligence)",
-      institution: "[Institution Name]",
-      period: "[Start Year] – [End Year]",
-      detail: "[Notable coursework, thesis/final year project, GPA/honours if you want to include it]",
+      institution: "Asia Pacific University of Technology & Innovation (APU)",
+      period: "Nov 2025 – Present",
+      detail: "CGPA: 4.00. Coursework: EduConnect Learning Centre (ReactJS, CSS).",
     },
     {
-      degree: "Diploma in Software Engineering",
-      institution: "[Institution Name]",
-      period: "[Start Year] – [End Year]",
-      detail: "[Notable coursework or achievements]",
+      degree: "Diploma in Information & Communication Technology (Software Engineering)",
+      institution: "Asia Pacific University of Technology & Innovation (APU)",
+      period: "Jul 2023 – Jun 2025",
+      detail: "CGPA: 3.74. Coursework: ResearchSnake (Python), CodeMaster (HTML, CSS).",
     },
   ],
 
   skills: {
-    Languages: ["Python", "TypeScript", "JavaScript", "[Add more]"],
-    "AI / ML": ["RAG pipelines", "Pinecone / vector search", "Gemini & OpenAI APIs", "Prompt engineering"],
-    "Frameworks": ["FastAPI", "Next.js", "React", "[Add more]"],
-    "Tools & Infra": ["Docker", "Git", "[Cloud provider]", "[Add more]"],
+    Languages: ["Python", "Java", "TypeScript", "JavaScript", "C#", "PHP"],
+    "AI / ML": [
+      "PyTorch",
+      "TensorFlow",
+      "scikit-learn",
+      "Hugging Face",
+      "OpenCV",
+      "YOLO",
+      "RAG pipelines",
+      "Random Forest",
+      "XGBoost",
+      "Gemini & OpenAI APIs",
+    ],
+    "Frameworks": ["React", "Next.js", "Node.js", "FastAPI", "ASP.NET"],
+    "Tools & Infra": ["Docker", "Git", "Supabase (PostgreSQL)", "MongoDB", "SQL / MariaDB", "CI/CD"],
   },
 
   contact: {
-    email: "[your.email@example.com]",
-    github: "https://github.com/[yourusername]",
-    linkedin: "https://linkedin.com/in/[yourprofile]",
-    resumeUrl: "[link to your resume PDF, or remove this field]",
+    email: "tkqvincent2@gmail.com",
+    github: "",
+    linkedin: "https://linkedin.com/in/kai-qi-vincent-teo-1596ab286",
+    resumeUrl: "/resume.pdf",
   },
 };
