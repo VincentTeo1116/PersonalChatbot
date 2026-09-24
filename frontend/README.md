@@ -55,6 +55,20 @@ not just in `.env.local` (that file isn't committed).
 
 Netlify works too via its Next.js runtime — same environment variable requirement.
 
+## Interactive extras
+
+- **Command palette** (`components/CommandPalette.tsx`, via `cmdk`) — press `Cmd/Ctrl+K` or
+  click "Search" in the nav. Fuzzy-navigates sections and individual projects (deep-links to
+  `#project-<slug>`, which the card listens for via CSS `:target` to highlight itself), opens
+  the chat assistant, opens the terminal, or jumps to email/GitHub/LinkedIn.
+- **Terminal easter egg** (`components/TerminalEasterEgg.tsx`, via `@xterm/xterm`) — the `>_`
+  button bottom-left. A tiny fake shell (`help`, `whoami`, `about`, `skills`, `projects`, `ls`,
+  `cat <file>`, `contact`, `clear`, `exit`, plus a `sudo make me a sandwich` joke) that reads
+  straight from `data/profile.ts` / `data/projects.ts`, so it never goes stale relative to the
+  rest of the site. Both are opened programmatically elsewhere via `window.dispatchEvent(new
+  CustomEvent("portfolio:open-palette"))` / `"portfolio:open-terminal"` — reuse that pattern if
+  you wire up more triggers later.
+
 ## Design notes
 
 - Dark theme, indigo/violet accent gradient, Geist font (matches the chat widget's default

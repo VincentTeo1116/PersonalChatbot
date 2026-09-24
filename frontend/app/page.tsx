@@ -5,6 +5,8 @@ import Projects from "@/components/Projects";
 import HackathonGallery from "@/components/HackathonGallery";
 import Contact from "@/components/Contact";
 import ChatWidgetLoader from "@/components/ChatWidgetLoader";
+import CommandPalette from "@/components/CommandPalette";
+import TerminalEasterEgg from "@/components/TerminalEasterEgg";
 
 export default function Home() {
   return (
@@ -18,6 +20,8 @@ export default function Home() {
         <Contact />
       </main>
       <ChatWidgetLoader />
+      <CommandPalette />
+      <TerminalEasterEgg />
     </>
   );
 }

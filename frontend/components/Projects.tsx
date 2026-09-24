@@ -14,7 +14,10 @@ export default function Projects() {
         <div className="mt-12 grid gap-8 sm:grid-cols-2">
           {projects.map((p, i) => (
             <Reveal key={p.slug} delay={i * 80}>
-              <article className="group h-full rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden hover:border-indigo-400/40 transition-colors">
+              <article
+                id={`project-${p.slug}`}
+                className="group h-full scroll-mt-24 rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition-colors hover:border-indigo-400/40 target:border-indigo-400/70 target:ring-2 target:ring-indigo-400/40"
+              >
                 <div className="relative aspect-[8/5] overflow-hidden">
                   <Image
                     src={p.image}

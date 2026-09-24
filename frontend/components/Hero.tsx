@@ -38,6 +38,12 @@ export default function Hero() {
               Chat with my AI assistant {"↓"}
             </a>
           </div>
+
+          <p className="mt-6 text-xs text-slate-500">
+            Press{" "}
+            <kbd className="rounded border border-white/15 bg-white/5 px-1.5 py-0.5 text-slate-300">{"⌘K"}</kbd>{" "}
+            to search, or open the terminal in the corner {"↙"}
+          </p>
         </div>
 
         <div className="relative mx-auto w-56 sm:w-72">

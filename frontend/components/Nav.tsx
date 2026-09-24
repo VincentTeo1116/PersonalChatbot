@@ -42,12 +42,23 @@ export default function Nav() {
           ))}
         </ul>
 
-        <a
-          href="#contact"
-          className="hidden md:inline-flex items-center rounded-full bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 transition-colors"
-        >
-          Get in touch
-        </a>
+        <div className="hidden md:flex items-center gap-3">
+          <button
+            type="button"
+            aria-label="Open command palette"
+            onClick={() => window.dispatchEvent(new CustomEvent("portfolio:open-palette"))}
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-2 text-xs text-slate-300 hover:border-white/30 hover:text-white transition-colors"
+          >
+            Search
+            <kbd className="rounded border border-white/15 bg-white/5 px-1.5 py-0.5 text-[10px]">{"⌘K"}</kbd>
+          </button>
+          <a
+            href="#contact"
+            className="inline-flex items-center rounded-full bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 transition-colors"
+          >
+            Get in touch
+          </a>
+        </div>
 
         <button
           aria-label="Toggle menu"
