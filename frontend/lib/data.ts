@@ -29,7 +29,7 @@ export const getProfile = cache(async (): Promise<Profile> => {
   ]);
 
   if (!profileRow) {
-    throw new Error("profile row (id=1) not found — run scripts/seed.ts first");
+    throw new Error("profile row (id=1) not found — run supabase/seed.sql first");
   }
 
   const skillsJson = (profileRow.skills ?? []) as SkillsJson;

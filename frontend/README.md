@@ -1,50 +1,85 @@
 # Portfolio Frontend
 
-Next.js (App Router, TypeScript, Tailwind CSS v4) portfolio site with an embedded AI chat
-widget backed by [`../portfolio-chatbot-backend`](../portfolio-chatbot-backend).
+Next.js 16 (App Router, TypeScript, Tailwind CSS v4) portfolio site backed by Supabase
+(Postgres + Storage + Auth), with a password-protected `/admin` CMS for editing every
+section, and an embedded AI chat widget backed by
+[`../portfolio-chatbot-backend`](../portfolio-chatbot-backend).
 
-## 1. Fill in your real content
+All content (profile, education, work experience, skills, projects, research, hackathon
+photos) lives in the database, not in code — a fresh clone has no content until you seed
+it, and you edit it afterward through `/admin`, not by editing files.
 
-Everything in `[brackets]` is a placeholder. Edit these files:
-
-- `data/profile.ts` — name, tagline, bio, education, skills, contact links
-- `data/projects.ts` — your project list (two entries are already filled in for you:
-  this portfolio chatbot itself, and the sibling Companies Act chatbot project)
-- `data/hackathons.ts` — captions for your hackathon photos
-
-Then replace the placeholder images with real ones (same filenames, or update the `src`
-paths in the data files above):
-- `public/avatar-placeholder.svg` — your photo
-- `public/projects/placeholder.svg` — screenshot for project #3
-- `public/hackathons/placeholder-1.svg` … `placeholder-4.svg` — your hackathon photos
-  (add/remove entries in `data/hackathons.ts` to match how many you have)
-- `public/education/placeholder-1.svg`, `placeholder-2.svg` — your university logo/campus
-  photos (add/remove entries in each `images` array in `data/profile.ts` to match how many
-  you have per education entry)
-
-## 2. Connect the chat widget to your backend
+## 1. Install dependencies
 
 ```bash
-cp .env.local.example .env.local
-# set NEXT_PUBLIC_CHATBOT_API_URL to your deployed backend's /api/chat endpoint
+npm install
+```
+
+> **Already had this repo cloned before?** If you pull the latest changes and see
+> `Module not found: Can't resolve 'motion/react'` (or any other dependency) when running
+> `npm run dev`, your local `node_modules` is just out of date relative to `package.json`.
+> Run `npm install` again — it's always safe to re-run after pulling, and picks up any
+> new dependency without needing a fresh clone or a `node_modules` wipe.
+
+## 2. Set up Supabase
+
+You need your own Supabase project — nothing here works without it, since every page
+fetches its content from it.
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. **Project Settings → API**: copy the `Project URL` and `anon public` key.
+3. Copy `.env.local.example` to `.env.local` and paste those two values in for
+   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. (Never put real values
+   in `.env.local.example` itself — that file is committed to git as a template;
+   `.env.local` is gitignored.)
+4. **Authentication → Sign-up settings**: turn **off** public sign-up.
+5. **Authentication → Users → Add user**: create the one admin account you'll log into
+   `/admin` with (real email + a strong password), with "Auto Confirm User" checked.
+   This is the only account that should ever exist.
+6. **Storage → New bucket**: name it `portfolio-content`, toggle **Public bucket** on.
+7. **SQL Editor**, run these files in order (copy-paste each one's contents, Run):
+   - `supabase/schema.sql` — all tables, indexes, and Row Level Security policies
+   - `supabase/002_work_experience.sql` — the Working Experience section's tables
+     (already folded into `schema.sql` too, so only needed if you ran an older
+     `schema.sql` before this section existed)
+   - `supabase/seed.sql` — your real profile/education/projects/research content (edit
+     this file first if you want different starting content — it's plain SQL, safe to
+     read before running)
+
+## 3. Add images (optional, can do later via `/admin`)
+
+`seed.sql` only inserts text content — your avatar, education photos, project
+screenshots, research image, and hackathon photos start out on placeholder images (or
+blank, where nothing's uploaded yet). Once you're logged into `/admin` (see the next
+step for how), every section's edit page has an upload form that pushes the file into
+Storage and links it to the right row automatically.
+
+## 4. Run locally
+
+```bash
+npm run dev
+```
+
+Open http://localhost:3000 — this is the public site, reading live from your Supabase
+project. To edit content, go to **http://localhost:3000/admin** (redirects to
+`/admin/login`) and sign in with the admin account you created in step 2.5. From there
+you can edit Profile, Education, Experience, Projects, Research, and Hackathons —
+changes appear on the public site immediately.
+
+## 5. Connect the chat widget to your backend
+
+```bash
+# already in .env.local from step 2 — just add/confirm this var too
+NEXT_PUBLIC_CHATBOT_API_URL=http://localhost:8080/api/chat
 ```
 
 The widget itself (`public/widget/chatbot-widget.js` + `.css`) is a copy of
 `../portfolio-chatbot-backend/widget/`. If you update the widget there, re-copy both
-files here.
+files here. Note the chatbot's knowledge base is a **separate** pipeline (Google Sheet →
+Pinecone, see the backend's own README) — it does not currently read from Supabase, so
+editing your profile via `/admin` won't automatically update what the chatbot knows.
 
-## 3. Run locally
-
-```bash
-npm install
-npm run dev
-```
-
-Open http://localhost:3000. The chat bubble in the bottom-right corner talks to whatever
-`NEXT_PUBLIC_CHATBOT_API_URL` points at (run the backend locally too if you want to test
-real answers, per its own README).
-
-## 4. Deploy
+## 6. Deploy
 
 Vercel is the path of least resistance for Next.js:
 
@@ -52,31 +87,36 @@ Vercel is the path of least resistance for Next.js:
 npx vercel
 ```
 
-or connect the GitHub repo at vercel.com/new. Set `NEXT_PUBLIC_CHATBOT_API_URL` as an
-environment variable in the Vercel project settings (pointing at your deployed backend),
-not just in `.env.local` (that file isn't committed).
+or connect the GitHub repo at vercel.com/new. Set all three env vars
+(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_CHATBOT_API_URL`)
+in the Vercel project settings — `.env.local` isn't committed, so nothing works on a
+deploy without them set there too.
 
 Netlify works too via its Next.js runtime — same environment variable requirement.
 
 ## Interactive extras
 
-- **Command palette** (`components/CommandPalette.tsx`, via `cmdk`) — press `Cmd/Ctrl+K` or
-  click "Search" in the nav. Fuzzy-navigates sections and individual projects (deep-links to
-  `#project-<slug>`, which the card listens for via CSS `:target` to highlight itself), opens
-  the chat assistant, opens the terminal, or jumps to email/GitHub/LinkedIn.
-- **Terminal easter egg** (`components/TerminalEasterEgg.tsx`, via `@xterm/xterm`) — the `>_`
-  button bottom-left. A tiny fake shell (`help`, `whoami`, `about`, `skills`, `projects`, `ls`,
-  `cat <file>`, `contact`, `clear`, `exit`, plus a `sudo make me a sandwich` joke) that reads
-  straight from `data/profile.ts` / `data/projects.ts`, so it never goes stale relative to the
-  rest of the site. Both are opened programmatically elsewhere via `window.dispatchEvent(new
-  CustomEvent("portfolio:open-palette"))` / `"portfolio:open-terminal"` — reuse that pattern if
-  you wire up more triggers later.
+- **Command palette** (`components/CommandPalette.tsx`, via `cmdk`) — press `Cmd/Ctrl+K`
+  or click "Search" in the nav. Fuzzy-navigates sections and individual projects
+  (deep-links to `#project-<slug>`, which the card listens for via CSS `:target` to
+  highlight itself), opens the chat assistant, opens the terminal, or jumps to
+  email/GitHub/LinkedIn.
+- **Terminal easter egg** (`components/TerminalEasterEgg.tsx`, via `@xterm/xterm`) — the
+  `>_` button bottom-left. A tiny fake shell (`help`, `whoami`, `about`, `skills`,
+  `education`, `projects`, `hackathons`, `ls`, `cat <file>`, `contact`, `clear`, `exit`,
+  plus a `sudo make me a sandwich` joke) reading from the same Supabase-backed data as
+  the rest of the site, so it never goes stale. Both are opened programmatically
+  elsewhere via `window.dispatchEvent(new CustomEvent("portfolio:open-palette"))` /
+  `"portfolio:open-terminal"` — reuse that pattern if you wire up more triggers later.
 
 ## Design notes
 
-- Dark theme, indigo/violet accent gradient, Geist font (matches the chat widget's default
-  primary color so the embedded widget doesn't look bolted on).
-- Sections fade in on scroll via a small `IntersectionObserver`-based `Reveal` wrapper
-  (`components/Reveal.tsx`) — no animation library needed.
-- All images are local SVGs under `public/`, so `next/image` needs no remote-pattern
-  config. Swap them for real JPG/PNG photos freely — `next/image` handles both.
+- Dark/light theme toggle, indigo/violet accent gradient, Geist font (matches the chat
+  widget's default primary color so the embedded widget doesn't look bolted on).
+- Animations run on [Motion](https://motion.dev) (`motion/react`, formerly Framer
+  Motion) — scroll-triggered reveals (`components/Reveal.tsx`), a shared-element nav
+  hover pill, magnetic buttons (`components/MagneticButton.tsx`), and spring-based card
+  hovers. Respects `prefers-reduced-motion` via `MotionConfig` in
+  `components/MotionProvider.tsx`.
+- `next/image` is configured (`next.config.ts`) to accept Supabase Storage URLs
+  (`*.supabase.co`) as a remote image pattern, alongside local files under `public/`.
