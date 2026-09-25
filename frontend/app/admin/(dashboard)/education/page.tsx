@@ -1,0 +1,72 @@
+import Link from "next/link";
+import { getEducation } from "@/lib/data";
+import { deleteEducation, moveEducation } from "./actions";
+
+export default async function EducationListPage() {
+  const education = await getEducation();
+
+  return (
+    <div>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-foreground">Education</h1>
+        <Link
+          href="/admin/education/new"
+          className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
+        >
+          + Add entry
+        </Link>
+      </div>
+
+      <ul className="space-y-3">
+        {education.map((ed, i) => (
+          <li key={ed.id} className="rounded-xl border border-border bg-surface p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-indigo-500 dark:text-indigo-300">{ed.period}</p>
+                <p className="font-semibold text-foreground">{ed.degree}</p>
+                <p className="text-sm text-text-muted">{ed.institution}</p>
+                <p className="mt-1 text-xs text-text-subtle">{ed.images.length} image(s)</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <form action={moveEducation}>
+                  <input type="hidden" name="id" value={ed.id} />
+                  <input type="hidden" name="direction" value="up" />
+                  <button
+                    type="submit"
+                    disabled={i === 0}
+                    className="rounded-lg border border-border px-2 py-1 text-xs text-text-secondary disabled:opacity-30"
+                  >
+                    ↑
+                  </button>
+                </form>
+                <form action={moveEducation}>
+                  <input type="hidden" name="id" value={ed.id} />
+                  <input type="hidden" name="direction" value="down" />
+                  <button
+                    type="submit"
+                    disabled={i === education.length - 1}
+                    className="rounded-lg border border-border px-2 py-1 text-xs text-text-secondary disabled:opacity-30"
+                  >
+                    ↓
+                  </button>
+                </form>
+                <Link
+                  href={`/admin/education/${ed.id}`}
+                  className="rounded-lg border border-border px-3 py-1 text-xs text-text-secondary hover:text-foreground"
+                >
+                  Edit
+                </Link>
+                <form action={deleteEducation}>
+                  <input type="hidden" name="id" value={ed.id} />
+                  <button type="submit" className="rounded-lg border border-border px-3 py-1 text-xs text-text-secondary hover:text-red-500">
+                    Delete
+                  </button>
+                </form>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

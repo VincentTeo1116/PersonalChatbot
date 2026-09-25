@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { profile } from "@/data/profile";
+import type { Profile } from "@/lib/types";
 
 declare global {
   interface Window {
@@ -18,7 +18,7 @@ const WIDGET_SCRIPT_ID = "portfolio-chatbot-widget-script";
  * then inject the script tag ourselves rather than relying on next/script
  * load-order guarantees.
  */
-export default function ChatWidgetLoader() {
+export default function ChatWidgetLoader({ profile }: { profile: Profile }) {
   useEffect(() => {
     if (document.getElementById(WIDGET_SCRIPT_ID)) return;
 
@@ -34,7 +34,7 @@ export default function ChatWidgetLoader() {
     script.src = "/widget/chatbot-widget.js";
     script.async = true;
     document.body.appendChild(script);
-  }, []);
+  }, [profile]);
 
   return null;
 }

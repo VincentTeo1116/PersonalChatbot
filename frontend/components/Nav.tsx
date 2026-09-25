@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { profile } from "@/data/profile";
+import type { Profile } from "@/lib/types";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const LINKS = [
@@ -12,7 +12,7 @@ const LINKS = [
   { href: "#contact", label: "Contact" },
 ];
 
-export default function Nav() {
+export default function Nav({ profile }: { profile: Profile }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);

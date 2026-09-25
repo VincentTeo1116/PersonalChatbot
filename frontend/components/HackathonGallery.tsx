@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
-import { hackathonPhotos } from "@/data/hackathons";
+import type { HackathonPhoto } from "@/lib/types";
 
-export default function HackathonGallery() {
+export default function HackathonGallery({ hackathonPhotos }: { hackathonPhotos: HackathonPhoto[] }) {
   return (
     <section id="hackathons" className="py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6">
@@ -18,7 +18,7 @@ export default function HackathonGallery() {
 
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {hackathonPhotos.map((photo, i) => (
-            <Reveal key={photo.src} delay={i * 80}>
+            <Reveal key={photo.id} delay={i * 80}>
               <figure className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-border transition-colors duration-300 hover:border-indigo-400/40">
                 <Image
                   src={photo.src}

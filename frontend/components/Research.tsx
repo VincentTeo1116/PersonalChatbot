@@ -4,9 +4,9 @@ import { useState } from "react";
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
 import ProjectModal from "@/components/ProjectModal";
-import { research } from "@/data/research";
+import type { Publication } from "@/lib/types";
 
-export default function Research() {
+export default function Research({ research }: { research: Publication[] }) {
   const [previewSlug, setPreviewSlug] = useState<string | null>(null);
   const previewPaper = research.find((r) => r.slug === previewSlug) ?? null;
 

@@ -3,9 +3,9 @@
 import { useRef } from "react";
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
-import { profile } from "@/data/profile";
+import type { Profile } from "@/lib/types";
 
-export default function Hero() {
+export default function Hero({ profile }: { profile: Profile }) {
   const avatarRef = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -88,7 +88,7 @@ export default function Hero() {
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 blur-2xl opacity-40" />
             <div ref={avatarRef} className="transition-transform duration-300 ease-out [transform-style:preserve-3d]">
               <Image
-                src="/avatar-placeholder.svg"
+                src={profile.avatarUrl}
                 alt={profile.name}
                 width={400}
                 height={400}

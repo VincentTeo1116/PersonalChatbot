@@ -18,6 +18,9 @@ paths in the data files above):
 - `public/projects/placeholder.svg` — screenshot for project #3
 - `public/hackathons/placeholder-1.svg` … `placeholder-4.svg` — your hackathon photos
   (add/remove entries in `data/hackathons.ts` to match how many you have)
+- `public/education/placeholder-1.svg`, `placeholder-2.svg` — your university logo/campus
+  photos (add/remove entries in each `images` array in `data/profile.ts` to match how many
+  you have per education entry)
 
 ## 2. Connect the chat widget to your backend
 

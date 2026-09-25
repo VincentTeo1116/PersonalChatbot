@@ -4,13 +4,13 @@ import { useState } from "react";
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
 import ProjectModal from "@/components/ProjectModal";
-import { projects } from "@/data/projects";
+import type { Project } from "@/lib/types";
 
 // Projects with screenshots/demo media open a preview modal when their
 // thumbnail is clicked, instead of navigating straight to the live link.
 const PREVIEWABLE_SLUGS = new Set(["abang-karipap", "secinsight-ai", "foodloop", "care-ai"]);
 
-export default function Projects() {
+export default function Projects({ projects }: { projects: Project[] }) {
   const [previewSlug, setPreviewSlug] = useState<string | null>(null);
   const previewProject = projects.find((p) => p.slug === previewSlug) ?? null;
 

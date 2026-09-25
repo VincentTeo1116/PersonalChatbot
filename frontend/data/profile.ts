@@ -15,18 +15,28 @@ export const profile = {
     "an AI CVE-summarising assistant that won 3rd place at the GTD x APU Hackathon. I also tutor " +
     "kids aged 8–17 in programming, which keeps me honest about explaining things simply.",
 
+  // Replace the placeholder images in public/education/ with real photos
+  // (same filenames, or update src below), and edit the captions.
   education: [
     {
       degree: "Bachelor's Degree, Computer Science (Artificial Intelligence)",
       institution: "Asia Pacific University of Technology & Innovation (APU)",
       period: "Nov 2025 – Present",
       detail: "CGPA: 4.00. Coursework: EduConnect Learning Centre (ReactJS, CSS).",
+      images: [
+        { src: "/education/placeholder-1.svg", caption: "APU logo" },
+        { src: "/education/placeholder-2.svg", caption: "APU campus" },
+      ],
     },
     {
       degree: "Diploma in Information & Communication Technology (Software Engineering)",
       institution: "Asia Pacific University of Technology & Innovation (APU)",
       period: "Jul 2023 – Jun 2025",
       detail: "CGPA: 3.74. Coursework: ResearchSnake (Python), CodeMaster (HTML, CSS).",
+      images: [
+        { src: "/education/placeholder-1.svg", caption: "APU logo" },
+        { src: "/education/placeholder-2.svg", caption: "APU campus" },
+      ],
     },
   ],
 

@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Command } from "cmdk";
-import { profile } from "@/data/profile";
-import { projects } from "@/data/projects";
-import { research } from "@/data/research";
+import type { Profile, Project, Publication } from "@/lib/types";
 
 const SECTIONS = [
   { id: "top", label: "Home" },
@@ -15,7 +13,15 @@ const SECTIONS = [
   { id: "contact", label: "Contact" },
 ];
 
-export default function CommandPalette() {
+export default function CommandPalette({
+  profile,
+  projects,
+  research,
+}: {
+  profile: Profile;
+  projects: Project[];
+  research: Publication[];
+}) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
