@@ -15,11 +15,7 @@ it, and you edit it afterward through `/admin`, not by editing files.
 npm install
 ```
 
-> **Already had this repo cloned before?** If you pull the latest changes and see
-> `Module not found: Can't resolve 'motion/react'` (or any other dependency) when running
-> `npm run dev`, your local `node_modules` is just out of date relative to `package.json`.
-> Run `npm install` again — it's always safe to re-run after pulling, and picks up any
-> new dependency without needing a fresh clone or a `node_modules` wipe.
+See [Troubleshooting](#troubleshooting) below if `npm run dev` fails right after this.
 
 ## 2. Set up Supabase
 
@@ -120,3 +116,33 @@ Netlify works too via its Next.js runtime — same environment variable requirem
   `components/MotionProvider.tsx`.
 - `next/image` is configured (`next.config.ts`) to accept Supabase Storage URLs
   (`*.supabase.co`) as a remote image pattern, alongside local files under `public/`.
+
+## Troubleshooting
+
+**`Module not found: Can't resolve 'motion/react'`** (or any other dependency) when
+running `npm run dev` — your local `node_modules` is out of date relative to
+`package.json`, usually from pulling changes without reinstalling. Run `npm install`
+again; it's always safe to re-run and picks up any new dependency without needing a
+fresh clone or a `node_modules` wipe.
+
+**`Turbopack is not supported on this platform (win32/x64) because native bindings are
+not available`** when running `npm run dev` or `npm run build` — despite what the
+message implies, Windows x64 *is* a supported Turbopack platform; this means the
+platform-specific native package (`@next/swc-win32-x64-msvc`) didn't actually get
+installed. This usually happens when `node_modules` was copied from another machine/OS
+instead of installed fresh, or when `npm install` was run with optional dependencies
+skipped (check for `omit=optional` or `optional=false` in any `.npmrc`, or an
+`--omit=optional`/`--no-optional` flag). Fix, in order of likelihood to work:
+1. Delete `node_modules` and `package-lock.json`'s lock (keep the file itself), then
+   `npm install` fresh on the actual Windows machine you're running on:
+   ```bash
+   rm -rf node_modules
+   npm install
+   ```
+2. If that doesn't fix it (e.g. a corporate proxy/firewall blocks the binary download),
+   fall back to Webpack instead of Turbopack for this one run:
+   ```bash
+   npx next dev --webpack
+   ```
+   or make it permanent by changing `"dev": "next dev"` to `"dev": "next dev --webpack"`
+   in `package.json` (same for the `"build"` script).

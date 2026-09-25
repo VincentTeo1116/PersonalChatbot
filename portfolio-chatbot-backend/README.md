@@ -63,6 +63,86 @@ python app.py   # serves on http://localhost:8080
 From then on, every edit to the `KB` tab re-embeds and upserts automatically — the chatbot's
 knowledge base is always current with the sheet.
 
+### How the sheet → Pinecone sync actually works
+
+**No text-chunking happens in this pipeline.** Each KB row (category + question + answer +
+tags) is short, FAQ-sized content, so it's embedded whole as a single vector — there's no
+document-splitting step to reason about. If you outgrow that (e.g. you want to paste in a
+long free-form document instead of a Q&A row), see [Adding chunking](#adding-chunking-if-you-need-it)
+below for where that logic would go.
+
+**1. Apps Script side** (`apps_script/Code.gs`), triggered either by the installable
+`onEdit` trigger (any edit to the `KB` tab) or manually via **Portfolio KB → Sync now**:
+- Reads the *entire* `KB` sheet via `getDataRange().getValues()` — not just the edited
+  row. Every sync sends the full current table, which is what makes this a **full resync**
+  rather than an incremental diff.
+- Validates the header row has all five required columns (`category`, `question`,
+  `answer`, `tags`, `is_active`); alerts and aborts if any are missing.
+- Converts each data row into a `{category, question, answer, tags, is_active}` object,
+  keeping only rows where `category`, `question`, and `answer` are all non-empty.
+- `POST`s `{"rows": [...]}` as JSON to `WEBHOOK_URL`, with the shared secret in an
+  `X-Sync-Secret` header (`SYNC_SECRET` script property). On auto-sync (every keystroke's
+  edit event), a `5xx` failure is only logged, not shown as an alert — otherwise you'd get
+  a popup on every character typed if the backend were briefly down.
+
+**2. Backend webhook** (`src/routes/webhook.py`, `POST /api/admin/sync-kb`):
+- Rejects the request with `401` unless `X-Sync-Secret` matches `SYNC_WEBHOOK_SECRET` from
+  `.env` — this is the only auth on this endpoint, so treat that secret like a password.
+- Validates the payload shape via a Pydantic model, then hands the row list to
+  `sync_rows()`.
+
+**3. Row processing** (`src/services/kb_sync.py`), per sync:
+- **Filtering**: drops any row missing `category`/`question`/`answer`, and any row whose
+  `is_active` is `"false"`, `"0"`, `"no"`, or empty — so you can stage draft content in
+  the sheet (set `is_active` to blank/false) without it reaching the chatbot yet.
+- **Stable IDs**: each surviving row's Pinecone vector ID is
+  `md5(f"{category}|{question}".lower().strip())`. This is what makes edits *update in
+  place* rather than create duplicates — if you edit the `answer` text but leave
+  `category`/`question` the same, the same vector ID gets upserted with new content. If
+  you edit the `category` or `question` text itself, that's a *new* ID (the old vector
+  becomes orphaned, and gets cleaned up in the next step).
+- **Embedding text**: `category + "\n" + question + "\n" + answer + "\n" + tags`
+  (whichever of those are non-empty), passed to Gemini's `text-embedding-004`
+  (`src/services/gemini_service.py:embed_text`, `task_type="retrieval_document"`, 768
+  dimensions) as one string, producing one vector per row.
+- **Upsert**: all vectors for the surviving rows go to Pinecone in one batch
+  (`pinecone_service.upsert_rows`), into the `portfolio-kb` namespace (or whatever
+  `PINECONE_NAMESPACE` is set to) of the `portfolio-chatbot` index (`PINECONE_INDEX_NAME`).
+- **Deletion / cleanup** (`pinecone_service.delete_missing_ids`): lists every vector ID
+  currently in that namespace, and deletes any that *aren't* in this sync's surviving-row
+  ID set. This is what makes it a true **sync** and not just an insert — deleting a row
+  from the sheet (or setting `is_active` to false, or editing its category/question so its
+  ID changes) actually removes the corresponding vector from Pinecone, so stale content
+  never lingers in what the chatbot can retrieve.
+- Returns `{upserted, removed, skipped, total_received}` counts, which the Apps Script
+  logs (`Logger.log`) — check **Apps Script → Executions** in the script editor if a sync
+  seems to have not taken effect.
+
+**Retrieval side** (for context — this doesn't run during sync): `POST /api/chat` embeds
+the visitor's question with `task_type="retrieval_query"`, queries Pinecone for the
+`TOP_K` (default 4) nearest vectors above `MIN_SCORE` (default 0.55) cosine similarity,
+concatenates their `answer` metadata into a context block, and feeds that to
+`gemini-2.5-flash` to generate the final grounded answer.
+
+#### Adding chunking (if you need it)
+
+If you ever move beyond short Q&A rows — say, a `KB` tab with a `content` column holding
+a multi-paragraph document per row — you'd add chunking in `kb_sync.py`, roughly:
+1. Split each row's long text into overlapping chunks (e.g. by paragraph, or a
+   fixed-token-count splitter with ~10-20% overlap so context isn't cut mid-sentence).
+2. Give each chunk its own Pinecone ID derived from the row ID plus a chunk index, e.g.
+   `f"{row_id}-{i}"`, so `delete_missing_ids` can still clean up correctly when a row's
+   chunk count changes between syncs (compute the full current ID set from all
+   rows × chunks before calling it, not just the row-level IDs).
+3. Embed and upsert each chunk as its own vector, all carrying the same `question`/
+   `category` metadata (plus a `chunk_index`) so retrieved chunks can be grouped or
+   deduplicated back to their source row when building the answer context.
+
+This isn't implemented today because the FAQ-row format keeps each unit of content
+naturally small enough that a single embedding already captures it well — chunking solves
+a problem (losing relevant context inside a too-large embedding) that doesn't exist yet
+at this content shape.
+
 ## 5. Test the chatbot
 
 ```bash
