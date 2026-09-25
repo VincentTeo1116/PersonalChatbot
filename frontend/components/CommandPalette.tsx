@@ -7,6 +7,7 @@ import type { Profile, Project, Publication } from "@/lib/types";
 const SECTIONS = [
   { id: "top", label: "Home" },
   { id: "about", label: "About & Education" },
+  { id: "experience", label: "Working Experience" },
   { id: "projects", label: "Projects" },
   { id: "research", label: "Research" },
   { id: "hackathons", label: "Hackathons" },

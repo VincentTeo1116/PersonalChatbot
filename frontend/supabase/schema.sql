@@ -90,6 +90,28 @@ create table public.hackathon_photos (
   created_at timestamptz not null default now()
 );
 
+create table public.work_experience (
+  id uuid primary key default gen_random_uuid(),
+  role text not null,
+  company text not null,
+  period text not null,
+  detail text not null,
+  logo_path text,
+  sort_order int not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.work_experience_images (
+  id uuid primary key default gen_random_uuid(),
+  work_experience_id uuid not null references public.work_experience(id) on delete cascade,
+  storage_path text not null,
+  caption text not null default '',
+  sort_order int not null default 0,
+  created_at timestamptz not null default now()
+);
+create index on public.work_experience_images (work_experience_id);
+
 -- Row Level Security: public read, admin-only (authenticated) write
 alter table public.profile enable row level security;
 alter table public.education enable row level security;
@@ -98,6 +120,8 @@ alter table public.projects enable row level security;
 alter table public.project_images enable row level security;
 alter table public.research enable row level security;
 alter table public.hackathon_photos enable row level security;
+alter table public.work_experience enable row level security;
+alter table public.work_experience_images enable row level security;
 
 create policy "public read" on public.profile for select using (true);
 create policy "public read" on public.education for select using (true);
@@ -106,6 +130,8 @@ create policy "public read" on public.projects for select using (true);
 create policy "public read" on public.project_images for select using (true);
 create policy "public read" on public.research for select using (true);
 create policy "public read" on public.hackathon_photos for select using (true);
+create policy "public read" on public.work_experience for select using (true);
+create policy "public read" on public.work_experience_images for select using (true);
 
 create policy "admin write" on public.profile for all
   using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
@@ -120,6 +146,10 @@ create policy "admin write" on public.project_images for all
 create policy "admin write" on public.research for all
   using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 create policy "admin write" on public.hackathon_photos for all
+  using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin write" on public.work_experience for all
+  using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin write" on public.work_experience_images for all
   using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 -- Storage: public read, authenticated (admin) write on the portfolio-content bucket

@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getProfile();
   return {
-    title: `${profile.name} — ${profile.tagline}`,
+    title: `${profile.name}'s Portfolio`,
     description: profile.heroSummary,
   };
 }

@@ -8,6 +8,7 @@ import type {
   Project,
   Publication,
   SkillCategory,
+  WorkExperience,
 } from "@/lib/types";
 
 const BUCKET = "portfolio-content";
@@ -134,5 +135,30 @@ export const getHackathonPhotos = cache(async (): Promise<HackathonPhoto[]> => {
     id: row.id,
     src: publicUrl(supabase, row.storage_path, "/hackathons/placeholder-1.svg"),
     caption: row.caption,
+  }));
+});
+
+export const getWorkExperience = cache(async (): Promise<WorkExperience[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("work_experience")
+    .select("*, work_experience_images(*)")
+    .order("sort_order");
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    role: row.role,
+    company: row.company,
+    period: row.period,
+    detail: row.detail,
+    logoUrl: row.logo_path
+      ? supabase.storage.from(BUCKET).getPublicUrl(row.logo_path).data.publicUrl
+      : null,
+    images: [...(row.work_experience_images ?? [])]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((img) => ({
+        src: publicUrl(supabase, img.storage_path, "/education/placeholder-2.svg"),
+        caption: img.caption,
+      })),
   }));
 });

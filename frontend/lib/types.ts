@@ -36,6 +36,21 @@ export type Profile = {
   };
 };
 
+export type WorkExperienceImage = {
+  src: string;
+  caption: string;
+};
+
+export type WorkExperience = {
+  id: string;
+  role: string;
+  company: string;
+  period: string;
+  detail: string;
+  logoUrl: string | null;
+  images: WorkExperienceImage[];
+};
+
 export type ProjectLink = {
   label: string;
   url: string;
