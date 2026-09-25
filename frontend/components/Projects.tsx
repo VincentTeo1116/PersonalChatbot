@@ -7,10 +7,6 @@ import Reveal from "@/components/Reveal";
 import ProjectModal from "@/components/ProjectModal";
 import type { Project } from "@/lib/types";
 
-// Projects with screenshots/demo media open a preview modal when their
-// thumbnail is clicked, instead of navigating straight to the live link.
-const PREVIEWABLE_SLUGS = new Set(["abang-karipap", "secinsight-ai", "foodloop", "care-ai"]);
-
 export default function Projects({ projects }: { projects: Project[] }) {
   const [previewSlug, setPreviewSlug] = useState<string | null>(null);
   const previewProject = projects.find((p) => p.slug === previewSlug) ?? null;
@@ -25,7 +21,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
 
         <div className="mt-12 grid gap-8 sm:grid-cols-2">
           {projects.map((p, i) => {
-            const previewable = PREVIEWABLE_SLUGS.has(p.slug);
+            const previewable = (p.screenshots?.length ?? 0) > 0 || !!p.demoVideoUrl;
             return (
               <Reveal key={p.slug} delay={i * 80}>
                 <motion.article
