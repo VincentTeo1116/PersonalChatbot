@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
+import { motion } from "motion/react";
 
 export type PreviewItem = {
   title: string;
@@ -36,12 +37,19 @@ export default function ProjectModal({
   const primaryLink = project.links[0];
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 py-10"
       onClick={onClose}
     >
-      <div
-        className="animate-fade-in-scale w-full max-w-2xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.96 }}
+        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative aspect-[8/5] bg-black/40">
@@ -103,7 +111,7 @@ export default function ProjectModal({
             ))}
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

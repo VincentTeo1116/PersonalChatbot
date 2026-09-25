@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
 import type { Profile } from "@/lib/types";
 import ThemeToggle from "@/components/ThemeToggle";
+import MagneticButton from "@/components/MagneticButton";
 
 const LINKS = [
   { href: "#about", label: "About" },
@@ -17,6 +19,7 @@ export default function Nav({ profile }: { profile: Profile }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [hoveredHref, setHoveredHref] = useState<string | null>(null);
 
   useEffect(() => {
     const onScroll = () => {
@@ -48,12 +51,25 @@ export default function Nav({ profile }: { profile: Profile }) {
           {profile.name}
         </a>
 
-        <ul className="hidden md:flex items-center gap-8 text-sm text-text-secondary">
+        <ul
+          className="hidden md:flex items-center gap-1 text-sm text-text-secondary"
+          onMouseLeave={() => setHoveredHref(null)}
+        >
           {LINKS.map((l) => (
-            <li key={l.href}>
-              <a href={l.href} className="group relative py-1 hover:text-foreground transition-colors">
+            <li key={l.href} className="relative">
+              {hoveredHref === l.href && (
+                <motion.span
+                  layoutId="nav-pill"
+                  className="absolute inset-0 rounded-full bg-surface-hover"
+                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                />
+              )}
+              <a
+                href={l.href}
+                onMouseEnter={() => setHoveredHref(l.href)}
+                className="relative z-10 block px-3 py-1.5 hover:text-foreground transition-colors"
+              >
                 {l.label}
-                <span className="absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-gradient-to-r from-indigo-400 to-fuchsia-400 transition-transform duration-300 group-hover:scale-x-100" />
               </a>
             </li>
           ))}
@@ -70,12 +86,14 @@ export default function Nav({ profile }: { profile: Profile }) {
             <kbd className="rounded border border-border bg-surface px-1.5 py-0.5 text-[10px]">{"⌘K"}</kbd>
           </button>
           <ThemeToggle />
-          <a
-            href="#contact"
-            className="inline-flex items-center rounded-full bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-indigo-400 hover:scale-105 active:scale-95"
-          >
-            Get in touch
-          </a>
+          <MagneticButton>
+            <a
+              href="#contact"
+              className="inline-flex items-center rounded-full bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-indigo-400 active:scale-95"
+            >
+              Get in touch
+            </a>
+          </MagneticButton>
         </div>
 
         <div className="flex items-center gap-2 md:hidden">

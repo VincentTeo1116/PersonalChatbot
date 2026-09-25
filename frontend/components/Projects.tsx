@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { AnimatePresence, motion } from "motion/react";
 import Reveal from "@/components/Reveal";
 import ProjectModal from "@/components/ProjectModal";
 import type { Project } from "@/lib/types";
@@ -27,9 +28,11 @@ export default function Projects({ projects }: { projects: Project[] }) {
             const previewable = PREVIEWABLE_SLUGS.has(p.slug);
             return (
               <Reveal key={p.slug} delay={i * 80}>
-                <article
+                <motion.article
                   id={`project-${p.slug}`}
-                  className="group h-full scroll-mt-24 rounded-2xl border border-border bg-surface overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:border-indigo-400/40 hover:shadow-2xl hover:shadow-indigo-500/10 target:border-indigo-400/70 target:ring-2 target:ring-indigo-400/40"
+                  whileHover={{ y: -6 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="group h-full scroll-mt-24 rounded-2xl border border-border bg-surface overflow-hidden transition-colors duration-300 hover:border-indigo-400/40 hover:shadow-2xl hover:shadow-indigo-500/10 target:border-indigo-400/70 target:ring-2 target:ring-indigo-400/40"
                 >
                   <div
                     className={`relative aspect-[8/5] overflow-hidden ${previewable ? "cursor-pointer" : ""}`}
@@ -91,14 +94,16 @@ export default function Projects({ projects }: { projects: Project[] }) {
                       </div>
                     )}
                   </div>
-                </article>
+                </motion.article>
               </Reveal>
             );
           })}
         </div>
       </div>
 
-      {previewProject && <ProjectModal project={previewProject} onClose={() => setPreviewSlug(null)} />}
+      <AnimatePresence>
+        {previewProject && <ProjectModal project={previewProject} onClose={() => setPreviewSlug(null)} />}
+      </AnimatePresence>
     </section>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { AnimatePresence, motion } from "motion/react";
 import Reveal from "@/components/Reveal";
 import ProjectModal from "@/components/ProjectModal";
 import type { Publication } from "@/lib/types";
@@ -23,9 +24,11 @@ export default function Research({ research }: { research: Publication[] }) {
         <div className="mt-12 grid gap-8 sm:grid-cols-2">
           {research.map((r, i) => (
             <Reveal key={r.slug} delay={i * 80}>
-              <article
+              <motion.article
                 id={`research-${r.slug}`}
-                className="group h-full scroll-mt-24 rounded-2xl border border-border bg-surface overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:border-indigo-400/40 hover:shadow-2xl hover:shadow-indigo-500/10 target:border-indigo-400/70 target:ring-2 target:ring-indigo-400/40"
+                whileHover={{ y: -6 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="group h-full scroll-mt-24 rounded-2xl border border-border bg-surface overflow-hidden transition-colors duration-300 hover:border-indigo-400/40 hover:shadow-2xl hover:shadow-indigo-500/10 target:border-indigo-400/70 target:ring-2 target:ring-indigo-400/40"
               >
                 <div
                   className="relative aspect-[8/5] cursor-pointer overflow-hidden"
@@ -72,23 +75,25 @@ export default function Research({ research }: { research: Publication[] }) {
                     </a>
                   </div>
                 </div>
-              </article>
+              </motion.article>
             </Reveal>
           ))}
         </div>
       </div>
 
-      {previewPaper && (
-        <ProjectModal
-          project={{
-            title: previewPaper.title,
-            description: previewPaper.description,
-            image: previewPaper.image,
-            links: [{ label: "Read on IEEE Xplore", url: previewPaper.doiUrl }],
-          }}
-          onClose={() => setPreviewSlug(null)}
-        />
-      )}
+      <AnimatePresence>
+        {previewPaper && (
+          <ProjectModal
+            project={{
+              title: previewPaper.title,
+              description: previewPaper.description,
+              image: previewPaper.image,
+              links: [{ label: "Read on IEEE Xplore", url: previewPaper.doiUrl }],
+            }}
+            onClose={() => setPreviewSlug(null)}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }

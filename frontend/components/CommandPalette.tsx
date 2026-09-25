@@ -67,7 +67,7 @@ export default function CommandPalette({
       open={open}
       onOpenChange={setOpen}
       label="Command palette"
-      className="fixed inset-0 z-[10000] flex items-start justify-center bg-black/60 backdrop-blur-sm px-4 pt-[12vh]"
+      className="animate-fade-in fixed inset-0 z-[10000] flex items-start justify-center bg-black/60 backdrop-blur-sm px-4 pt-[12vh]"
       shouldFilter
     >
       <div className="animate-fade-in-scale w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">

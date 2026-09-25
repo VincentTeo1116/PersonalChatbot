@@ -228,8 +228,14 @@ export default function TerminalEasterEgg({
       </button>
 
       <div
-        hidden={!isOpen}
-        className="fixed left-5 bottom-24 z-[9999] flex h-[min(70vh,420px)] w-[min(90vw,480px)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl"
+        aria-hidden={!isOpen}
+        inert={!isOpen}
+        onTransitionEnd={() => {
+          if (isOpen) fitRef.current?.fit();
+        }}
+        className={`fixed left-5 bottom-24 z-[9999] flex h-[min(70vh,420px)] w-[min(90vw,480px)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl origin-bottom-left transition-all duration-300 ease-out ${
+          isOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
+        }`}
       >
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
           <div>

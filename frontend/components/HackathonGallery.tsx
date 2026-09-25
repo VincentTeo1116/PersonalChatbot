@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { motion } from "motion/react";
 import Reveal from "@/components/Reveal";
 import type { HackathonPhoto } from "@/lib/types";
 
@@ -19,7 +22,11 @@ export default function HackathonGallery({ hackathonPhotos }: { hackathonPhotos:
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {hackathonPhotos.map((photo, i) => (
             <Reveal key={photo.id} delay={i * 80}>
-              <figure className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-border transition-colors duration-300 hover:border-indigo-400/40">
+              <motion.figure
+                whileHover={{ y: -4 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-border transition-colors duration-300 hover:border-indigo-400/40"
+              >
                 <Image
                   src={photo.src}
                   alt={photo.caption}
@@ -29,7 +36,7 @@ export default function HackathonGallery({ hackathonPhotos }: { hackathonPhotos:
                 <figcaption className="absolute inset-x-0 bottom-0 translate-y-1 bg-gradient-to-t from-black/80 to-transparent p-3 text-xs text-white opacity-90 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                   {photo.caption}
                 </figcaption>
-              </figure>
+              </motion.figure>
             </Reveal>
           ))}
         </div>
