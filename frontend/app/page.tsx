@@ -1,6 +1,7 @@
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
+import TechMarquee from "@/components/TechMarquee";
 import WorkExperience from "@/components/WorkExperience";
 import Projects from "@/components/Projects";
 import Research from "@/components/Research";
@@ -25,6 +26,7 @@ export default async function Home() {
       <Nav profile={profile} />
       <main className="flex-1">
         <Hero profile={profile} />
+        <TechMarquee items={profile.skills.flatMap((s) => s.items)} />
         <About profile={profile} research={research} />
         <WorkExperience experience={workExperience} />
         <Projects projects={projects} />

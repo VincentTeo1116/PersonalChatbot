@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
+import { motion, useScroll, useSpring } from "motion/react";
 import type { Profile } from "@/lib/types";
 import ThemeToggle from "@/components/ThemeToggle";
 import MagneticButton from "@/components/MagneticButton";
@@ -18,15 +18,13 @@ const LINKS = [
 export default function Nav({ profile }: { profile: Profile }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 24, restDelta: 0.001 });
   const [hoveredHref, setHoveredHref] = useState<string | null>(null);
 
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 8);
-      const doc = document.documentElement;
-      const max = doc.scrollHeight - doc.clientHeight;
-      setProgress(max > 0 ? (window.scrollY / max) * 100 : 0);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -34,15 +32,18 @@ export default function Nav({ profile }: { profile: Profile }) {
   }, []);
 
   return (
-    <header
+    <motion.header
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.7, delay: 0.1 }}
       className={`fixed top-0 inset-x-0 z-40 transition-colors duration-300 ${
         scrolled ? "bg-background/80 backdrop-blur border-b border-border" : "bg-transparent"
       }`}
     >
       <div className="absolute inset-x-0 top-0 h-0.5 bg-border">
-        <div
-          className="h-full bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 transition-[width] duration-150 ease-out"
-          style={{ width: `${progress}%` }}
+        <motion.div
+          className="h-full origin-left bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400"
+          style={{ scaleX: progress }}
         />
       </div>
 
@@ -130,6 +131,6 @@ export default function Nav({ profile }: { profile: Profile }) {
           ))}
         </ul>
       </div>
-    </header>
+    </motion.header>
   );
 }

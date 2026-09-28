@@ -3,21 +3,20 @@
 import Image from "next/image";
 import { motion } from "motion/react";
 import Reveal from "@/components/Reveal";
+import SectionHeading from "@/components/SectionHeading";
 import type { HackathonPhoto } from "@/lib/types";
 
 export default function HackathonGallery({ hackathonPhotos }: { hackathonPhotos: HackathonPhoto[] }) {
   return (
     <section id="hackathons" className="py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6">
-        <Reveal>
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-indigo-400">Hackathons</h2>
-          <p className="mt-3 text-2xl sm:text-3xl font-semibold text-foreground">Building under pressure</p>
+        <SectionHeading eyebrow="Hackathons" title="Building under pressure">
           <p className="mt-3 max-w-xl text-text-secondary">
             Four hackathons in under a year — GTD x APU (3rd place), KitaHack, UM Hackathon, and AWS
             CendekiAwan — each one a fresh problem, a new team, and roughly 24-48 hours to ship
             something real. I keep coming back for the pace and the forced simplicity.
           </p>
-        </Reveal>
+        </SectionHeading>
 
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {hackathonPhotos.map((photo, i) => (

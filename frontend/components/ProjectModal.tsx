@@ -41,7 +41,7 @@ export default function ProjectModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 py-10"
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <motion.div
@@ -49,10 +49,10 @@ export default function ProjectModal({
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.96 }}
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
+        className="flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative aspect-[8/5] bg-black/40">
+        <div className="relative aspect-[8/5] max-h-[45dvh] shrink-0 bg-black/40">
           {project.demoVideoUrl ? (
             <video
               src={project.demoVideoUrl}
@@ -73,7 +73,7 @@ export default function ProjectModal({
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="overflow-y-auto p-6">
           <h3 className="font-semibold text-foreground text-lg">{project.title}</h3>
           <p className="mt-2 text-sm text-text-secondary leading-relaxed">{project.description}</p>
           <div className="mt-4 flex flex-wrap gap-2">

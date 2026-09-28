@@ -1,5 +1,6 @@
 import Image from "next/image";
-import Reveal from "@/components/Reveal";
+import SectionHeading from "@/components/SectionHeading";
+import { Timeline, TimelineItem } from "@/components/Timeline";
 import type { WorkExperience as WorkExperienceEntry } from "@/lib/types";
 
 function DetailText({ detail }: { detail: string }) {
@@ -24,20 +25,12 @@ export default function WorkExperience({ experience }: { experience: WorkExperie
   return (
     <section id="experience" className="py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6">
-        <Reveal>
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-indigo-400">Experience</h2>
-          <p className="mt-3 text-2xl sm:text-3xl font-semibold text-foreground">Working experience</p>
-        </Reveal>
+        <SectionHeading eyebrow="Experience" title="Working experience" />
 
-        <Reveal delay={100}>
-          <ol className="relative mt-12 max-w-2xl border-l border-border pl-6 space-y-10">
-            {experience.map((exp) => (
-              <li
-                key={exp.id}
-                className="group relative transition-transform duration-300 hover:translate-x-1"
-              >
-                <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-indigo-400 ring-4 ring-indigo-400/20 animate-pulse-ring" />
-
+        <div className="mt-12 max-w-2xl">
+          <Timeline className="space-y-10">
+            {experience.map((exp, index) => (
+              <TimelineItem key={exp.id} index={index}>
                 <div className="flex items-start gap-3">
                   {exp.logoUrl && (
                     <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border bg-surface">
@@ -68,10 +61,10 @@ export default function WorkExperience({ experience }: { experience: WorkExperie
                     ))}
                   </div>
                 )}
-              </li>
+              </TimelineItem>
             ))}
-          </ol>
-        </Reveal>
+          </Timeline>
+        </div>
       </div>
     </section>
   );

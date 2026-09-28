@@ -1,19 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useMotionValue, useSpring } from "motion/react";
+import { motion, useMotionValue, useScroll, useSpring, useTransform } from "motion/react";
 import Reveal from "@/components/Reveal";
 import MagneticButton from "@/components/MagneticButton";
+import SplitText from "@/components/SplitText";
 import type { Profile } from "@/lib/types";
+
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
+  show: { transition: { staggerChildren: 0.12, delayChildren: 0.85 } },
 };
 
 const item = {
   hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
 };
 
 export default function Hero({ profile }: { profile: Profile }) {
@@ -21,6 +24,12 @@ export default function Hero({ profile }: { profile: Profile }) {
   const rotateY = useMotionValue(0);
   const springRotateX = useSpring(rotateX, { stiffness: 150, damping: 15 });
   const springRotateY = useSpring(rotateY, { stiffness: 150, damping: 15 });
+
+  // Scroll-linked parallax: the glow drifts slower than the page, the content eases up and fades.
+  const { scrollY } = useScroll();
+  const glowY = useTransform(scrollY, [0, 700], [0, 200]);
+  const contentY = useTransform(scrollY, [0, 500], [0, 80]);
+  const contentOpacity = useTransform(scrollY, [0, 420], [1, 0]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -36,64 +45,74 @@ export default function Hero({ profile }: { profile: Profile }) {
   };
 
   return (
-    <section id="top" className="relative overflow-hidden pt-32 pb-24 sm:pt-40 sm:pb-32">
+    <section id="top" className="relative overflow-hidden pt-32 pb-28 sm:pt-40 sm:pb-36">
       {/* Background glow */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
+      <motion.div style={{ y: glowY }} className="pointer-events-none absolute inset-0 -z-10">
         <div className="animate-float absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-indigo-600 opacity-[var(--blob-opacity)] blur-[120px]" />
         <div className="animate-float-slow absolute top-20 right-0 h-[380px] w-[380px] rounded-full bg-fuchsia-500 opacity-[var(--blob-opacity)] blur-[100px]" />
-      </div>
+      </motion.div>
 
-      <div className="mx-auto max-w-6xl px-6 grid gap-12 sm:grid-cols-[1.2fr_0.8fr] items-center">
-        <motion.div variants={container} initial="hidden" animate="show">
+      <motion.div
+        style={{ y: contentY, opacity: contentOpacity }}
+        className="mx-auto max-w-6xl px-6 grid gap-12 sm:grid-cols-[1.2fr_0.8fr] items-center"
+      >
+        <div>
           <motion.p
-            variants={item}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05, duration: 0.6, ease: EASE }}
             className="inline-flex items-center rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-500 dark:text-indigo-300 mb-6"
           >
             {profile.location}
           </motion.p>
 
-          <motion.h1
-            variants={item}
-            className="text-4xl sm:text-6xl font-bold tracking-tight text-foreground leading-[1.05]"
-          >
-            Hi, I&apos;m {profile.name}.
-            <br />
-            <span className="animate-gradient-x bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
-              {profile.tagline}
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
+            <SplitText text={`Hi, I'm ${profile.name}.`} delay={0.15} />
+            <span className="block overflow-hidden pb-[0.15em] -mb-[0.15em]">
+              <motion.span
+                className="block animate-gradient-x bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent"
+                initial={{ y: "110%" }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.85, ease: EASE, delay: 0.6 }}
+              >
+                {profile.tagline}
+              </motion.span>
             </span>
-          </motion.h1>
+          </h1>
 
-          <motion.p variants={item} className="mt-6 max-w-xl text-lg text-text-secondary leading-relaxed">
-            {profile.heroSummary}
-          </motion.p>
+          <motion.div variants={container} initial="hidden" animate="show">
+            <motion.p variants={item} className="mt-6 max-w-xl text-lg text-text-secondary leading-relaxed">
+              {profile.heroSummary}
+            </motion.p>
 
-          <motion.div variants={item} className="mt-10 flex flex-wrap gap-4">
-            <MagneticButton>
-              <a
-                href="#projects"
-                className="rounded-full bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-indigo-400 hover:shadow-lg hover:shadow-indigo-500/30 active:scale-95 inline-block"
-              >
-                View my work
-              </a>
-            </MagneticButton>
-            <MagneticButton>
-              <a
-                href="#contact"
-                className="rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-foreground/5 active:scale-95 inline-block"
-              >
-                Chat with my AI assistant {"↓"}
-              </a>
-            </MagneticButton>
+            <motion.div variants={item} className="mt-10 flex flex-wrap gap-4">
+              <MagneticButton>
+                <a
+                  href="#projects"
+                  className="rounded-full bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-indigo-400 hover:shadow-lg hover:shadow-indigo-500/30 active:scale-95 inline-block"
+                >
+                  View my work
+                </a>
+              </MagneticButton>
+              <MagneticButton>
+                <a
+                  href="#contact"
+                  className="rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-foreground/5 active:scale-95 inline-block"
+                >
+                  Chat with my AI assistant {"↓"}
+                </a>
+              </MagneticButton>
+            </motion.div>
+
+            <motion.p variants={item} className="mt-6 text-xs text-text-subtle">
+              Press{" "}
+              <kbd className="rounded border border-border bg-surface px-1.5 py-0.5 text-text-secondary">{"⌘K"}</kbd>{" "}
+              to search, or open the terminal in the corner {"↙"}
+            </motion.p>
           </motion.div>
+        </div>
 
-          <motion.p variants={item} className="mt-6 text-xs text-text-subtle">
-            Press{" "}
-            <kbd className="rounded border border-border bg-surface px-1.5 py-0.5 text-text-secondary">{"⌘K"}</kbd>{" "}
-            to search, or open the terminal in the corner {"↙"}
-          </motion.p>
-        </motion.div>
-
-        <Reveal delay={200}>
+        <Reveal delay={200} direction="right">
           <div
             className="relative mx-auto w-56 sm:w-72"
             onMouseMove={handleMouseMove}
@@ -116,7 +135,23 @@ export default function Hero({ profile }: { profile: Profile }) {
             </motion.div>
           </div>
         </Reveal>
-      </div>
+      </motion.div>
+
+      {/* Scroll cue */}
+      <motion.div
+        aria-hidden
+        style={{ opacity: contentOpacity }}
+        className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-text-subtle sm:flex"
+      >
+        <span className="text-[10px] uppercase tracking-[0.25em]">Scroll</span>
+        <span className="relative h-9 w-5 rounded-full border border-border">
+          <motion.span
+            className="absolute left-1/2 top-1.5 h-1.5 w-1 -translate-x-1/2 rounded-full bg-indigo-400"
+            animate={{ y: [0, 14, 0], opacity: [1, 0.2, 1] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </span>
+      </motion.div>
     </section>
   );
 }

@@ -1,10 +1,10 @@
-"""Turns rows pushed from the Google Sheet into Pinecone vectors.
+"""Turns knowledge-base rows into Pinecone vectors.
 
-This is the "auto-update" half of the pipeline: the Apps Script bound to the
-KB sheet POSTs the full, current set of rows here every time the sheet is
-edited (see apps_script/Code.gs). We re-embed and upsert everything — the
-knowledge base is small enough that a full resync is simpler and more
-reliable than diffing individual rows.
+This is the "auto-update" half of the pipeline: the rows are built from the
+portfolio's Supabase tables (see supabase_source.py) every time the site's
+/admin triggers a sync. We re-embed and upsert everything — the knowledge base
+is small enough that a full resync is simpler and more reliable than diffing
+individual rows.
 """
 import hashlib
 import logging

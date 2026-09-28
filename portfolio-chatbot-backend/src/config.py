@@ -26,7 +26,11 @@ class Config:
     TOP_K: int = int(os.getenv("TOP_K", "4"))
     MIN_SCORE: float = float(os.getenv("MIN_SCORE", "0.55"))
 
-    # --- Sync webhook (called by the Google Apps Script bound to the KB sheet) ---
+    # --- Supabase (the knowledge base source: the same tables the portfolio site renders) ---
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "").rstrip("/")
+    SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
+
+    # --- Sync webhook (called by the portfolio site's /admin after content changes) ---
     SYNC_WEBHOOK_SECRET: str = os.getenv("SYNC_WEBHOOK_SECRET", "")
 
     # --- Cache ---
@@ -45,6 +49,8 @@ class Config:
             for name, val in [
                 ("PINECONE_API_KEY", cls.PINECONE_API_KEY),
                 ("GEMINI_API_KEY", cls.GEMINI_API_KEY),
+                ("SUPABASE_URL", cls.SUPABASE_URL),
+                ("SUPABASE_ANON_KEY", cls.SUPABASE_ANON_KEY),
                 ("SYNC_WEBHOOK_SECRET", cls.SYNC_WEBHOOK_SECRET),
             ]
             if not val

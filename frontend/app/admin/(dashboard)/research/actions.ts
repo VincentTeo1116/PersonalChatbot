@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { uploadNextImage } from "@/lib/storage";
 
 function refresh() {
@@ -11,6 +12,7 @@ function refresh() {
 }
 
 export async function createResearch(formData: FormData) {
+  queueChatbotSync();
   const supabase = await createClient();
   const { count } = await supabase.from("research").select("*", { count: "exact", head: true });
 
@@ -37,6 +39,7 @@ export async function createResearch(formData: FormData) {
 }
 
 export async function updateResearch(formData: FormData) {
+  queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase
@@ -61,6 +64,7 @@ export async function updateResearch(formData: FormData) {
 }
 
 export async function deleteResearch(formData: FormData) {
+  queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase.from("research").delete().eq("id", id);

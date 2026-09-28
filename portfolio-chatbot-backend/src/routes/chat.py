@@ -15,6 +15,11 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 _cache: TTLCache = TTLCache(maxsize=Config.CACHE_SIZE, ttl=Config.CACHE_TTL)
 
 
+def clear_cache() -> None:
+    """Drop cached answers -- called after a KB sync so visitors never get stale replies."""
+    _cache.clear()
+
+
 class ChatRequest(BaseModel):
     question: str = Field(..., min_length=3, max_length=500)
 

@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence } from "motion/react";
 import Reveal from "@/components/Reveal";
+import SectionHeading from "@/components/SectionHeading";
+import TiltCard from "@/components/TiltCard";
 import ProjectModal from "@/components/ProjectModal";
 import type { Project } from "@/lib/types";
 
@@ -14,20 +16,15 @@ export default function Projects({ projects }: { projects: Project[] }) {
   return (
     <section id="projects" className="py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6">
-        <Reveal>
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-indigo-400">Projects</h2>
-          <p className="mt-3 text-2xl sm:text-3xl font-semibold text-foreground">Things I&apos;ve built</p>
-        </Reveal>
+        <SectionHeading eyebrow="Projects" title="Things I've built" />
 
         <div className="mt-12 grid gap-8 sm:grid-cols-2">
           {projects.map((p, i) => {
             const previewable = (p.screenshots?.length ?? 0) > 0 || !!p.demoVideoUrl;
             return (
-              <Reveal key={p.slug} delay={i * 80}>
-                <motion.article
+              <Reveal key={p.slug} delay={i * 80} direction={i % 2 === 0 ? "left" : "right"}>
+                <TiltCard
                   id={`project-${p.slug}`}
-                  whileHover={{ y: -6 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   className="group h-full scroll-mt-24 rounded-2xl border border-border bg-surface overflow-hidden transition-colors duration-300 hover:border-indigo-400/40 hover:shadow-2xl hover:shadow-indigo-500/10 target:border-indigo-400/70 target:ring-2 target:ring-indigo-400/40"
                 >
                   <div
@@ -49,13 +46,6 @@ export default function Projects({ projects }: { projects: Project[] }) {
                       <span className="absolute top-3 left-3 rounded-full bg-amber-500/90 px-2.5 py-1 text-xs font-medium text-white">
                         {p.award}
                       </span>
-                    )}
-                    {previewable && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100">
-                        <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
-                          Preview &nearr;
-                        </span>
-                      </div>
                     )}
                   </div>
                   <div className="p-6">
@@ -90,7 +80,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                       </div>
                     )}
                   </div>
-                </motion.article>
+                </TiltCard>
               </Reveal>
             );
           })}

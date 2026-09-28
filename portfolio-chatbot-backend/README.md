@@ -6,10 +6,10 @@ architecture used in the Companies Act chatbot but simplified for portfolio scal
 - **Embeddings + generation**: Google Gemini (`text-embedding-004`, `gemini-2.5-flash`)
 - **Vector store**: Pinecone (single namespace, no reranker/HyDE/multi-namespace fusion needed
   at this scale)
-- **Knowledge base**: a Google Sheet (FAQ-style rows: category / question / answer / tags),
-  editable like Excel
-- **Auto-sync**: a bound Google Apps Script pushes the sheet to a `/api/admin/sync-kb` webhook
-  on every edit, which re-embeds and upserts into Pinecone. No manual export step, ever.
+- **Knowledge base**: the portfolio's own Supabase tables (profile, education, experience,
+  projects, research) — the same content the site renders, so there is one place to edit
+- **Auto-sync**: saving content in the site's `/admin` pings a `/api/admin/sync-kb` webhook,
+  which reads Supabase, re-embeds, and upserts into Pinecone. No spreadsheet, no manual export.
 
 ```
 Visitor asks question
@@ -18,7 +18,7 @@ Visitor asks question
 POST /api/chat ──► embed question ──► Pinecone query ──► build context ──► Gemini generate ──► answer + sources
                                                                                        ▲
                                                                                        │
-Google Sheet (KB tab) ──edit──► Apps Script ──► POST /api/admin/sync-kb ──► embed rows ──► Pinecone upsert
+Site /admin ──save──► POST /api/admin/sync-kb ──► read Supabase ──► embed entries ──► Pinecone upsert
 ```
 
 ## 1. Provision Pinecone
@@ -35,113 +35,108 @@ https://aistudio.google.com/apikey — free tier is enough for a portfolio site'
 
 ```bash
 cp .env.example .env
-# fill in PINECONE_API_KEY, GEMINI_API_KEY, and generate a random SYNC_WEBHOOK_SECRET
+# fill in PINECONE_API_KEY, GEMINI_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY, and a random SYNC_WEBHOOK_SECRET
 pip install -r requirements.txt
 python app.py   # serves on http://localhost:8080
 ```
 
 `GET /health` should return `{"status": "ok"}`.
 
-## 4. Set up the knowledge base sheet
+## 4. Connect the knowledge base (Supabase)
 
-1. Open `kb_template/portfolio_kb_template.xlsx` and import it into Google Sheets
-   (Google Sheets → File → Import → Upload). Keep the tab name **`KB`** exactly as-is — the
-   Apps Script and this README both depend on it.
-2. Read the **Instructions** tab in the template, then replace the `[bracketed]` placeholder
-   text in the **KB** tab with your real bio, skills, projects, education, and contact info.
-   Rows already include your diploma (Software Engineering) → degree (Computer Science,
-   Artificial Intelligence) education path as a starting example.
-3. In the Sheet: **Extensions → Apps Script**, paste in `apps_script/Code.gs`.
-4. **Project Settings (⚙) → Script Properties**, add:
-   - `WEBHOOK_URL` = `https://<your-deployed-backend>/api/admin/sync-kb`
-   - `SYNC_SECRET` = the same value as `SYNC_WEBHOOK_SECRET` in your backend `.env`
-5. Reload the Sheet tab. A **Portfolio KB** menu appears.
-6. Run **Portfolio KB → Enable auto-sync on edit** once — this asks for permission to call
-   your backend URL and installs the trigger.
-7. Run **Portfolio KB → Sync now** to push the initial content.
+There is no spreadsheet or Apps Script any more. The chatbot's knowledge base is built from
+the same Supabase tables the portfolio site renders (profile, education, work experience,
+projects, research), so editing content in the site's `/admin` is the only step needed to
+update what the chatbot knows.
 
-From then on, every edit to the `KB` tab re-embeds and upserts automatically — the chatbot's
-knowledge base is always current with the sheet.
+1. Set up the frontend's Supabase project first (see `../frontend/README.md`: schema + seed
+   SQL). The chatbot reads what's in it.
+2. In this backend's `.env`, set `SUPABASE_URL` and `SUPABASE_ANON_KEY` to the same values
+   as the frontend's `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Only the
+   public anon key is needed — the content tables allow public reads via Row Level Security.
+3. Set `SYNC_WEBHOOK_SECRET` to any long random string.
+4. In the frontend's `.env.local`, set (then restart `npm run dev`):
+   ```
+   CHATBOT_SYNC_URL=http://localhost:8080/api/admin/sync-kb   # your deployed backend URL in production
+   CHATBOT_SYNC_SECRET=<the same value as SYNC_WEBHOOK_SECRET>
+   ```
+5. Run the first sync: log into the site's `/admin` → **Chatbot** → **Sync chatbot now**
+   (or `curl -X POST -H "X-Sync-Secret: <secret>" http://localhost:8080/api/admin/sync-kb`).
 
-### How the sheet → Pinecone sync actually works
+From then on, saving (create / edit / delete) in the Profile, Education, Experience,
+Projects, or Research sections of `/admin` re-syncs the chatbot automatically in the
+background. Reordering and image uploads don't change what the chatbot knows, so they don't
+trigger a sync. If a background sync ever fails (backend offline, for example), the save
+itself still succeeds — use **Chatbot → Sync chatbot now** to catch up; it shows the result.
 
-**No text-chunking happens in this pipeline.** Each KB row (category + question + answer +
-tags) is short, FAQ-sized content, so it's embedded whole as a single vector — there's no
-document-splitting step to reason about. If you outgrow that (e.g. you want to paste in a
-long free-form document instead of a Q&A row), see [Adding chunking](#adding-chunking-if-you-need-it)
-below for where that logic would go.
+### How the Supabase → Pinecone sync actually works
 
-**1. Apps Script side** (`apps_script/Code.gs`), triggered either by the installable
-`onEdit` trigger (any edit to the `KB` tab) or manually via **Portfolio KB → Sync now**:
-- Reads the *entire* `KB` sheet via `getDataRange().getValues()` — not just the edited
-  row. Every sync sends the full current table, which is what makes this a **full resync**
-  rather than an incremental diff.
-- Validates the header row has all five required columns (`category`, `question`,
-  `answer`, `tags`, `is_active`); alerts and aborts if any are missing.
-- Converts each data row into a `{category, question, answer, tags, is_active}` object,
-  keeping only rows where `category`, `question`, and `answer` are all non-empty.
-- `POST`s `{"rows": [...]}` as JSON to `WEBHOOK_URL`, with the shared secret in an
-  `X-Sync-Secret` header (`SYNC_SECRET` script property). On auto-sync (every keystroke's
-  edit event), a `5xx` failure is only logged, not shown as an alert — otherwise you'd get
-  a popup on every character typed if the backend were briefly down.
+**No text-chunking happens in this pipeline.** Each entry (a project, a degree, a job, a
+skill category…) is short, so it's embedded whole as a single vector — there's no
+document-splitting step to reason about. If you outgrow that, see
+[Adding chunking](#adding-chunking-if-you-need-it) below.
 
-**2. Backend webhook** (`src/routes/webhook.py`, `POST /api/admin/sync-kb`):
-- Rejects the request with `401` unless `X-Sync-Secret` matches `SYNC_WEBHOOK_SECRET` from
-  `.env` — this is the only auth on this endpoint, so treat that secret like a password.
-- Validates the payload shape via a Pydantic model, then hands the row list to
-  `sync_rows()`.
+**1. Trigger** — the site's admin server actions (`frontend/lib/chatbot-sync.ts`) `POST` to
+`/api/admin/sync-kb` with the shared secret in an `X-Sync-Secret` header. The request has no
+body: it's only a "resync now" signal. It runs via Next.js `after()`, i.e. after the save's
+response has already gone out, so a slow or offline backend never delays or breaks a save.
 
-**3. Row processing** (`src/services/kb_sync.py`), per sync:
-- **Filtering**: drops any row missing `category`/`question`/`answer`, and any row whose
-  `is_active` is `"false"`, `"0"`, `"no"`, or empty — so you can stage draft content in
-  the sheet (set `is_active` to blank/false) without it reaching the chatbot yet.
-- **Stable IDs**: each surviving row's Pinecone vector ID is
-  `md5(f"{category}|{question}".lower().strip())`. This is what makes edits *update in
-  place* rather than create duplicates — if you edit the `answer` text but leave
-  `category`/`question` the same, the same vector ID gets upserted with new content. If
-  you edit the `category` or `question` text itself, that's a *new* ID (the old vector
-  becomes orphaned, and gets cleaned up in the next step).
-- **Embedding text**: `category + "\n" + question + "\n" + answer + "\n" + tags`
-  (whichever of those are non-empty), passed to Gemini's `text-embedding-004`
-  (`src/services/gemini_service.py:embed_text`, `task_type="retrieval_document"`, 768
-  dimensions) as one string, producing one vector per row.
-- **Upsert**: all vectors for the surviving rows go to Pinecone in one batch
-  (`pinecone_service.upsert_rows`), into the `portfolio-kb` namespace (or whatever
-  `PINECONE_NAMESPACE` is set to) of the `portfolio-chatbot` index (`PINECONE_INDEX_NAME`).
-- **Deletion / cleanup** (`pinecone_service.delete_missing_ids`): lists every vector ID
-  currently in that namespace, and deletes any that *aren't* in this sync's surviving-row
-  ID set. This is what makes it a true **sync** and not just an insert — deleting a row
-  from the sheet (or setting `is_active` to false, or editing its category/question so its
-  ID changes) actually removes the corresponding vector from Pinecone, so stale content
-  never lingers in what the chatbot can retrieve.
-- Returns `{upserted, removed, skipped, total_received}` counts, which the Apps Script
-  logs (`Logger.log`) — check **Apps Script → Executions** in the script editor if a sync
-  seems to have not taken effect.
+**2. Webhook** (`src/routes/webhook.py`) — rejects anything without the right secret (`401`;
+treat the secret like a password), then reads Supabase and syncs.
 
-**Retrieval side** (for context — this doesn't run during sync): `POST /api/chat` embeds
-the visitor's question with `task_type="retrieval_query"`, queries Pinecone for the
-`TOP_K` (default 4) nearest vectors above `MIN_SCORE` (default 0.55) cosine similarity,
-concatenates their `answer` metadata into a context block, and feeds that to
-`gemini-2.5-flash` to generate the final grounded answer.
+**3. Reading Supabase** (`src/services/supabase_source.py`) — one `GET` per table through
+Supabase's REST API with `httpx`, then each row is turned into a FAQ-style entry:
+
+| Source | Entries produced |
+|---|---|
+| `profile` | "Who is …?" (tagline, location, hero summary, about), "How can I contact …?", CGPA, hackathon count, one per skill category, plus an overall skills entry |
+| `education` | one per degree: "Tell me about <degree> at <institution>" |
+| `work_experience` | one per job: "What did … do as <role> at <company>?" (bullet lines flattened to sentences) |
+| `projects` | one per project: description, award, tech tags, links |
+| `research` | one per paper: venue, authors, supervisor, DOI, description |
+
+Hackathon photos are not included (captions only, no substantive content).
+
+**4. Embedding and upsert** (`src/services/kb_sync.py`, unchanged from the Sheet era):
+- **Stable IDs**: `md5(f"{category}|{question}".lower().strip())`. Editing an entry's
+  *content* updates its vector in place; renaming what it's about (a project's title, a
+  degree name) changes the question and therefore the ID, so the old vector is cleaned up in
+  the next step.
+- **Embedding text**: `category + question + answer + tags`, embedded as one string with
+  Gemini `text-embedding-004` (768 dims, `task_type="retrieval_document"`), one vector each.
+- **Upsert** into the `PINECONE_NAMESPACE` of the `PINECONE_INDEX_NAME` index, in one batch.
+- **Cleanup** (`pinecone_service.delete_missing_ids`): every vector in the namespace that
+  isn't in this sync is deleted — so removing a project from `/admin` genuinely removes it
+  from the chatbot's knowledge, not just from the page.
+
+**5. Safety and freshness**
+- If Supabase can't be read, or returns no content at all, the sync aborts with `502` and
+  leaves Pinecone untouched — because the cleanup step would otherwise delete *everything*.
+- After a successful sync the in-memory answer cache is cleared, so visitors never receive a
+  cached answer built from the old content.
+- The response is `{status, upserted, removed, skipped, total_received}`, which the admin's
+  **Chatbot** page displays.
+
+**Retrieval side** (for context — this doesn't run during sync): `POST /api/chat` embeds the
+visitor's question with `task_type="retrieval_query"`, queries Pinecone for the `TOP_K`
+(default 4) nearest vectors above `MIN_SCORE` (default 0.55) cosine similarity, concatenates
+their `answer` metadata into a context block, and feeds that to `gemini-2.5-flash` to
+generate the final grounded answer.
 
 #### Adding chunking (if you need it)
 
-If you ever move beyond short Q&A rows — say, a `KB` tab with a `content` column holding
-a multi-paragraph document per row — you'd add chunking in `kb_sync.py`, roughly:
-1. Split each row's long text into overlapping chunks (e.g. by paragraph, or a
-   fixed-token-count splitter with ~10-20% overlap so context isn't cut mid-sentence).
-2. Give each chunk its own Pinecone ID derived from the row ID plus a chunk index, e.g.
-   `f"{row_id}-{i}"`, so `delete_missing_ids` can still clean up correctly when a row's
-   chunk count changes between syncs (compute the full current ID set from all
-   rows × chunks before calling it, not just the row-level IDs).
-3. Embed and upsert each chunk as its own vector, all carrying the same `question`/
-   `category` metadata (plus a `chunk_index`) so retrieved chunks can be grouped or
-   deduplicated back to their source row when building the answer context.
+If an entry ever grows into a long free-form document (say a multi-page `description`), you'd
+add chunking in `kb_sync.py`, roughly:
+1. Split the long text into overlapping chunks (by paragraph, or a fixed-token splitter with
+   ~10–20% overlap so context isn't cut mid-sentence).
+2. Give each chunk its own Pinecone ID derived from the entry ID plus a chunk index, e.g.
+   `f"{row_id}-{i}"`, and compute the full current ID set (entries × chunks) before calling
+   `delete_missing_ids`, so cleanup stays correct when an entry's chunk count changes.
+3. Embed and upsert each chunk as its own vector, all carrying the same `question`/`category`
+   metadata plus a `chunk_index`, so retrieved chunks can be grouped back to their entry.
 
-This isn't implemented today because the FAQ-row format keeps each unit of content
-naturally small enough that a single embedding already captures it well — chunking solves
-a problem (losing relevant context inside a too-large embedding) that doesn't exist yet
-at this content shape.
+This isn't implemented today because each entry is already small enough for one embedding to
+capture it well — chunking solves a problem that doesn't exist at this content size.
 
 ## 5. Test the chatbot
 
@@ -156,7 +151,8 @@ curl -X POST http://localhost:8080/api/chat \
 Any container host works (Cloud Run, Fly.io, Render, a small VM). Requirements:
 - Expose port `8080` (or set `$PORT` and adjust `app.py`)
 - Set the same env vars as `.env`
-- Point the Apps Script `WEBHOOK_URL` at the deployed URL
+- Set the frontend's `CHATBOT_SYNC_URL` (`https://<deployed-backend>/api/admin/sync-kb`) and
+  `CHATBOT_SYNC_SECRET` so `/admin` saves reach the deployed backend
 - Set `ALLOWED_ORIGINS` to your actual portfolio domain (not `*`) once deployed
 
 ## 7. Embed the chat widget on your portfolio site
@@ -166,8 +162,7 @@ dependencies) that calls `/api/chat` and renders a floating chat bubble.
 
 **Try it locally first:** with the backend running (`python app.py`), open
 `widget/demo.html` directly in a browser (double-click it, or `start widget/demo.html`
-on Windows). Click the chat bubble bottom-right and ask a question synced from your KB
-sheet.
+on Windows). Click the chat bubble bottom-right and ask a question about your portfolio.
 
 **To embed on the real site**, copy one `<script>` tag onto any page — plain HTML, React,
 Next.js, whatever the portfolio ends up being built with:
@@ -211,6 +206,8 @@ Deliberately dropped (portfolio scale doesn't need the complexity):
 - Circuit breaker — traffic volume doesn't warrant it; add back if this gets hammered
 
 Added (not in the original):
-- Google Sheets + Apps Script as the "Excel" knowledge base with a push-on-edit webhook,
-  since the original project's knowledge base is updated via a manual CLI upload script
-  (`knowledge_upload.py`) rather than auto-synced from a spreadsheet.
+- The portfolio's Supabase tables as the knowledge base, with a push-on-save webhook from the
+  site's `/admin`, since the original project's knowledge base is updated via a manual CLI
+  upload script (`knowledge_upload.py`) rather than auto-synced from the content source.
+  (An earlier version of this project used a Google Sheet + Apps Script for this; it was
+  dropped so the site and the chatbot share one source of truth.)

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { uploadNextImage } from "@/lib/storage";
 
 export type ProfileFormState = { error?: string; success?: boolean } | undefined;
@@ -42,6 +43,7 @@ export async function saveProfile(
 
   if (error) return { error: error.message };
 
+  queueChatbotSync();
   revalidatePath("/");
   revalidatePath("/admin/profile");
   return { success: true };

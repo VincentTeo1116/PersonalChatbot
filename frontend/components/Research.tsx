@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence } from "motion/react";
 import Reveal from "@/components/Reveal";
+import SectionHeading from "@/components/SectionHeading";
+import TiltCard from "@/components/TiltCard";
 import ProjectModal from "@/components/ProjectModal";
 import type { Publication } from "@/lib/types";
 
@@ -16,18 +18,13 @@ export default function Research({ research }: { research: Publication[] }) {
   return (
     <section id="research" className="py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6">
-        <Reveal>
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-indigo-400">Research</h2>
-          <p className="mt-3 text-2xl sm:text-3xl font-semibold text-foreground">Published work</p>
-        </Reveal>
+        <SectionHeading eyebrow="Research" title="Published work" />
 
         <div className="mt-12 grid gap-8 sm:grid-cols-2">
           {research.map((r, i) => (
-            <Reveal key={r.slug} delay={i * 80}>
-              <motion.article
+            <Reveal key={r.slug} delay={i * 80} direction={i % 2 === 0 ? "left" : "right"}>
+              <TiltCard
                 id={`research-${r.slug}`}
-                whileHover={{ y: -6 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 className="group h-full scroll-mt-24 rounded-2xl border border-border bg-surface overflow-hidden transition-colors duration-300 hover:border-indigo-400/40 hover:shadow-2xl hover:shadow-indigo-500/10 target:border-indigo-400/70 target:ring-2 target:ring-indigo-400/40"
               >
                 <div
@@ -40,11 +37,6 @@ export default function Research({ research }: { research: Publication[] }) {
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100">
-                    <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
-                      Preview &nearr;
-                    </span>
-                  </div>
                 </div>
                 <div className="p-6">
                   <h3 className="font-semibold text-foreground text-lg leading-snug">{r.title}</h3>
@@ -75,7 +67,7 @@ export default function Research({ research }: { research: Publication[] }) {
                     </a>
                   </div>
                 </div>
-              </motion.article>
+              </TiltCard>
             </Reveal>
           ))}
         </div>

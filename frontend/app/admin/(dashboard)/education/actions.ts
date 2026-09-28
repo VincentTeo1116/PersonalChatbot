@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
 
 function refresh() {
@@ -11,6 +12,7 @@ function refresh() {
 }
 
 export async function createEducation(formData: FormData) {
+  queueChatbotSync();
   const supabase = await createClient();
   const { count } = await supabase.from("education").select("*", { count: "exact", head: true });
 
@@ -33,6 +35,7 @@ export async function createEducation(formData: FormData) {
 }
 
 export async function updateEducation(formData: FormData) {
+  queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase
@@ -52,6 +55,7 @@ export async function updateEducation(formData: FormData) {
 }
 
 export async function deleteEducation(formData: FormData) {
+  queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
 

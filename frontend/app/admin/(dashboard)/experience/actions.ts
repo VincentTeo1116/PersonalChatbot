@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
 
 const MAX_PHOTOS = 2;
@@ -13,6 +14,7 @@ function refresh() {
 }
 
 export async function createExperience(formData: FormData) {
+  queueChatbotSync();
   const supabase = await createClient();
   const { count } = await supabase.from("work_experience").select("*", { count: "exact", head: true });
 
@@ -35,6 +37,7 @@ export async function createExperience(formData: FormData) {
 }
 
 export async function updateExperience(formData: FormData) {
+  queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase
@@ -55,6 +58,7 @@ export async function updateExperience(formData: FormData) {
 }
 
 export async function deleteExperience(formData: FormData) {
+  queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
 

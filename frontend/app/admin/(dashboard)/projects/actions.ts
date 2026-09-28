@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
 
 function refresh() {
@@ -20,6 +21,7 @@ function parseLinks(raw: string): { label: string; url: string }[] {
 }
 
 export async function createProject(formData: FormData) {
+  queueChatbotSync();
   const supabase = await createClient();
   const { count } = await supabase.from("projects").select("*", { count: "exact", head: true });
 
@@ -46,6 +48,7 @@ export async function createProject(formData: FormData) {
 }
 
 export async function updateProject(formData: FormData) {
+  queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase
@@ -70,6 +73,7 @@ export async function updateProject(formData: FormData) {
 }
 
 export async function deleteProject(formData: FormData) {
+  queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
 

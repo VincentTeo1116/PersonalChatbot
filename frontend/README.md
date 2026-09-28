@@ -71,9 +71,21 @@ NEXT_PUBLIC_CHATBOT_API_URL=http://localhost:8080/api/chat
 
 The widget itself (`public/widget/chatbot-widget.js` + `.css`) is a copy of
 `../portfolio-chatbot-backend/widget/`. If you update the widget there, re-copy both
-files here. Note the chatbot's knowledge base is a **separate** pipeline (Google Sheet →
-Pinecone, see the backend's own README) — it does not currently read from Supabase, so
-editing your profile via `/admin` won't automatically update what the chatbot knows.
+files here.
+
+The chatbot's knowledge base is built from these same Supabase tables (no spreadsheet). To
+keep it in sync, add these **server-only** vars to `.env.local` (values explained in
+`../portfolio-chatbot-backend/README.md`, section 4):
+
+```bash
+CHATBOT_SYNC_URL=http://localhost:8080/api/admin/sync-kb
+CHATBOT_SYNC_SECRET=<same value as the backend's SYNC_WEBHOOK_SECRET>
+```
+
+After that, saving in `/admin` (Profile, Education, Experience, Projects, Research)
+re-syncs the chatbot in the background, and **Admin → Chatbot → Sync chatbot now** runs it
+manually and shows the result. Leave both vars unset and the site works as before — the
+chatbot just won't learn about edits.
 
 ## 6. Deploy
 
@@ -83,8 +95,9 @@ Vercel is the path of least resistance for Next.js:
 npx vercel
 ```
 
-or connect the GitHub repo at vercel.com/new. Set all three env vars
-(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_CHATBOT_API_URL`)
+or connect the GitHub repo at vercel.com/new. Set all five env vars
+(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_CHATBOT_API_URL`,
+`CHATBOT_SYNC_URL`, `CHATBOT_SYNC_SECRET`; pointing the last two at your deployed backend)
 in the Vercel project settings — `.env.local` isn't committed, so nothing works on a
 deploy without them set there too.
 

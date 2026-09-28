@@ -1,18 +1,20 @@
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
+import SectionHeading from "@/components/SectionHeading";
+import SkillGroup from "@/components/SkillGroup";
 import StatCounter from "@/components/StatCounter";
+import { Timeline, TimelineItem } from "@/components/Timeline";
 import type { Profile, Publication } from "@/lib/types";
 
 export default function About({ profile, research }: { profile: Profile; research: Publication[] }) {
   return (
     <section id="about" className="py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6">
-        <Reveal>
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-indigo-400">About</h2>
+        <SectionHeading eyebrow="About">
           <p className="mt-3 max-w-2xl text-base sm:text-lg text-text-secondary leading-relaxed">
             {profile.about}
           </p>
-        </Reveal>
+        </SectionHeading>
 
         <Reveal delay={80}>
           <div className="mt-10 flex flex-wrap gap-x-12 gap-y-6">
@@ -28,12 +30,11 @@ export default function About({ profile, research }: { profile: Profile; researc
 
         <div className="mt-16 grid gap-16 lg:grid-cols-2">
           {/* Education timeline */}
-          <Reveal delay={100}>
+          <Reveal delay={100} direction="left">
             <h3 className="text-lg font-semibold text-foreground mb-6">Education</h3>
-            <ol className="relative border-l border-border pl-6 space-y-8">
-              {profile.education.map((ed) => (
-                <li key={ed.id} className="group relative transition-transform duration-300 hover:translate-x-1">
-                  <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-indigo-400 ring-4 ring-indigo-400/20 animate-pulse-ring" />
+            <Timeline className="space-y-8">
+              {profile.education.map((ed, i) => (
+                <TimelineItem key={ed.id} index={i}>
                   <p className="text-xs font-medium text-indigo-500 dark:text-indigo-300">{ed.period}</p>
                   <h4 className="mt-1 font-semibold text-foreground transition-colors group-hover:text-indigo-500 dark:group-hover:text-indigo-300">
                     {ed.degree}
@@ -53,31 +54,17 @@ export default function About({ profile, research }: { profile: Profile; researc
                       ))}
                     </div>
                   )}
-                </li>
+                </TimelineItem>
               ))}
-            </ol>
+            </Timeline>
           </Reveal>
 
           {/* Skills */}
-          <Reveal delay={200}>
+          <Reveal delay={200} direction="right">
             <h3 className="text-lg font-semibold text-foreground mb-6">Skills</h3>
             <div className="space-y-6">
               {profile.skills.map(({ category, items }) => (
-                <div key={category}>
-                  <p className="text-xs font-medium uppercase tracking-wide text-text-muted mb-2">
-                    {category}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {items.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-full border border-border bg-surface px-3 py-1 text-sm text-text-secondary transition-all duration-200 hover:-translate-y-0.5 hover:scale-105 hover:border-indigo-400/50 hover:bg-indigo-500/10 hover:text-foreground"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                <SkillGroup key={category} category={category} items={items} />
               ))}
             </div>
           </Reveal>
