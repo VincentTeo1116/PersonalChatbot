@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, useMotionValue, useScroll, useSpring, useTransform } from "motion/react";
 import Reveal from "@/components/Reveal";
@@ -19,11 +20,28 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
 };
 
+/** Below `sm`, the hero grid stacks into one column, so the avatar sits well below the
+ * hero text -- much lower than on desktop's side-by-side layout. The fixed scroll-pixel
+ * thresholds below assume the desktop height, so on mobile the fade-out finishes before
+ * the avatar has even scrolled into view. Disable the scroll fade/lift there entirely. */
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 640px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return isDesktop;
+}
+
 export default function Hero({ profile }: { profile: Profile }) {
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(0);
   const springRotateX = useSpring(rotateX, { stiffness: 150, damping: 15 });
   const springRotateY = useSpring(rotateY, { stiffness: 150, damping: 15 });
+  const isDesktop = useIsDesktop();
 
   // Scroll-linked parallax: the glow drifts slower than the page, the content eases up and fades.
   const { scrollY } = useScroll();
@@ -53,7 +71,7 @@ export default function Hero({ profile }: { profile: Profile }) {
       </motion.div>
 
       <motion.div
-        style={{ y: contentY, opacity: contentOpacity }}
+        style={{ y: isDesktop ? contentY : 0, opacity: isDesktop ? contentOpacity : 1 }}
         className="mx-auto max-w-6xl px-6 grid gap-12 sm:grid-cols-[1.2fr_0.8fr] items-center"
       >
         <div>
