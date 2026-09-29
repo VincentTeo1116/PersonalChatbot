@@ -23,7 +23,7 @@ class Config:
 
     # --- Groq (answer generation -- higher free-tier limits than Gemini for this) ---
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
-    GROQ_CHAT_MODEL: str = os.getenv("GROQ_CHAT_MODEL", "llama-3.1-8b-instant")
+    GROQ_CHAT_MODEL: str = os.getenv("GROQ_CHAT_MODEL", "qwen/qwen3.8-27b")
 
     # --- Retrieval ---
     TOP_K: int = int(os.getenv("TOP_K", "4"))

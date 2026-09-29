@@ -4,10 +4,13 @@ A RAG chatbot for a software engineer portfolio website, adapted from the node-b
 architecture used in the Companies Act chatbot but simplified for portfolio scale:
 
 - **Embeddings**: Google Gemini (`gemini-embedding-001`, truncated to 768 dims)
-- **Answer generation**: Groq (`llama-3.1-8b-instant` by default) — split out from Gemini
-  because Groq's free tier (30 req/min, 14,400 req/day on this model) is far less likely to
-  be rate-limited than Gemini's chat models for a portfolio site's traffic. Groq has no
-  embeddings endpoint, so that half of the pipeline stays on Gemini.
+- **Answer generation**: Groq (`qwen/qwen3.8-27b` by default) — split out from Gemini for
+  its free tier's throughput (observed ~8,000 tokens/min, refilling in well under a second,
+  plenty for a portfolio site's traffic even if it's not dramatically higher in absolute
+  numbers than Gemini's). Groq has no embeddings endpoint, so that half of the pipeline
+  stays on Gemini. **Groq's model lineup changes often** — if `GROQ_CHAT_MODEL` ever 404s,
+  check what your key currently has access to with `client.models.list()` (see
+  `.env.example`) rather than assuming the configured name still exists.
 - **Vector store**: Pinecone (single namespace, no reranker/HyDE/multi-namespace fusion needed
   at this scale)
 - **Knowledge base**: the portfolio's own Supabase tables (profile, education, experience,
@@ -129,7 +132,7 @@ Hackathon photos are not included (captions only, no substantive content).
 visitor's question with Gemini (`task_type="retrieval_query"`), queries Pinecone for the
 `TOP_K` (default 4) nearest vectors above `MIN_SCORE` (default 0.55) cosine similarity,
 concatenates their `answer` metadata into a context block, and feeds that to Groq's
-`GROQ_CHAT_MODEL` (default `llama-3.1-8b-instant`) to generate the final grounded answer.
+`GROQ_CHAT_MODEL` (default `qwen/qwen3.8-27b`) to generate the final grounded answer.
 `POST /api/chat/stream` does the same retrieval, but
 streams the answer back as newline-delimited JSON (`{"type":"chunk","text":...}` lines, then
 one terminal `{"type":"done", answer, sources, cache_hit, latency_ms}` or `{"type":"error",
