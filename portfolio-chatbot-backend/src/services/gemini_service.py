@@ -27,11 +27,14 @@ Answer:"""
 
 
 def embed_text(text: str, task_type: str = "retrieval_document") -> list[float]:
-    """Embed a single string using Gemini text-embedding-004 (768 dims)."""
+    """Embed a single string, truncated to Config.PINECONE_DIMENSION (768) so the
+    output always matches the existing Pinecone index regardless of the embedding
+    model's native size (gemini-embedding-001 defaults to 3072 dims)."""
     result = genai.embed_content(
         model=Config.GEMINI_EMBEDDING_MODEL,
         content=text,
         task_type=task_type,
+        output_dimensionality=Config.PINECONE_DIMENSION,
     )
     return result["embedding"]
 
