@@ -1,7 +1,41 @@
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import StatCounter from "@/components/StatCounter";
-import { getGithubStats } from "@/lib/github";
+import { getGithubStats, type ContributionCalendar } from "@/lib/github";
+
+/** Renders the contribution calendar as a grid of weeks (columns) x days (rows), shaded
+ * in the site's own indigo theme rather than GitHub's green -- so it looks like a native
+ * part of the page, not an embedded badge. */
+function ContributionGraph({ calendar }: { calendar: ContributionCalendar }) {
+  const max = Math.max(1, ...calendar.weeks.flat().map((d) => d.count));
+
+  function levelClass(count: number) {
+    if (count === 0) return "bg-surface-hover";
+    const ratio = count / max;
+    if (ratio > 0.75) return "bg-indigo-500";
+    if (ratio > 0.5) return "bg-indigo-400";
+    if (ratio > 0.25) return "bg-indigo-400/60";
+    return "bg-indigo-400/30";
+  }
+
+  return (
+    <div className="mt-6 overflow-x-auto pb-2">
+      <div className="inline-grid grid-flow-col gap-[3px]">
+        {calendar.weeks.map((week, wi) => (
+          <div key={wi} className="grid grid-rows-7 gap-[3px]">
+            {week.map((day) => (
+              <div
+                key={day.date}
+                title={`${day.count} contribution${day.count === 1 ? "" : "s"} on ${day.date}`}
+                className={`h-[10px] w-[10px] rounded-[2px] ${levelClass(day.count)}`}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 /** Renders nothing if GitHub's API can't be reached, the URL isn't a real github.com
  * profile, or the account has no public data -- a GitHub hiccup should never break the
@@ -20,8 +54,17 @@ export default async function GithubStats({ githubUrl }: { githubUrl: string | u
             <StatCounter value={stats.publicRepos} label="Public repos" />
             <StatCounter value={stats.totalStars} label="Stars earned" />
             <StatCounter value={stats.followers} label="Followers" />
+            {stats.contributions && (
+              <StatCounter value={stats.contributions.totalContributions} label="Contributions (1y)" />
+            )}
           </div>
         </Reveal>
+
+        {stats.contributions && (
+          <Reveal delay={150}>
+            <ContributionGraph calendar={stats.contributions} />
+          </Reveal>
+        )}
 
         {stats.topLanguages.length > 0 && (
           <Reveal delay={200}>

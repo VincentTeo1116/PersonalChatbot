@@ -1,11 +1,20 @@
 import "server-only";
 
+export type ContributionDay = { date: string; count: number };
+export type ContributionCalendar = {
+  totalContributions: number;
+  weeks: ContributionDay[][];
+};
+
 export type GithubStats = {
   username: string;
   publicRepos: number;
   followers: number;
   totalStars: number;
   topLanguages: string[];
+  /** null if GITHUB_TOKEN isn't set or the GraphQL call fails -- the rest of the stats
+   * above come from the unauthenticated REST API and work independently of this. */
+  contributions: ContributionCalendar | null;
 };
 
 type GithubRepo = { stargazers_count?: number; language?: string | null; fork?: boolean };
@@ -19,6 +28,62 @@ function extractUsername(githubUrl: string): string | null {
     if (u.hostname.replace(/^www\./, "").toLowerCase() !== "github.com") return null;
     const segment = u.pathname.split("/").filter(Boolean)[0];
     return segment || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The green-square contribution calendar isn't available through GitHub's REST API at
+ * all -- only the GraphQL API exposes it, which requires an authenticated token (no
+ * special scopes needed, it's still just public data). Returns null if GITHUB_TOKEN
+ * isn't configured or the request fails for any reason, same fail-open philosophy as
+ * the rest of this module -- callers get the numeric stats regardless.
+ */
+async function getGithubContributions(username: string): Promise<ContributionCalendar | null> {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) return null;
+
+  try {
+    const res = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `query($login: String!) {
+          user(login: $login) {
+            contributionsCollection {
+              contributionCalendar {
+                totalContributions
+                weeks {
+                  contributionDays {
+                    date
+                    contributionCount
+                  }
+                }
+              }
+            }
+          }
+        }`,
+        variables: { login: username },
+      }),
+      next: { revalidate: 21600 },
+    });
+    if (!res.ok) return null;
+
+    const json = await res.json();
+    const calendar = json?.data?.user?.contributionsCollection?.contributionCalendar;
+    if (!calendar?.weeks) return null;
+
+    return {
+      totalContributions: calendar.totalContributions ?? 0,
+      weeks: calendar.weeks.map(
+        (w: { contributionDays: { date: string; contributionCount: number }[] }) =>
+          w.contributionDays.map((d) => ({ date: d.date, count: d.contributionCount }))
+      ),
+    };
   } catch {
     return null;
   }
@@ -44,12 +109,13 @@ export async function getGithubStats(githubUrl: string | undefined | null): Prom
 
   try {
     const headers = { Accept: "application/vnd.github+json" };
-    const [userRes, reposRes] = await Promise.all([
+    const [userRes, reposRes, contributions] = await Promise.all([
       fetch(`https://api.github.com/users/${username}`, { headers, next: { revalidate: 21600 } }),
       fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, {
         headers,
         next: { revalidate: 21600 },
       }),
+      getGithubContributions(username),
     ]);
     if (!userRes.ok || !reposRes.ok) return null;
 
@@ -75,6 +141,7 @@ export async function getGithubStats(githubUrl: string | undefined | null): Prom
       followers: user.followers ?? 0,
       totalStars,
       topLanguages,
+      contributions,
     };
   } catch {
     return null;
