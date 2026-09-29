@@ -2,23 +2,26 @@ import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import TechMarquee from "@/components/TechMarquee";
+import GithubStats from "@/components/GithubStats";
 import WorkExperience from "@/components/WorkExperience";
 import Projects from "@/components/Projects";
 import Research from "@/components/Research";
 import HackathonGallery from "@/components/HackathonGallery";
+import Testimonials from "@/components/Testimonials";
 import Contact from "@/components/Contact";
 import ChatWidgetLoader from "@/components/ChatWidgetLoader";
 import CommandPalette from "@/components/CommandPalette";
 import TerminalEasterEgg from "@/components/TerminalEasterEgg";
-import { getProfile, getProjects, getResearch, getHackathonPhotos, getWorkExperience } from "@/lib/data";
+import { getProfile, getProjects, getResearch, getHackathonPhotos, getWorkExperience, getTestimonials } from "@/lib/data";
 
 export default async function Home() {
-  const [profile, projects, research, hackathonPhotos, workExperience] = await Promise.all([
+  const [profile, projects, research, hackathonPhotos, workExperience, testimonials] = await Promise.all([
     getProfile(),
     getProjects(),
     getResearch(),
     getHackathonPhotos(),
     getWorkExperience(),
+    getTestimonials(),
   ]);
 
   return (
@@ -26,12 +29,14 @@ export default async function Home() {
       <Nav profile={profile} />
       <main className="flex-1">
         <Hero profile={profile} />
-        <TechMarquee items={profile.skills.flatMap((s) => s.items)} />
+        <TechMarquee items={profile.skills.flatMap((s) => s.items.map((i) => i.name))} />
         <About profile={profile} research={research} />
+        <GithubStats githubUrl={profile.contact.github} />
         <WorkExperience experience={workExperience} />
         <Projects projects={projects} />
         <Research research={research} />
         <HackathonGallery hackathonPhotos={hackathonPhotos} />
+        <Testimonials testimonials={testimonials} />
         <Contact profile={profile} />
       </main>
       <ChatWidgetLoader profile={profile} />

@@ -12,9 +12,15 @@ export type EducationEntry = {
   images: EducationImage[];
 };
 
+/** `level` is a 1-5 proficiency rating, shown as filled dots next to the skill name. */
+export type SkillItem = {
+  name: string;
+  level: number;
+};
+
 export type SkillCategory = {
   category: string;
-  items: string[];
+  items: SkillItem[];
 };
 
 export type Profile = {
@@ -90,6 +96,14 @@ export type HackathonPhoto = {
   id: string;
   src: string;
   caption: string;
+};
+
+export type Testimonial = {
+  id: string;
+  authorName: string;
+  authorRole: string;
+  quote: string;
+  avatarUrl: string | null;
 };
 
 /** A question a visitor asked the chatbot, logged by the backend for review in

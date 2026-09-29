@@ -9,6 +9,8 @@ import type {
   Project,
   Publication,
   SkillCategory,
+  SkillItem,
+  Testimonial,
   WorkExperience,
 } from "@/lib/types";
 
@@ -19,7 +21,18 @@ function publicUrl(supabase: SupabaseClient, path: string | null | undefined, fa
   return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
-type SkillsJson = { category: string; sort_order?: number; items: string[] }[];
+// items can be either the old shape (plain skill-name strings) or the new shape (with a
+// proficiency level) -- normalizeSkillItem() below is the one place that reconciles both,
+// so every other file in the app can assume SkillItem{name, level} and never has to know
+// this migration happened.
+type RawSkillItem = string | { name: string; level?: number };
+type SkillsJson = { category: string; sort_order?: number; items: RawSkillItem[] }[];
+const DEFAULT_SKILL_LEVEL = 4; // shown for legacy plain-string skills with no saved level
+
+function normalizeSkillItem(item: RawSkillItem): SkillItem {
+  if (typeof item === "string") return { name: item, level: DEFAULT_SKILL_LEVEL };
+  return { name: item.name, level: item.level ?? DEFAULT_SKILL_LEVEL };
+}
 
 export const getProfile = cache(async (): Promise<Profile> => {
   const supabase = await createClient();
@@ -36,7 +49,7 @@ export const getProfile = cache(async (): Promise<Profile> => {
   const skillsJson = (profileRow.skills ?? []) as SkillsJson;
   const skills: SkillCategory[] = [...skillsJson]
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-    .map((s) => ({ category: s.category, items: s.items }));
+    .map((s) => ({ category: s.category, items: (s.items ?? []).map(normalizeSkillItem) }));
 
   return {
     name: profileRow.name,
@@ -53,9 +66,28 @@ export const getProfile = cache(async (): Promise<Profile> => {
       email: profileRow.contact_email,
       github: profileRow.contact_github,
       linkedin: profileRow.contact_linkedin,
-      resumeUrl: profileRow.contact_resume_url,
+      // An uploaded resume (resume_path, via Storage) takes priority over a manually
+      // typed external URL, so re-uploading a new PDF from /admin always wins.
+      resumeUrl: publicUrl(supabase, profileRow.resume_path, profileRow.contact_resume_url ?? ""),
     },
   };
+});
+
+/** Testimonials/recommendations shown as social proof on the public site. Returns []
+ * on any error (most likely 005_testimonials.sql hasn't been run yet) so the homepage
+ * never crashes over this -- it just renders no testimonials section instead. */
+export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("testimonials").select("*").order("sort_order");
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    authorName: row.author_name,
+    authorRole: row.author_role,
+    quote: row.quote,
+    avatarUrl: row.avatar_path ? publicUrl(supabase, row.avatar_path, "") : null,
+  }));
 });
 
 export const getEducation = cache(async (): Promise<EducationEntry[]> => {

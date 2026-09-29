@@ -1,5 +1,10 @@
+"use client";
+
+import { useState } from "react";
+import { AnimatePresence } from "motion/react";
 import MagneticButton from "@/components/MagneticButton";
 import Reveal from "@/components/Reveal";
+import ResumeModal from "@/components/ResumeModal";
 import SectionHeading from "@/components/SectionHeading";
 import type { Profile } from "@/lib/types";
 
@@ -7,6 +12,8 @@ const OUTLINE_BUTTON =
   "inline-block rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-foreground/10 active:scale-95";
 
 export default function Contact({ profile }: { profile: Profile }) {
+  const [resumeOpen, setResumeOpen] = useState(false);
+
   return (
     <section id="contact" className="relative overflow-hidden py-24 sm:py-32">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
@@ -52,18 +59,24 @@ export default function Contact({ profile }: { profile: Profile }) {
           {profile.contact.resumeUrl && (
             <Reveal delay={300} direction="up">
               <MagneticButton>
-                <a href={profile.contact.resumeUrl} target="_blank" rel="noreferrer" className={OUTLINE_BUTTON}>
+                <button type="button" onClick={() => setResumeOpen(true)} className={OUTLINE_BUTTON}>
                   Resume
-                </a>
+                </button>
               </MagneticButton>
             </Reveal>
           )}
         </div>
 
         <p className="mt-20 text-xs text-text-subtle">
-          Built with Next.js &amp; Tailwind CSS. Assistant powered by Gemini + Pinecone RAG.
+          Built with Next.js &amp; Tailwind CSS. Assistant powered by Gemini + Groq + Pinecone RAG.
         </p>
       </div>
+
+      <AnimatePresence>
+        {resumeOpen && profile.contact.resumeUrl && (
+          <ResumeModal resumeUrl={profile.contact.resumeUrl} onClose={() => setResumeOpen(false)} />
+        )}
+      </AnimatePresence>
     </section>
   );
 }

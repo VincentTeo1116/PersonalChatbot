@@ -15,7 +15,8 @@ function buildCommands(
   hackathonPhotos: HackathonPhoto[]
 ): Record<string, (args: string[]) => string[]> {
   const projectFiles = projects.map((p) => `${p.slug}.txt`);
-  const skillLines = () => profile.skills.map(({ category, items }) => `${category}: ${items.join(", ")}`);
+  const skillLines = () =>
+    profile.skills.map(({ category, items }) => `${category}: ${items.map((i) => i.name).join(", ")}`);
 
   return {
     help: () => [

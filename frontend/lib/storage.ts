@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 const BUCKET = "portfolio-content";
 
-function extOf(filename: string) {
+export function extOf(filename: string) {
   const dot = filename.lastIndexOf(".");
   return dot === -1 ? "" : filename.slice(dot); // includes the leading "."
 }
@@ -34,6 +34,24 @@ export async function uploadNextImage(
     .upload(path, file, { upsert: false });
   if (uploadError) throw uploadError;
 
+  return { path, publicUrl: supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl };
+}
+
+/**
+ * Uploads a file to a FIXED path `{folder}/{filename}`, overwriting whatever was there
+ * before (upsert: true). Use this for "there's only ever one current file" cases, like a
+ * resume, unlike uploadNextImage's incrementing gallery numbering -- a re-upload replaces
+ * the old file in place instead of accumulating image-1, image-2, image-3, ...
+ */
+export async function uploadFixedFile(
+  supabase: SupabaseClient,
+  folder: string,
+  filename: string,
+  file: File
+): Promise<{ path: string; publicUrl: string }> {
+  const path = `${folder}/${filename}`;
+  const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true });
+  if (uploadError) throw uploadError;
   return { path, publicUrl: supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl };
 }
 

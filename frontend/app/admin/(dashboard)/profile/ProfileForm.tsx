@@ -4,31 +4,55 @@ import { useActionState, useState } from "react";
 import type { ChangeEvent } from "react";
 import Image from "next/image";
 import type { Profile } from "@/lib/types";
-import { saveProfile, uploadAvatar, type ProfileFormState } from "./actions";
+import { saveProfile, uploadAvatar, uploadResume, type ProfileFormState } from "./actions";
 
 const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400";
 const labelClass = "text-sm text-text-secondary";
+const LEVELS = [1, 2, 3, 4, 5];
 
-type SkillRow = { category: string; items: string };
+type SkillRow = { category: string; itemsText: string; levels: Record<string, number> };
+
+function parseSkillNames(itemsText: string): string[] {
+  return itemsText
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 
 export default function ProfileForm({ profile }: { profile: Profile }) {
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(saveProfile, undefined);
   const [skills, setSkills] = useState<SkillRow[]>(
-    profile.skills.map((s) => ({ category: s.category, items: s.items.join(", ") }))
+    profile.skills.map((s) => ({
+      category: s.category,
+      itemsText: s.items.map((i) => i.name).join(", "),
+      levels: Object.fromEntries(s.items.map((i) => [i.name, i.level])),
+    }))
   );
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [resumeUrl, setResumeUrl] = useState(profile.contact.resumeUrl);
+  const [resumeBusy, setResumeBusy] = useState(false);
+  const [resumeError, setResumeError] = useState<string | null>(null);
 
   const skillsJson = JSON.stringify(
     skills
       .filter((s) => s.category.trim())
-      .map((s) => ({
-        category: s.category.trim(),
-        items: s.items.split(",").map((i) => i.trim()).filter(Boolean),
-      }))
+      .map((s) => {
+        const names = parseSkillNames(s.itemsText);
+        return {
+          category: s.category.trim(),
+          items: names.map((name) => ({ name, level: s.levels[name] ?? 4 })),
+        };
+      })
   );
+
+  function setSkillLevel(rowIndex: number, name: string, level: number) {
+    setSkills((prev) =>
+      prev.map((s, idx) => (idx === rowIndex ? { ...s, levels: { ...s.levels, [name]: level } } : s))
+    );
+  }
 
   async function handleAvatarChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -41,6 +65,20 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
     if (result.error) setAvatarError(result.error);
     if (result.publicUrl) setAvatarUrl(result.publicUrl);
     setAvatarBusy(false);
+    e.target.value = "";
+  }
+
+  async function handleResumeChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setResumeBusy(true);
+    setResumeError(null);
+    const formData = new FormData();
+    formData.set("file", file);
+    const result = await uploadResume(formData);
+    if (result.error) setResumeError(result.error);
+    if (result.publicUrl) setResumeUrl(result.publicUrl);
+    setResumeBusy(false);
     e.target.value = "";
   }
 
@@ -149,48 +187,102 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
           />
         </div>
         <div>
-          <label className={labelClass} htmlFor="contactResumeUrl">Resume URL</label>
+          <label className={labelClass} htmlFor="contactResumeUrl">Resume URL (fallback if no PDF uploaded below)</label>
           <input
             id="contactResumeUrl"
             name="contactResumeUrl"
             defaultValue={profile.contact.resumeUrl}
+            placeholder="e.g. an external link if you'd rather not upload a file"
             className={inputClass}
           />
+        </div>
+        <div>
+          <label className={labelClass}>
+            <span className="mb-1 block">Or upload a resume PDF (takes priority over the URL above)</span>
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={handleResumeChange}
+              disabled={resumeBusy}
+              className="text-xs text-text-secondary"
+            />
+          </label>
+          {resumeBusy && <p className="mt-1 text-xs text-text-subtle">Uploading…</p>}
+          {resumeError && <p className="mt-1 text-xs text-red-500">{resumeError}</p>}
+          {!resumeBusy && !resumeError && resumeUrl && (
+            <a href={resumeUrl} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-indigo-500 hover:underline">
+              View current resume →
+            </a>
+          )}
         </div>
       </section>
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-foreground">Skills</h2>
-        {skills.map((row, i) => (
-          <div key={i} className="flex flex-col gap-2 sm:flex-row">
-            <input
-              value={row.category}
-              onChange={(e) =>
-                setSkills((prev) => prev.map((s, idx) => (idx === i ? { ...s, category: e.target.value } : s)))
-              }
-              placeholder="Category (e.g. Languages)"
-              className={`${inputClass} sm:w-40 sm:shrink-0`}
-            />
-            <input
-              value={row.items}
-              onChange={(e) =>
-                setSkills((prev) => prev.map((s, idx) => (idx === i ? { ...s, items: e.target.value } : s)))
-              }
-              placeholder="Comma-separated items"
-              className={inputClass}
-            />
-            <button
-              type="button"
-              onClick={() => setSkills((prev) => prev.filter((_, idx) => idx !== i))}
-              className="shrink-0 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:text-red-500 sm:py-0"
-            >
-              Remove
-            </button>
-          </div>
-        ))}
+        <p className="text-xs text-text-subtle">
+          List names comma-separated as before, then set each one&apos;s proficiency (1 = learning, 5 = expert) below —
+          shown on the site as small dots next to each skill.
+        </p>
+        {skills.map((row, i) => {
+          const names = parseSkillNames(row.itemsText);
+          return (
+            <div key={i} className="space-y-2 rounded-lg border border-border p-3">
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  value={row.category}
+                  onChange={(e) =>
+                    setSkills((prev) => prev.map((s, idx) => (idx === i ? { ...s, category: e.target.value } : s)))
+                  }
+                  placeholder="Category (e.g. Languages)"
+                  className={`${inputClass} sm:w-40 sm:shrink-0`}
+                />
+                <input
+                  value={row.itemsText}
+                  onChange={(e) =>
+                    setSkills((prev) => prev.map((s, idx) => (idx === i ? { ...s, itemsText: e.target.value } : s)))
+                  }
+                  placeholder="Comma-separated items"
+                  className={inputClass}
+                />
+                <button
+                  type="button"
+                  onClick={() => setSkills((prev) => prev.filter((_, idx) => idx !== i))}
+                  className="shrink-0 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:text-red-500 sm:py-0"
+                >
+                  Remove
+                </button>
+              </div>
+
+              {names.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {names.map((name) => (
+                    <label
+                      key={name}
+                      className="flex items-center gap-1.5 rounded-lg border border-border bg-background px-2 py-1 text-xs text-text-secondary"
+                    >
+                      <span className="max-w-[9rem] truncate">{name}</span>
+                      <select
+                        value={row.levels[name] ?? 4}
+                        onChange={(e) => setSkillLevel(i, name, Number(e.target.value))}
+                        className="rounded border border-border bg-surface px-1 py-0.5 text-xs text-foreground outline-none"
+                        aria-label={`Proficiency for ${name}`}
+                      >
+                        {LEVELS.map((lvl) => (
+                          <option key={lvl} value={lvl}>
+                            {lvl}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
         <button
           type="button"
-          onClick={() => setSkills((prev) => [...prev, { category: "", items: "" }])}
+          onClick={() => setSkills((prev) => [...prev, { category: "", itemsText: "", levels: {} }])}
           className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:text-foreground"
         >
           + Add category
