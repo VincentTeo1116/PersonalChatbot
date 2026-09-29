@@ -45,6 +45,17 @@
       if (attrConfig[k] === null) delete attrConfig[k];
     });
 
+    var starterQuestionsAttr = scriptEl && scriptEl.getAttribute("data-starter-questions");
+    if (starterQuestionsAttr) {
+      // Pipe-delimited (not comma) since a question can itself contain a comma.
+      attrConfig.starterQuestions = starterQuestionsAttr
+        .split("|")
+        .map(function (q) {
+          return q.trim();
+        })
+        .filter(Boolean);
+    }
+
     var globalConfig = window.PortfolioChatbotConfig || {};
     return Object.assign(
       {
@@ -53,10 +64,29 @@
         primaryColor: "#4f46e5",
         greeting: "Hi! Ask me anything about my background, skills, or projects.",
         noCss: false,
+        starterQuestions: [
+          "What projects have you built?",
+          "What's your tech stack?",
+          "Tell me about your work experience",
+          "How can I get in touch?",
+        ],
       },
       attrConfig,
       globalConfig
     );
+  }
+
+  /** Derives the streaming endpoint from the configured chat URL, e.g.
+   * ".../api/chat" -> ".../api/chat/stream". Returns null if apiUrl can't be parsed
+   * as a URL at all, in which case the caller falls back to the non-streaming call. */
+  function buildStreamUrl(apiUrl) {
+    try {
+      var u = new URL(apiUrl, window.location.href);
+      u.pathname = u.pathname.replace(/\/+$/, "") + "/stream";
+      return u.toString();
+    } catch (e) {
+      return null;
+    }
   }
 
   function injectStylesheet() {
@@ -148,6 +178,7 @@
     document.body.appendChild(this.panel);
 
     this._addMessage("bot", this.config.greeting);
+    this._addSuggestions();
   };
 
   ChatbotWidget.prototype.toggle = function () {
@@ -173,6 +204,32 @@
     this.messagesEl.appendChild(bubble);
     this._scrollToBottom();
     return bubble;
+  };
+
+  ChatbotWidget.prototype._addSuggestions = function () {
+    var self = this;
+    var questions = this.config.starterQuestions;
+    if (!questions || !questions.length) return;
+
+    var wrap = el("div", "pcw-suggestions");
+    questions.forEach(function (q) {
+      var chip = el("button", "pcw-suggestion-chip", { type: "button", text: q });
+      chip.addEventListener("click", function () {
+        self.inputEl.value = q;
+        self._send();
+      });
+      wrap.appendChild(chip);
+    });
+    this.messagesEl.appendChild(wrap);
+    this.suggestionsEl = wrap;
+    this._scrollToBottom();
+  };
+
+  ChatbotWidget.prototype._removeSuggestions = function () {
+    if (this.suggestionsEl && this.suggestionsEl.parentNode) {
+      this.suggestionsEl.parentNode.removeChild(this.suggestionsEl);
+    }
+    this.suggestionsEl = null;
   };
 
   ChatbotWidget.prototype._addSources = function (sources) {
@@ -205,18 +262,111 @@
     this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
   };
 
-  ChatbotWidget.prototype._send = function () {
+  // Reads a newline-delimited-JSON stream from /api/chat/stream. Resolves once the
+  // stream is done with something on screen (a full answer, or a partial one with an
+  // explanatory note appended); only REJECTS when nothing was ever shown at all, which
+  // is the signal _send() uses to fall back to the plain, non-streaming endpoint.
+  ChatbotWidget.prototype._sendStreaming = function (question) {
     var self = this;
-    var question = this.inputEl.value.trim();
-    if (!question || this.isLoading) return;
+    var streamUrl = buildStreamUrl(this.config.apiUrl);
+    if (!streamUrl) return Promise.reject(new Error("Could not build a streaming URL"));
 
-    this._addMessage("user", question);
-    this.inputEl.value = "";
-    this.isLoading = true;
-    this.sendBtn.disabled = true;
-    this._showTyping();
+    return fetch(streamUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: question }),
+    }).then(function (res) {
+      if (!res.ok || !res.body || !res.body.getReader) {
+        throw new Error("Streaming not available (" + (res && res.status) + ")");
+      }
 
-    fetch(this.config.apiUrl, {
+      var reader = res.body.getReader();
+      var decoder = new TextDecoder();
+      var buffer = "";
+      var bubble = null;
+      var text = "";
+      var gotAnyChunk = false;
+      var gotDone = false;
+
+      function handleLine(line) {
+        if (!line) return;
+        var msg;
+        try {
+          msg = JSON.parse(line);
+        } catch (e) {
+          return; // ignore a malformed line rather than fail the whole stream over it
+        }
+
+        if (msg.type === "chunk") {
+          gotAnyChunk = true;
+          if (!bubble) {
+            self._hideTyping();
+            bubble = self._addMessage("bot", "");
+          }
+          text += msg.text;
+          bubble.textContent = text;
+          self._scrollToBottom();
+        } else if (msg.type === "done") {
+          gotDone = true;
+          if (!bubble) {
+            self._hideTyping();
+            bubble = self._addMessage("bot", "");
+          }
+          // Snap to the server's canonical, fully markdown-cleaned answer, even if the
+          // raw streamed chunks briefly differed from it.
+          bubble.textContent = msg.answer || text || "Sorry, I couldn't find an answer to that.";
+          self._addSources(msg.sources);
+        } else if (msg.type === "error") {
+          gotDone = true;
+          if (!bubble) self._hideTyping();
+          self._addMessage("error", msg.message || "Something went wrong reaching the assistant. Please try again in a moment.");
+        }
+      }
+
+      function finishedIncomplete() {
+        self._addMessage("error", "Connection interrupted — the answer above may be incomplete. Try asking again.");
+      }
+
+      function pump() {
+        return reader.read().then(
+          function (result) {
+            if (result.done) {
+              if (buffer.trim()) handleLine(buffer.trim());
+              if (!gotDone) {
+                if (gotAnyChunk) {
+                  finishedIncomplete();
+                  return;
+                }
+                throw new Error("Stream ended with no data");
+              }
+              return;
+            }
+            buffer += decoder.decode(result.value, { stream: true });
+            var lines = buffer.split("\n");
+            buffer = lines.pop(); // last, possibly-incomplete line stays buffered
+            lines.forEach(handleLine);
+            return pump();
+          },
+          function (readErr) {
+            if (gotAnyChunk) {
+              finishedIncomplete();
+              return;
+            }
+            throw readErr;
+          }
+        );
+      }
+
+      return pump();
+    });
+  };
+
+  // The original, reliable request/response call -- used as a fallback whenever
+  // streaming can't even get started (old browser, network hiccup, backend not yet
+  // redeployed with the /stream route, etc.).
+  ChatbotWidget.prototype._sendNonStreaming = function (question) {
+    var self = this;
+    return fetch(this.config.apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: question }),
@@ -229,6 +379,24 @@
         self._hideTyping();
         self._addMessage("bot", data.answer || "Sorry, I couldn't find an answer to that.");
         self._addSources(data.sources);
+      });
+  };
+
+  ChatbotWidget.prototype._send = function () {
+    var self = this;
+    var question = this.inputEl.value.trim();
+    if (!question || this.isLoading) return;
+
+    this._removeSuggestions();
+    this._addMessage("user", question);
+    this.inputEl.value = "";
+    this.isLoading = true;
+    this.sendBtn.disabled = true;
+    this._showTyping();
+
+    this._sendStreaming(question)
+      .catch(function () {
+        return self._sendNonStreaming(question);
       })
       .catch(function () {
         self._hideTyping();

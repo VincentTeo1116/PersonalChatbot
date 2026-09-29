@@ -121,7 +121,17 @@ Hackathon photos are not included (captions only, no substantive content).
 visitor's question with `task_type="retrieval_query"`, queries Pinecone for the `TOP_K`
 (default 4) nearest vectors above `MIN_SCORE` (default 0.55) cosine similarity, concatenates
 their `answer` metadata into a context block, and feeds that to `gemini-2.5-flash` to
-generate the final grounded answer.
+generate the final grounded answer. `POST /api/chat/stream` does the same retrieval, but
+streams the answer back as newline-delimited JSON (`{"type":"chunk","text":...}` lines, then
+one terminal `{"type":"done", answer, sources, cache_hit, latency_ms}` or `{"type":"error",
+message}`) so the widget can render it word-by-word; the widget falls back to the plain
+`/api/chat` call automatically if streaming isn't available.
+
+Every answered question (on either endpoint) is also logged to Supabase's `chat_logs` table
+in the background — see `src/services/chat_logging.py` and
+`frontend/supabase/004_chat_logs.sql` — so `/admin/chatbot` can show what visitors actually
+ask. This is best-effort: if the migration hasn't been run yet, logging silently no-ops and
+the chat itself is unaffected.
 
 #### Adding chunking (if you need it)
 
@@ -174,8 +184,14 @@ Next.js, whatever the portfolio ends up being built with:
   data-owner-name="Vincent"
   data-primary-color="#4f46e5"
   data-greeting="Hi! Ask me anything about Vincent's background, skills, or projects."
+  data-starter-questions="What projects have you built?|What's your tech stack?|How can I get in touch?"
 ></script>
 ```
+
+`data-starter-questions` is optional and pipe-delimited (not comma, since a question can
+contain one) — clickable suggestion chips shown before the visitor's first message, removed
+once they send anything. Omit it to use the built-in defaults, or pass `starterQuestions: []`
+via `PortfolioChatbotConfig` below to turn them off entirely.
 
 Host `chatbot-widget.js` and `chatbot-widget.css` alongside your site's static assets (the
 script auto-loads the CSS from the same folder it was served from). The widget has no

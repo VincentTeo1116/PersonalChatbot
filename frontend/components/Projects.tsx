@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { AnimatePresence } from "motion/react";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
@@ -49,7 +50,11 @@ export default function Projects({ projects }: { projects: Project[] }) {
                     )}
                   </div>
                   <div className="p-6">
-                    <h3 className="font-semibold text-foreground text-lg">{p.title}</h3>
+                    <h3 className="font-semibold text-foreground text-lg">
+                      <Link href={`/projects/${p.slug}`} className="transition-colors hover:text-indigo-500 dark:hover:text-indigo-300">
+                        {p.title}
+                      </Link>
+                    </h3>
                     <p className="mt-2 text-sm text-text-secondary leading-relaxed">{p.description}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {p.tags.map((t) => (
@@ -61,24 +66,29 @@ export default function Projects({ projects }: { projects: Project[] }) {
                         </span>
                       ))}
                     </div>
-                    {p.links.length > 0 && (
-                      <div className="mt-5 flex flex-wrap gap-4">
-                        {p.links.map((l) => (
-                          <a
-                            key={l.label}
-                            href={l.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="group/link inline-flex items-center gap-1 text-sm font-medium text-indigo-600 dark:text-indigo-300 transition-colors hover:text-indigo-500 dark:hover:text-indigo-200"
-                          >
-                            {l.label}
-                            <span className="transition-transform duration-200 group-hover/link:translate-x-0.5">
-                              &rarr;
-                            </span>
-                          </a>
-                        ))}
-                      </div>
-                    )}
+                    <div className="mt-5 flex flex-wrap gap-4">
+                      <Link
+                        href={`/projects/${p.slug}`}
+                        className="group/link inline-flex items-center gap-1 text-sm font-medium text-indigo-600 dark:text-indigo-300 transition-colors hover:text-indigo-500 dark:hover:text-indigo-200"
+                      >
+                        Case study
+                        <span className="transition-transform duration-200 group-hover/link:translate-x-0.5">&rarr;</span>
+                      </Link>
+                      {p.links.map((l) => (
+                        <a
+                          key={l.label}
+                          href={l.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="group/link inline-flex items-center gap-1 text-sm font-medium text-indigo-600 dark:text-indigo-300 transition-colors hover:text-indigo-500 dark:hover:text-indigo-200"
+                        >
+                          {l.label}
+                          <span className="transition-transform duration-200 group-hover/link:translate-x-0.5">
+                            &rarr;
+                          </span>
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 </TiltCard>
               </Reveal>
@@ -88,7 +98,12 @@ export default function Projects({ projects }: { projects: Project[] }) {
       </div>
 
       <AnimatePresence>
-        {previewProject && <ProjectModal project={previewProject} onClose={() => setPreviewSlug(null)} />}
+        {previewProject && (
+          <ProjectModal
+            project={{ ...previewProject, caseStudyHref: `/projects/${previewProject.slug}` }}
+            onClose={() => setPreviewSlug(null)}
+          />
+        )}
       </AnimatePresence>
     </section>
   );

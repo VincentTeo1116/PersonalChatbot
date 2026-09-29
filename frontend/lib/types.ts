@@ -91,3 +91,16 @@ export type HackathonPhoto = {
   src: string;
   caption: string;
 };
+
+/** A question a visitor asked the chatbot, logged by the backend for review in
+ * /admin/chatbot -- see supabase/004_chat_logs.sql. */
+export type ChatLog = {
+  id: string;
+  question: string;
+  answer: string;
+  matched: boolean;
+  topScore: number | null;
+  cacheHit: boolean;
+  latencyMs: number | null;
+  createdAt: string;
+};

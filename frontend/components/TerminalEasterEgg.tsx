@@ -79,59 +79,6 @@ export default function TerminalEasterEgg({
   const historyRef = useRef<string[]>([]);
   const historyIndexRef = useRef(0);
 
-  useEffect(() => {
-    const onExternalOpen = () => setIsOpen(true);
-    window.addEventListener("portfolio:open-terminal", onExternalOpen);
-    return () => window.removeEventListener("portfolio:open-terminal", onExternalOpen);
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen || !containerRef.current || termRef.current) return;
-    let disposed = false;
-
-    (async () => {
-      const [{ Terminal }, { FitAddon }] = await Promise.all([
-        import("@xterm/xterm"),
-        import("@xterm/addon-fit"),
-      ]);
-      if (disposed || !containerRef.current) return;
-
-      const term = new Terminal({
-        cursorBlink: true,
-        fontSize: 13,
-        fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
-        theme: { background: "#020617", foreground: "#e2e8f0", cursor: "#818cf8" },
-      });
-      const fit = new FitAddon();
-      term.loadAddon(fit);
-      term.open(containerRef.current);
-      fit.fit();
-
-      termRef.current = term;
-      fitRef.current = fit;
-
-      term.writeln(`Welcome to ${profile.name}'s terminal. Type 'help' to see available commands.`);
-      term.write(`\r\n${PROMPT}`);
-
-      term.onData((data) => handleData(term, data));
-    })();
-
-    return () => {
-      disposed = true;
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const onResize = () => fitRef.current?.fit();
-    window.addEventListener("resize", onResize);
-    const t = setTimeout(() => fitRef.current?.fit(), 50);
-    return () => {
-      window.removeEventListener("resize", onResize);
-      clearTimeout(t);
-    };
-  }, [isOpen]);
-
   function prompt(term: XTerm) {
     term.write(`\r\n${PROMPT}`);
   }
@@ -215,6 +162,71 @@ export default function TerminalEasterEgg({
     bufferRef.current += data;
     term.write(data);
   }
+
+  // handleData is a plain function redefined every render (it closes over `commands`,
+  // which depends on the profile/projects/hackathonPhotos props). The effect below only
+  // wants to create the xterm.js Terminal once per open, not tear it down and recreate it
+  // whenever those props change -- so instead of listing handleData as a dependency (which
+  // would force exactly that), keep a ref that's always up to date and have term.onData
+  // call through it. The assignment happens in its own effect (not during render) so it
+  // always reflects the latest closure by the time an actual keystroke comes in.
+  const handleDataRef = useRef(handleData);
+  useEffect(() => {
+    handleDataRef.current = handleData;
+  });
+
+  useEffect(() => {
+    const onExternalOpen = () => setIsOpen(true);
+    window.addEventListener("portfolio:open-terminal", onExternalOpen);
+    return () => window.removeEventListener("portfolio:open-terminal", onExternalOpen);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen || !containerRef.current || termRef.current) return;
+    let disposed = false;
+
+    (async () => {
+      const [{ Terminal }, { FitAddon }] = await Promise.all([
+        import("@xterm/xterm"),
+        import("@xterm/addon-fit"),
+      ]);
+      if (disposed || !containerRef.current) return;
+
+      const term = new Terminal({
+        cursorBlink: true,
+        fontSize: 13,
+        fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+        theme: { background: "#020617", foreground: "#e2e8f0", cursor: "#818cf8" },
+      });
+      const fit = new FitAddon();
+      term.loadAddon(fit);
+      term.open(containerRef.current);
+      fit.fit();
+
+      termRef.current = term;
+      fitRef.current = fit;
+
+      term.writeln(`Welcome to ${profile.name}'s terminal. Type 'help' to see available commands.`);
+      term.write(`\r\n${PROMPT}`);
+
+      term.onData((data) => handleDataRef.current(term, data));
+    })();
+
+    return () => {
+      disposed = true;
+    };
+  }, [isOpen, profile.name]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onResize = () => fitRef.current?.fit();
+    window.addEventListener("resize", onResize);
+    const t = setTimeout(() => fitRef.current?.fit(), 50);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      clearTimeout(t);
+    };
+  }, [isOpen]);
 
   return (
     <>

@@ -2,6 +2,7 @@ import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type {
+  ChatLog,
   EducationEntry,
   HackathonPhoto,
   Profile,
@@ -160,5 +161,30 @@ export const getWorkExperience = cache(async (): Promise<WorkExperience[]> => {
         src: publicUrl(supabase, img.storage_path, "/education/placeholder-2.svg"),
         caption: img.caption,
       })),
+  }));
+});
+
+/** Recent questions visitors asked the chatbot (see supabase/004_chat_logs.sql).
+ * Returns [] on any error -- most likely that migration hasn't been run yet -- so the
+ * admin page never crashes over this, it just shows an empty state instead. */
+export const getChatLogs = cache(async (limit = 50): Promise<ChatLog[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("chat_logs")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    question: row.question,
+    answer: row.answer,
+    matched: row.matched,
+    topScore: row.top_score,
+    cacheHit: row.cache_hit,
+    latencyMs: row.latency_ms,
+    createdAt: row.created_at,
   }));
 });

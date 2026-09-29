@@ -45,14 +45,22 @@ export default function CommandPalette({
 
   const close = () => setOpen(false);
 
+  // Updates the URL fragment and scrolls there, same net effect as `location.hash = id`
+  // without assigning to `window.location` directly (the site's `scroll-smooth` class
+  // on <html> already makes this animate the same way the native hash-jump would).
+  const navigateToHash = (id: string) => {
+    window.history.pushState(null, "", `#${id}`);
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const goTo = (hash: string) => {
-    window.location.hash = hash;
+    navigateToHash(hash);
     close();
   };
 
   const openAssistant = () => {
     close();
-    window.location.hash = "contact";
+    navigateToHash("contact");
     // The widget script attaches itself to window.portfolioChatbot once loaded.
     (window as unknown as { portfolioChatbot?: { open?: () => void } }).portfolioChatbot?.open?.();
   };

@@ -41,6 +41,9 @@ fetches its content from it.
    - `supabase/seed.sql` — your real profile/education/projects/research content (edit
      this file first if you want different starting content — it's plain SQL, safe to
      read before running)
+   - `supabase/004_chat_logs.sql` — lets the chatbot backend log visitor questions for
+     review in `/admin/chatbot`; safe to skip, the admin page just shows an empty state
+     until this has been run
 
 ## 3. Add images (optional, can do later via `/admin`)
 

@@ -7,6 +7,12 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
   const [isDark, setIsDark] = useState<boolean | null>(null);
 
   useEffect(() => {
+    // document.documentElement isn't available during SSR, and the server has no way to
+    // know what the early inline theme script (app/layout.tsx's THEME_INIT_SCRIPT) set on
+    // <html> in the browser -- computing this during render instead (e.g. a lazy useState
+    // initializer) would mismatch the server-rendered "no icon yet" output and trigger a
+    // hydration error. Deferring to an effect is the correct fix here, not a lint issue.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsDark(document.documentElement.classList.contains("dark"));
   }, []);
 
