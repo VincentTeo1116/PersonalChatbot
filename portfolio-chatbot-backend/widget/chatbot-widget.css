@@ -84,8 +84,43 @@
   font-size: 14px;
 }
 .pcw-header-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
   opacity: 0.85;
+}
+
+.pcw-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: transparent; /* invisible until _setStatus sets a state class */
+}
+.pcw-status-dot--waking {
+  background: #f59e0b;
+  animation: pcw-status-pulse 1.4s infinite ease-in-out;
+}
+.pcw-status-dot--online {
+  background: #22c55e;
+}
+.pcw-status-dot--offline {
+  background: #9ca3af;
+}
+@keyframes pcw-status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* The launcher's dot sits as a small badge on the button itself, visible before the
+   panel is ever opened. */
+.pcw-launcher .pcw-status-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  box-shadow: 0 0 0 2px var(--pcw-primary);
 }
 .pcw-close {
   background: transparent;

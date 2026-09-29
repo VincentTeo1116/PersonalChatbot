@@ -89,6 +89,28 @@
     }
   }
 
+  /** Derives the backend's health-check URL from the configured chat URL, e.g.
+   * ".../api/chat" -> ".../health". Returns null if apiUrl can't be parsed. */
+  function buildHealthUrl(apiUrl) {
+    try {
+      var u = new URL(apiUrl, window.location.href);
+      u.pathname = "/health";
+      u.search = "";
+      return u.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Free-tier hosts (e.g. Render) put the backend to sleep after a period of no
+  // traffic; the first request afterward triggers a cold start that can take up to
+  // ~60s. These tune the status dot's state machine so a visitor sees "waking up"
+  // instead of the widget just silently hanging.
+  var HEALTH_WAKE_RETRY_MS = 4000; // how often to re-check while waking up
+  var HEALTH_WAKE_TIMEOUT_MS = 90000; // give up calling it "waking" after this long
+  var HEALTH_OFFLINE_RETRY_MS = 30000; // how often to re-check once given up
+  var HEALTH_KEEPALIVE_MS = 4 * 60 * 1000; // how often to re-check once confirmed online
+
   function injectStylesheet() {
     if (!scriptEl || !scriptEl.src) return;
     var href = new URL("chatbot-widget.css", scriptEl.src).toString();
@@ -116,7 +138,9 @@
     this.config = config;
     this.isOpen = false;
     this.isLoading = false;
+    this.status = null; // "waking" | "online" | "offline", set by _startHealthMonitor
     this._build();
+    this._startHealthMonitor();
   }
 
   ChatbotWidget.prototype._build = function () {
@@ -131,17 +155,27 @@
       "aria-expanded": "false",
       type: "button",
     });
-    this.launcher.innerHTML = "&#128172;"; // speech balloon emoji, safe static markup
+    var launcherIcon = el("span");
+    launcherIcon.innerHTML = "&#128172;"; // speech balloon emoji, safe static markup
+    this.launcher.appendChild(launcherIcon);
+    this.launcherDot = el("span", "pcw-status-dot", { "aria-hidden": "true" });
+    this.launcher.appendChild(this.launcherDot);
     this.launcher.addEventListener("click", function () {
       self.toggle();
     });
 
     this.panel = el("div", "pcw-panel", { hidden: "hidden", role: "dialog", "aria-label": "Chat" });
 
+    this._defaultSubtitle = "AI assistant · answers from my portfolio";
     var header = el("div", "pcw-header");
     var headerText = el("div");
     headerText.appendChild(el("div", "pcw-header-title", { text: "Ask " + this.config.ownerName }));
-    headerText.appendChild(el("div", "pcw-header-subtitle", { text: "AI assistant · answers from my portfolio" }));
+    var subtitleRow = el("div", "pcw-header-subtitle");
+    this.headerDot = el("span", "pcw-status-dot", { "aria-hidden": "true" });
+    this.headerSubtitleText = el("span", null, { text: this._defaultSubtitle });
+    subtitleRow.appendChild(this.headerDot);
+    subtitleRow.appendChild(this.headerSubtitleText);
+    headerText.appendChild(subtitleRow);
     var closeBtn = el("button", "pcw-close", { "aria-label": "Close chat", type: "button", text: "×" });
     closeBtn.addEventListener("click", function () {
       self.close();
@@ -260,6 +294,86 @@
 
   ChatbotWidget.prototype._scrollToBottom = function () {
     this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
+  };
+
+  ChatbotWidget.prototype._setStatus = function (status) {
+    if (this.status === status) return;
+    var wasOnline = this.status === "online";
+    this.status = status;
+    if (status === "online" && !wasOnline) this._shownWakingNotice = false;
+
+    var label =
+      status === "online"
+        ? "Online"
+        : status === "offline"
+        ? "Offline right now — try again shortly"
+        : "Waking up… (can take up to a minute)";
+
+    [this.launcherDot, this.headerDot].forEach(
+      function (dot) {
+        if (!dot) return;
+        dot.className = "pcw-status-dot pcw-status-dot--" + status;
+        dot.setAttribute("aria-label", label);
+        dot.setAttribute("title", label);
+      }
+    );
+    if (this.headerSubtitleText) {
+      this.headerSubtitleText.textContent = status === "online" ? this._defaultSubtitle : label;
+    }
+  };
+
+  ChatbotWidget.prototype._scheduleHealthCheck = function (delay) {
+    var self = this;
+    clearTimeout(this._healthTimer);
+    this._healthTimer = setTimeout(function () {
+      self._checkHealth();
+    }, delay);
+  };
+
+  ChatbotWidget.prototype._checkHealth = function () {
+    var self = this;
+    var healthUrl = buildHealthUrl(this.config.apiUrl);
+    if (!healthUrl) return;
+
+    fetch(healthUrl)
+      .then(function (res) {
+        if (!res.ok) throw new Error("unhealthy");
+        self._setStatus("online");
+        self._scheduleHealthCheck(HEALTH_KEEPALIVE_MS);
+      })
+      .catch(function () {
+        if (self.status === "online") {
+          // Was working before -- treat any failure now as going back to sleep
+          // (or briefly down) rather than waiting out a fresh wake-up timeout.
+          self._setStatus("offline");
+          self._scheduleHealthCheck(HEALTH_OFFLINE_RETRY_MS);
+          return;
+        }
+        var elapsed = Date.now() - self._monitorStartedAt;
+        if (elapsed > HEALTH_WAKE_TIMEOUT_MS) {
+          self._setStatus("offline");
+          self._scheduleHealthCheck(HEALTH_OFFLINE_RETRY_MS);
+        } else {
+          self._setStatus("waking");
+          self._scheduleHealthCheck(HEALTH_WAKE_RETRY_MS);
+        }
+      });
+  };
+
+  // Pings the backend as soon as the widget loads (so a sleeping Render instance starts
+  // waking up before the visitor even opens the chat panel), tracks online/waking/offline
+  // state on the status dots, and re-checks promptly whenever the tab becomes visible
+  // again (it may have gone back to sleep while the visitor was on another tab).
+  ChatbotWidget.prototype._startHealthMonitor = function () {
+    var self = this;
+    this._monitorStartedAt = Date.now();
+    this._checkHealth();
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState !== "visible") return;
+      if (self.status !== "online") self._monitorStartedAt = Date.now();
+      self._checkHealth();
+    });
   };
 
   // Reads a newline-delimited-JSON stream from /api/chat/stream. Resolves once the
@@ -392,6 +506,17 @@
     this.inputEl.value = "";
     this.isLoading = true;
     this.sendBtn.disabled = true;
+
+    if (this.status !== "online" && !this._shownWakingNotice) {
+      this._shownWakingNotice = true;
+      this._addMessage(
+        "bot",
+        this.status === "offline"
+          ? "The assistant looks offline right now. I'll try anyway, but it may take a moment or fail — feel free to retry shortly."
+          : "The assistant is waking up after being idle — the first reply can take up to a minute. Thanks for waiting!"
+      );
+    }
+
     this._showTyping();
 
     this._sendStreaming(question)
