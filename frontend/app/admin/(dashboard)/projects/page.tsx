@@ -20,13 +20,13 @@ export default async function ProjectsListPage() {
       <ul className="space-y-3">
         {projects.map((p, i) => (
           <li key={p.id} className="rounded-xl border border-border bg-surface p-4">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div className="min-w-0">
                 <p className="font-semibold text-foreground">{p.title}</p>
                 <p className="text-sm text-text-muted">{p.slug}</p>
                 <p className="mt-1 text-xs text-text-subtle">{p.tags.join(", ")}</p>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex flex-wrap shrink-0 items-center gap-2">
                 <form action={moveProject}>
                   <input type="hidden" name="id" value={p.id} />
                   <input type="hidden" name="direction" value="up" />

@@ -62,7 +62,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                       ))}
                     </div>
                     {p.links.length > 0 && (
-                      <div className="mt-5 flex gap-4">
+                      <div className="mt-5 flex flex-wrap gap-4">
                         {p.links.map((l) => (
                           <a
                             key={l.label}

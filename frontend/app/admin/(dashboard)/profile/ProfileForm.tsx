@@ -98,7 +98,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
         </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-4">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className={labelClass} htmlFor="statCgpa">Stat: CGPA</label>
           <input
@@ -162,14 +162,14 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-foreground">Skills</h2>
         {skills.map((row, i) => (
-          <div key={i} className="flex gap-2">
+          <div key={i} className="flex flex-col gap-2 sm:flex-row">
             <input
               value={row.category}
               onChange={(e) =>
                 setSkills((prev) => prev.map((s, idx) => (idx === i ? { ...s, category: e.target.value } : s)))
               }
               placeholder="Category (e.g. Languages)"
-              className={`${inputClass} w-40 shrink-0`}
+              className={`${inputClass} sm:w-40 sm:shrink-0`}
             />
             <input
               value={row.items}
@@ -182,7 +182,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
             <button
               type="button"
               onClick={() => setSkills((prev) => prev.filter((_, idx) => idx !== i))}
-              className="shrink-0 rounded-lg border border-border px-3 text-sm text-text-secondary hover:text-red-500"
+              className="shrink-0 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:text-red-500 sm:py-0"
             >
               Remove
             </button>

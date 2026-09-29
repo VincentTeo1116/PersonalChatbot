@@ -20,12 +20,12 @@ export default async function ResearchListPage() {
       <ul className="space-y-3">
         {research.map((r, i) => (
           <li key={r.id} className="rounded-xl border border-border bg-surface p-4">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div className="min-w-0">
                 <p className="font-semibold text-foreground">{r.title}</p>
                 <p className="text-sm text-text-muted">{r.venue}</p>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex flex-wrap shrink-0 items-center gap-2">
                 <form action={moveResearch}>
                   <input type="hidden" name="id" value={r.id} />
                   <input type="hidden" name="direction" value="up" />

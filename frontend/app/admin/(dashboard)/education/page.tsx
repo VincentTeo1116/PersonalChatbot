@@ -20,14 +20,14 @@ export default async function EducationListPage() {
       <ul className="space-y-3">
         {education.map((ed, i) => (
           <li key={ed.id} className="rounded-xl border border-border bg-surface p-4">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div className="min-w-0">
                 <p className="text-xs font-medium text-indigo-500 dark:text-indigo-300">{ed.period}</p>
                 <p className="font-semibold text-foreground">{ed.degree}</p>
                 <p className="text-sm text-text-muted">{ed.institution}</p>
                 <p className="mt-1 text-xs text-text-subtle">{ed.images.length} image(s)</p>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex flex-wrap shrink-0 items-center gap-2">
                 <form action={moveEducation}>
                   <input type="hidden" name="id" value={ed.id} />
                   <input type="hidden" name="direction" value="up" />

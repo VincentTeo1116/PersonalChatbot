@@ -50,11 +50,11 @@ export default async function EditExperiencePage({ params }: { params: Promise<{
 
       <section className="max-w-2xl space-y-3">
         <h2 className="text-sm font-semibold text-foreground">Company logo</h2>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-border bg-surface">
             {logoUrl && <Image src={logoUrl} alt="Company logo" fill className="object-cover" />}
           </div>
-          <form action={uploadExperienceLogo} className="flex items-end gap-2">
+          <form action={uploadExperienceLogo} className="flex flex-wrap items-end gap-2">
             <input type="hidden" name="id" value={id} />
             <input name="file" type="file" accept="image/*" required className="block text-sm" />
             <button type="submit" className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400">

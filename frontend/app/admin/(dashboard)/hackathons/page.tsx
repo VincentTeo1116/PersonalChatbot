@@ -30,7 +30,7 @@ export default async function HackathonsAdminPage() {
             id="caption"
             name="caption"
             placeholder="[Hackathon name] — [Year], [what happened]"
-            className="block w-72 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400"
+            className="block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400 sm:w-72"
           />
         </div>
         <div>

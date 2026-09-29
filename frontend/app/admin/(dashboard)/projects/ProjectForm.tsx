@@ -80,12 +80,12 @@ export default function ProjectForm({
       <div className="space-y-2">
         <p className={labelClass}>Other links (GitHub, write-up, etc.)</p>
         {links.map((link, i) => (
-          <div key={i} className="flex gap-2">
+          <div key={i} className="flex flex-col gap-2 sm:flex-row">
             <input
               value={link.label}
               onChange={(e) => setLinks((prev) => prev.map((l, idx) => (idx === i ? { ...l, label: e.target.value } : l)))}
               placeholder="Label (e.g. GitHub)"
-              className={`${inputClass} w-40 shrink-0`}
+              className={`${inputClass} sm:w-40 sm:shrink-0`}
             />
             <input
               value={link.url}
@@ -96,7 +96,7 @@ export default function ProjectForm({
             <button
               type="button"
               onClick={() => setLinks((prev) => prev.filter((_, idx) => idx !== i))}
-              className="shrink-0 rounded-lg border border-border px-3 text-sm text-text-secondary hover:text-red-500"
+              className="shrink-0 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:text-red-500 sm:py-0"
             >
               Remove
             </button>

@@ -44,7 +44,7 @@ export default async function EditResearchPage({ params }: { params: Promise<{ i
         <div className="relative h-32 w-52 overflow-hidden rounded-lg border border-border">
           <Image src={imageUrl} alt={research.title} fill className="object-cover" />
         </div>
-        <form action={uploadResearchImage} className="flex items-end gap-2">
+        <form action={uploadResearchImage} className="flex flex-wrap items-end gap-2">
           <input type="hidden" name="id" value={id} />
           <input id="file" name="file" type="file" accept="image/*" required className="block text-sm" />
           <button type="submit" className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400">
