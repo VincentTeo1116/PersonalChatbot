@@ -3,7 +3,11 @@
 A RAG chatbot for a software engineer portfolio website, adapted from the node-based
 architecture used in the Companies Act chatbot but simplified for portfolio scale:
 
-- **Embeddings + generation**: Google Gemini (`text-embedding-004`, `gemini-2.5-flash`)
+- **Embeddings**: Google Gemini (`gemini-embedding-001`, truncated to 768 dims)
+- **Answer generation**: Groq (`llama-3.1-8b-instant` by default) — split out from Gemini
+  because Groq's free tier (30 req/min, 14,400 req/day on this model) is far less likely to
+  be rate-limited than Gemini's chat models for a portfolio site's traffic. Groq has no
+  embeddings endpoint, so that half of the pipeline stays on Gemini.
 - **Vector store**: Pinecone (single namespace, no reranker/HyDE/multi-namespace fusion needed
   at this scale)
 - **Knowledge base**: the portfolio's own Supabase tables (profile, education, experience,
@@ -15,10 +19,10 @@ architecture used in the Companies Act chatbot but simplified for portfolio scal
 Visitor asks question
         │
         ▼
-POST /api/chat ──► embed question ──► Pinecone query ──► build context ──► Gemini generate ──► answer + sources
-                                                                                       ▲
-                                                                                       │
-Site /admin ──save──► POST /api/admin/sync-kb ──► read Supabase ──► embed entries ──► Pinecone upsert
+POST /api/chat ──► embed question (Gemini) ──► Pinecone query ──► build context ──► generate (Groq) ──► answer + sources
+                                                                                              ▲
+                                                                                              │
+Site /admin ──save──► POST /api/admin/sync-kb ──► read Supabase ──► embed entries (Gemini) ──► Pinecone upsert
 ```
 
 ## 1. Provision Pinecone
@@ -27,15 +31,19 @@ Create a Pinecone project/API key, then leave index creation to the app — `ens
 in `src/services/pinecone_service.py` creates a serverless index (dimension 768, cosine) on
 first startup if it doesn't already exist.
 
-## 2. Get a Gemini API key
+## 2. Get a Gemini API key and a Groq API key
 
-https://aistudio.google.com/apikey — free tier is enough for a portfolio site's traffic.
+- Gemini (embeddings only): https://aistudio.google.com/apikey — free tier is enough for a
+  portfolio site's embedding traffic.
+- Groq (answer generation): https://console.groq.com/keys — no credit card required for the
+  free tier.
 
 ## 3. Configure the backend
 
 ```bash
 cp .env.example .env
-# fill in PINECONE_API_KEY, GEMINI_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY, and a random SYNC_WEBHOOK_SECRET
+# fill in PINECONE_API_KEY, GEMINI_API_KEY, GROQ_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY,
+# and a random SYNC_WEBHOOK_SECRET
 pip install -r requirements.txt
 python app.py   # serves on http://localhost:8080
 ```
@@ -103,7 +111,7 @@ Hackathon photos are not included (captions only, no substantive content).
   degree name) changes the question and therefore the ID, so the old vector is cleaned up in
   the next step.
 - **Embedding text**: `category + question + answer + tags`, embedded as one string with
-  Gemini `text-embedding-004` (768 dims, `task_type="retrieval_document"`), one vector each.
+  Gemini `gemini-embedding-001` (768 dims, `task_type="retrieval_document"`), one vector each.
 - **Upsert** into the `PINECONE_NAMESPACE` of the `PINECONE_INDEX_NAME` index, in one batch.
 - **Cleanup** (`pinecone_service.delete_missing_ids`): every vector in the namespace that
   isn't in this sync is deleted — so removing a project from `/admin` genuinely removes it
@@ -118,10 +126,11 @@ Hackathon photos are not included (captions only, no substantive content).
   **Chatbot** page displays.
 
 **Retrieval side** (for context — this doesn't run during sync): `POST /api/chat` embeds the
-visitor's question with `task_type="retrieval_query"`, queries Pinecone for the `TOP_K`
-(default 4) nearest vectors above `MIN_SCORE` (default 0.55) cosine similarity, concatenates
-their `answer` metadata into a context block, and feeds that to `gemini-2.5-flash` to
-generate the final grounded answer. `POST /api/chat/stream` does the same retrieval, but
+visitor's question with Gemini (`task_type="retrieval_query"`), queries Pinecone for the
+`TOP_K` (default 4) nearest vectors above `MIN_SCORE` (default 0.55) cosine similarity,
+concatenates their `answer` metadata into a context block, and feeds that to Groq's
+`GROQ_CHAT_MODEL` (default `llama-3.1-8b-instant`) to generate the final grounded answer.
+`POST /api/chat/stream` does the same retrieval, but
 streams the answer back as newline-delimited JSON (`{"type":"chunk","text":...}` lines, then
 one terminal `{"type":"done", answer, sources, cache_hit, latency_ms}` or `{"type":"error",
 message}`) so the widget can render it word-by-word; the widget falls back to the plain
@@ -211,7 +220,7 @@ the script (equivalent to the data-attributes above):
 ## Design notes vs. the Companies Act chatbot
 
 Kept:
-- FAQ-style row → embed → Pinecone → retrieve → Gemini-generate pipeline
+- FAQ-style row → embed (Gemini) → Pinecone → retrieve → generate (Groq) pipeline
 - TTL response cache
 - Config centralized in `src/config.py`, never hardcoded
 

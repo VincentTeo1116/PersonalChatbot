@@ -15,12 +15,15 @@ class Config:
     PINECONE_API_KEY: str = os.getenv("PINECONE_API_KEY", "")
     PINECONE_INDEX_NAME: str = os.getenv("PINECONE_INDEX_NAME", "portfolio-chatbot")
     PINECONE_NAMESPACE: str = os.getenv("PINECONE_NAMESPACE", "portfolio-kb")
-    PINECONE_DIMENSION: int = 768  # must match Gemini text-embedding-004
+    PINECONE_DIMENSION: int = 768  # must match GEMINI_EMBEDDING_MODEL's output_dimensionality
 
-    # --- Gemini ---
+    # --- Gemini (embeddings only -- see groq_service.py for answer generation) ---
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GEMINI_EMBEDDING_MODEL: str = os.getenv("GEMINI_EMBEDDING_MODEL", "models/gemini-embedding-001")
-    GEMINI_CHAT_MODEL: str = os.getenv("GEMINI_CHAT_MODEL", "models/gemini-3.8-flash")
+
+    # --- Groq (answer generation -- higher free-tier limits than Gemini for this) ---
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    GROQ_CHAT_MODEL: str = os.getenv("GROQ_CHAT_MODEL", "llama-3.1-8b-instant")
 
     # --- Retrieval ---
     TOP_K: int = int(os.getenv("TOP_K", "4"))
@@ -49,6 +52,7 @@ class Config:
             for name, val in [
                 ("PINECONE_API_KEY", cls.PINECONE_API_KEY),
                 ("GEMINI_API_KEY", cls.GEMINI_API_KEY),
+                ("GROQ_API_KEY", cls.GROQ_API_KEY),
                 ("SUPABASE_URL", cls.SUPABASE_URL),
                 ("SUPABASE_ANON_KEY", cls.SUPABASE_ANON_KEY),
                 ("SYNC_WEBHOOK_SECRET", cls.SYNC_WEBHOOK_SECRET),

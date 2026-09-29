@@ -11,7 +11,9 @@ from pydantic import BaseModel, Field
 from src.config import Config
 from src.services import pinecone_service
 from src.services.chat_logging import log_chat
-from src.services.gemini_service import embed_text, generate_answer, generate_answer_stream, strip_markdown
+from src.services.gemini_service import embed_text
+from src.services.groq_service import generate_answer, generate_answer_stream
+from src.services.text_utils import strip_markdown
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/chat", tags=["chat"])
