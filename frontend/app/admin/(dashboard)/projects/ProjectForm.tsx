@@ -7,6 +7,8 @@ const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400";
 const labelClass = "text-sm text-text-secondary";
 
+const LIVE_SITE_LABEL = "Live site";
+
 export default function ProjectForm({
   project,
   action,
@@ -16,12 +18,22 @@ export default function ProjectForm({
   action: (formData: FormData) => void;
   submitLabel: string;
 }) {
-  const [links, setLinks] = useState(project?.links ?? []);
+  // The "Live site" link gets its own field below (auto-saved into `links` as the
+  // first entry) so it doesn't need to be typed twice into the generic list.
+  const [liveSiteUrl, setLiveSiteUrl] = useState(
+    project?.links.find((l) => l.label === LIVE_SITE_LABEL)?.url ?? ""
+  );
+  const [links, setLinks] = useState(project?.links.filter((l) => l.label !== LIVE_SITE_LABEL) ?? []);
+
+  const allLinks = [
+    ...(liveSiteUrl.trim() ? [{ label: LIVE_SITE_LABEL, url: liveSiteUrl.trim() }] : []),
+    ...links.filter((l) => l.label && l.url),
+  ];
 
   return (
     <form action={action} className="max-w-2xl space-y-4">
       {project && <input type="hidden" name="id" value={project.id} />}
-      <input type="hidden" name="links" value={JSON.stringify(links.filter((l) => l.label && l.url))} />
+      <input type="hidden" name="links" value={JSON.stringify(allLinks)} />
 
       <div>
         <label className={labelClass} htmlFor="slug">Slug</label>
@@ -41,7 +53,20 @@ export default function ProjectForm({
       </div>
       <div>
         <label className={labelClass} htmlFor="demoVideoUrl">Demo video URL</label>
-        <input id="demoVideoUrl" name="demoVideoUrl" defaultValue={project?.demoVideoUrl} className={inputClass} />
+        <input id="demoVideoUrl" name="demoVideoUrl" defaultValue={project?.demoVideoUrl} placeholder="YouTube link or a direct .mp4/.webm URL" className={inputClass} />
+      </div>
+      <div>
+        <label className={labelClass} htmlFor="liveSiteUrl">Live site URL</label>
+        <input
+          id="liveSiteUrl"
+          value={liveSiteUrl}
+          onChange={(e) => setLiveSiteUrl(e.target.value)}
+          placeholder="https://your-deployed-site.com"
+          className={inputClass}
+        />
+        <p className="mt-1 text-xs text-text-secondary">
+          When filled in, this is saved as a &quot;{LIVE_SITE_LABEL}&quot; button automatically &mdash; no need to add it below too.
+        </p>
       </div>
       <div>
         <label className={labelClass} htmlFor="award">Award badge</label>
@@ -53,7 +78,7 @@ export default function ProjectForm({
       </label>
 
       <div className="space-y-2">
-        <p className={labelClass}>Links</p>
+        <p className={labelClass}>Other links (GitHub, write-up, etc.)</p>
         {links.map((link, i) => (
           <div key={i} className="flex gap-2">
             <input
