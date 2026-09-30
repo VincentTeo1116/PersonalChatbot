@@ -67,9 +67,9 @@ export default function Contact({ profile }: { profile: Profile }) {
           )}
         </div>
 
-        <p className="mt-20 text-xs text-text-subtle">
+        {/* <p className="mt-20 text-xs text-text-subtle">
           Built with Next.js &amp; Tailwind CSS. Assistant powered by Gemini + Groq + Pinecone RAG.
-        </p>
+        </p> */}
       </div>
 
       <AnimatePresence>
