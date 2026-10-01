@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence } from "motion/react";
 import MagneticButton from "@/components/MagneticButton";
+import MeetingRequestModal from "@/components/MeetingRequestModal";
 import Reveal from "@/components/Reveal";
 import ResumeModal from "@/components/ResumeModal";
 import SectionHeading from "@/components/SectionHeading";
@@ -13,6 +14,7 @@ const OUTLINE_BUTTON =
 
 export default function Contact({ profile }: { profile: Profile }) {
   const [resumeOpen, setResumeOpen] = useState(false);
+  const [meetingOpen, setMeetingOpen] = useState(false);
 
   return (
     <section id="contact" className="relative overflow-hidden py-24 sm:py-32">
@@ -38,6 +40,17 @@ export default function Contact({ profile }: { profile: Profile }) {
               >
                 {profile.contact.email}
               </a>
+            </MagneticButton>
+          </Reveal>
+          <Reveal delay={50} direction="up">
+            <MagneticButton>
+              <button
+                type="button"
+                onClick={() => setMeetingOpen(true)}
+                className="inline-block rounded-full bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-indigo-400 hover:shadow-lg hover:shadow-indigo-500/30 active:scale-95"
+              >
+                Request a meeting
+              </button>
             </MagneticButton>
           </Reveal>
           {profile.contact.github && (
@@ -76,6 +89,7 @@ export default function Contact({ profile }: { profile: Profile }) {
         {resumeOpen && profile.contact.resumeUrl && (
           <ResumeModal resumeUrl={profile.contact.resumeUrl} onClose={() => setResumeOpen(false)} />
         )}
+        {meetingOpen && <MeetingRequestModal onClose={() => setMeetingOpen(false)} />}
       </AnimatePresence>
     </section>
   );

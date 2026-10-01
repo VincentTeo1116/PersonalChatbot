@@ -5,6 +5,7 @@ import type {
   ChatLog,
   EducationEntry,
   HackathonPhoto,
+  MeetingRequest,
   Profile,
   Project,
   Publication,
@@ -193,6 +194,30 @@ export const getWorkExperience = cache(async (): Promise<WorkExperience[]> => {
         src: publicUrl(supabase, img.storage_path, "/education/placeholder-2.svg"),
         caption: img.caption,
       })),
+  }));
+});
+
+/** "Request a meeting" form submissions (see supabase/007_meeting_requests.sql).
+ * Returns [] on any error -- most likely that migration hasn't been run yet -- so the
+ * admin page never crashes over this, it just shows an empty state instead. */
+export const getMeetingRequests = cache(async (): Promise<MeetingRequest[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("meeting_requests")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    name: row.name,
+    position: row.position,
+    company: row.company,
+    email: row.email,
+    phone: row.phone,
+    message: row.message,
+    createdAt: row.created_at,
   }));
 });
 

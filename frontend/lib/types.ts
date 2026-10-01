@@ -106,6 +106,19 @@ export type Testimonial = {
   avatarUrl: string | null;
 };
 
+/** A "Request a meeting" form submission from a visitor -- see
+ * supabase/007_meeting_requests.sql and /admin/meeting-requests. */
+export type MeetingRequest = {
+  id: string;
+  name: string;
+  position: string;
+  company: string;
+  email: string;
+  phone: string;
+  message: string | null;
+  createdAt: string;
+};
+
 /** A question a visitor asked the chatbot, logged by the backend for review in
  * /admin/chatbot -- see supabase/004_chat_logs.sql. */
 export type ChatLog = {

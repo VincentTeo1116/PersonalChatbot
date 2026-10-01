@@ -14,9 +14,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Required so the og:image/twitter:image tags Next.js generates from opengraph-image.tsx
+// resolve to absolute URLs -- social crawlers (Slack, iMessage, LinkedIn, ...) won't
+// follow a relative one. Falls back to the known production URL; override with
+// NEXT_PUBLIC_SITE_URL if the domain ever changes.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vincent16-portfolio.vercel.app";
+
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getProfile();
   return {
+    metadataBase: new URL(SITE_URL),
     title: `${profile.name}'s Portfolio`,
     description: profile.heroSummary,
   };
