@@ -81,7 +81,7 @@ export default function Contact({ profile }: { profile: Profile }) {
         </div>
 
         <p className="mt-20 text-xs text-text-subtle">
-          Built with Next.js &amp; Tailwind CSS. Assistant powered by Gemini + Groq + Pinecone RAG.
+          Built with Next.js &amp; Tailwind CSS. © {new Date().getFullYear()} Vincent Teo Kai Qi. All rights reserved.
         </p>
       </div>
 

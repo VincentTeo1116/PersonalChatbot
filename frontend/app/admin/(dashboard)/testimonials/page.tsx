@@ -19,8 +19,7 @@ export default async function TestimonialsListPage() {
 
       {testimonials.length === 0 && (
         <p className="rounded-xl border border-border bg-surface p-4 text-sm text-text-subtle">
-          No testimonials yet. If supabase/005_testimonials.sql hasn&apos;t been run in the Supabase SQL editor,
-          run it first.
+          No testimonials yet. 
         </p>
       )}
 
