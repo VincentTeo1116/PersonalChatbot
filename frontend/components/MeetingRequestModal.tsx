@@ -96,26 +96,26 @@ export default function MeetingRequestModal({ onClose }: { onClose: () => void }
 
               <div>
                 <label className={labelClass} htmlFor="mr-name">Full name</label>
-                <input id="mr-name" className={inputClass} placeholder="Jane Recruiter" {...field("name")} />
+                <input id="mr-name" className={inputClass} placeholder="David Ali Muthu" {...field("name")} />
                 {errorFor("name") && <p className="mt-1 text-xs text-red-500">{errorFor("name")}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={labelClass} htmlFor="mr-position">Job title</label>
-                  <input id="mr-position" className={inputClass} placeholder="Technical Recruiter" {...field("position")} />
+                  <input id="mr-position" className={inputClass} placeholder="Hiring Manager / IT Team Lead" {...field("position")} />
                   {errorFor("position") && <p className="mt-1 text-xs text-red-500">{errorFor("position")}</p>}
                 </div>
                 <div>
                   <label className={labelClass} htmlFor="mr-company">Company</label>
-                  <input id="mr-company" className={inputClass} placeholder="Acme Corp" {...field("company")} />
+                  <input id="mr-company" className={inputClass} placeholder="ABC Company" {...field("company")} />
                   {errorFor("company") && <p className="mt-1 text-xs text-red-500">{errorFor("company")}</p>}
                 </div>
               </div>
 
               <div>
                 <label className={labelClass} htmlFor="mr-email">Email</label>
-                <input id="mr-email" type="email" className={inputClass} placeholder="jane@company.com" {...field("email")} />
+                <input id="mr-email" type="email" className={inputClass} placeholder="username@abc.com" {...field("email")} />
                 {errorFor("email") && <p className="mt-1 text-xs text-red-500">{errorFor("email")}</p>}
               </div>
 
