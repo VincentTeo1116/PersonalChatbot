@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
@@ -17,7 +17,7 @@ const CAKE_FLAVORS = [
 ];
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" }).format(new Date(value));
+  return new Intl.DateTimeFormat("en-MY", { month: "long", year: "numeric" }).format(new Date(value));
 }
 
 export default function GithubExhibition({
@@ -33,6 +33,7 @@ export default function GithubExhibition({
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(repositories[0]?.id ?? null);
   const [tab, setTab] = useState<DetailTab>("idea");
+  const [languageMix, setLanguageMix] = useState<Record<number, string[]>>({});
 
   const rooms = useMemo(
     () => ["All exhibits", ...Array.from(new Set(repositories.map((repo) => repo.language).filter((v): v is string => !!v))).slice(0, 5)],
@@ -50,6 +51,30 @@ export default function GithubExhibition({
   const currentPage = Math.min(page, pageCount - 1);
   const cakeSlices = filtered.slice(currentPage * LAYER_WIDTHS.length, (currentPage + 1) * LAYER_WIDTHS.length);
   const selected = cakeSlices.find((repo) => repo.id === selectedId) ?? cakeSlices[0] ?? null;
+
+  useEffect(() => {
+    if (!selected || languageMix[selected.id] !== undefined) return;
+
+    let cancelled = false;
+    fetch(`https://api.github.com/repos/${encodeURIComponent(username)}/${encodeURIComponent(selected.name)}/languages`, {
+      headers: { Accept: "application/vnd.github+json" },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Could not load this repository's languages");
+        return response.json() as Promise<Record<string, number>>;
+      })
+      .then((bytesByLanguage) => {
+        const topLanguages = Object.entries(bytesByLanguage)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([language]) => language);
+        if (!cancelled) setLanguageMix((current) => ({ ...current, [selected.id]: topLanguages }));
+      })
+      .catch(() => {
+        if (!cancelled) setLanguageMix((current) => ({ ...current, [selected.id]: selected.language ? [selected.language] : [] }));
+      });
+    return () => { cancelled = true; };
+  }, [languageMix, selected, username]);
 
   function resetGallery() {
     setPage(0);
@@ -242,11 +267,16 @@ export default function GithubExhibition({
                               </>}
                               {tab === "ingredients" && <>
                                 <p className="text-xs font-semibold uppercase tracking-wider text-indigo-500 dark:text-indigo-300">Ingredients in this layer</p>
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                  {selected.language && <span className="rounded-full bg-indigo-500/10 px-3 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-300">{selected.language} · primary language</span>}
-                                  {selected.topics.map((topic) => <span key={topic} className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-text-secondary">{topic}</span>)}
-                                  {!selected.language && !selected.topics.length && <span className="text-sm text-text-muted">No language or topics listed yet.</span>}
+                                <p className="mt-3 text-xs font-medium text-text-muted">Top languages by code size</p>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  {languageMix[selected.id] === undefined && <span className="text-sm text-text-muted">Checking the recipe…</span>}
+                                  {languageMix[selected.id]?.map((language, index) => <span key={language} className="rounded-full bg-indigo-500/10 px-3 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-300">{index + 1}. {language}</span>)}
+                                  {languageMix[selected.id]?.length === 0 && <span className="text-sm text-text-muted">No language data listed.</span>}
                                 </div>
+                                {selected.topics.length > 0 && <>
+                                  <p className="mt-4 text-xs font-medium text-text-muted">Topics</p>
+                                  <div className="mt-2 flex flex-wrap gap-2">{selected.topics.map((topic) => <span key={topic} className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-text-secondary">{topic}</span>)}</div>
+                                </>}
                               </>}
                               {tab === "bake" && <>
                                 <p className="text-xs font-semibold uppercase tracking-wider text-indigo-500 dark:text-indigo-300">Baking notes</p>
@@ -258,7 +288,7 @@ export default function GithubExhibition({
 
                         <div className="mt-5 flex flex-wrap gap-3">
                           <a href={selected.htmlUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-indigo-500 px-5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-indigo-400">Open recipe on GitHub <span aria-hidden>↗</span></a>
-                          {selected.homepage && <a href={selected.homepage} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm font-medium text-foreground transition hover:border-indigo-400/50 hover:bg-surface-hover">Taste the live demo ↗</a>}
+                          {/* {selected.homepage && <a href={selected.homepage} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm font-medium text-foreground transition hover:border-indigo-400/50 hover:bg-surface-hover">Taste the live demo ↗</a>} */}
                         </div>
                       </motion.div>
                     ) : (
