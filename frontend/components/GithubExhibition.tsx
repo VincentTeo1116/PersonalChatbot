@@ -7,6 +7,7 @@ import SectionHeading from "@/components/SectionHeading";
 import type { GithubRepository } from "@/lib/github";
 
 type DetailTab = "idea" | "ingredients" | "bake";
+type LanguageShare = { name: string; percent: number | null };
 const LAYER_WIDTHS = ["w-full", "w-[94%]", "w-[88%]", "w-[82%]", "w-[76%]"];
 const CAKE_FLAVORS = [
   "from-indigo-400 via-violet-400 to-fuchsia-400",
@@ -33,7 +34,7 @@ export default function GithubExhibition({
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(repositories[0]?.id ?? null);
   const [tab, setTab] = useState<DetailTab>("idea");
-  const [languageMix, setLanguageMix] = useState<Record<number, string[]>>({});
+  const [languageMix, setLanguageMix] = useState<Record<number, LanguageShare[]>>({});
 
   const rooms = useMemo(
     () => ["All exhibits", ...Array.from(new Set(repositories.map((repo) => repo.language).filter((v): v is string => !!v))).slice(0, 5)],
@@ -64,14 +65,15 @@ export default function GithubExhibition({
         return response.json() as Promise<Record<string, number>>;
       })
       .then((bytesByLanguage) => {
+        const totalBytes = Object.values(bytesByLanguage).reduce((total, bytes) => total + bytes, 0);
         const topLanguages = Object.entries(bytesByLanguage)
           .sort((a, b) => b[1] - a[1])
           .slice(0, 3)
-          .map(([language]) => language);
+          .map(([name, bytes]) => ({ name, percent: totalBytes > 0 ? Math.round((bytes / totalBytes) * 100) : null }));
         if (!cancelled) setLanguageMix((current) => ({ ...current, [selected.id]: topLanguages }));
       })
       .catch(() => {
-        if (!cancelled) setLanguageMix((current) => ({ ...current, [selected.id]: selected.language ? [selected.language] : [] }));
+        if (!cancelled) setLanguageMix((current) => ({ ...current, [selected.id]: selected.language ? [{ name: selected.language, percent: null }] : [] }));
       });
     return () => { cancelled = true; };
   }, [languageMix, selected, username]);
@@ -270,7 +272,7 @@ export default function GithubExhibition({
                                 <p className="mt-3 text-xs font-medium text-text-muted">Top languages by code size</p>
                                 <div className="mt-2 flex flex-wrap gap-2">
                                   {languageMix[selected.id] === undefined && <span className="text-sm text-text-muted">Checking the recipe…</span>}
-                                  {languageMix[selected.id]?.map((language, index) => <span key={language} className="rounded-full bg-indigo-500/10 px-3 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-300">{index + 1}. {language}</span>)}
+                                  {languageMix[selected.id]?.map((language, index) => <span key={language.name} className="rounded-full bg-indigo-500/10 px-3 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-300">{index + 1}. {language.name}{language.percent != null && <span className="ml-1 tabular-nums text-indigo-500/75 dark:text-indigo-200/75">{language.percent}%</span>}</span>)}
                                   {languageMix[selected.id]?.length === 0 && <span className="text-sm text-text-muted">No language data listed.</span>}
                                 </div>
                                 {selected.topics.length > 0 && <>
