@@ -17,8 +17,77 @@ export type GithubStats = {
   contributions: ContributionCalendar | null;
 };
 
+export type GithubRepository = {
+  id: number;
+  name: string;
+  description: string | null;
+  htmlUrl: string;
+  homepage: string | null;
+  language: string | null;
+  topics: string[];
+  stars: number;
+  forks: number;
+  updatedAt: string;
+  archived: boolean;
+};
+
 type GithubRepo = { stargazers_count?: number; language?: string | null; fork?: boolean };
 type GithubUser = { public_repos?: number; followers?: number };
+
+/** Fetches the owner's public repositories for the interactive exhibition.
+ * Forks and the portfolio's own repo are omitted; GitHub's anonymous API is cached
+ * for six hours and failures leave the rest of the homepage unaffected. */
+export async function getGithubRepositories(
+  githubUrl: string | undefined | null,
+): Promise<{ username: string; repositories: GithubRepository[] } | null> {
+  if (!githubUrl) return null;
+  const username = extractUsername(githubUrl);
+  if (!username) return null;
+
+  try {
+    const response = await fetch(
+      `https://api.github.com/users/${username}/repos?per_page=100&sort=updated&type=owner`,
+      { headers: { Accept: "application/vnd.github+json" }, next: { revalidate: 21600 } },
+    );
+    if (!response.ok) return null;
+    const repos = (await response.json()) as Array<{
+      id: number;
+      name: string;
+      description: string | null;
+      html_url: string;
+      homepage: string | null;
+      language: string | null;
+      topics?: string[];
+      stargazers_count: number;
+      forks_count: number;
+      updated_at: string;
+      fork: boolean;
+      archived: boolean;
+    }>;
+    if (!Array.isArray(repos)) return null;
+
+    return {
+      username,
+      repositories: repos
+        .filter((repo) => !repo.fork && repo.name.toLowerCase() !== username.toLowerCase())
+        .map((repo) => ({
+          id: repo.id,
+          name: repo.name,
+          description: repo.description,
+          htmlUrl: repo.html_url,
+          homepage: repo.homepage || null,
+          language: repo.language,
+          topics: repo.topics ?? [],
+          stars: repo.stargazers_count ?? 0,
+          forks: repo.forks_count ?? 0,
+          updatedAt: repo.updated_at,
+          archived: repo.archived,
+        })),
+    };
+  } catch {
+    return null;
+  }
+}
 
 /** Pulls the GitHub username out of a profile URL like "https://github.com/username".
  * Returns null for anything that isn't actually a github.com profile link. */

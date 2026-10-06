@@ -10,6 +10,7 @@ const LINKS = [
   { href: "#about", label: "About" },
   { href: "#experience", label: "Experience" },
   { href: "#projects", label: "Projects" },
+  { href: "#github-exhibition", label: "GitHub Gallery" },
   { href: "#research", label: "Research" },
   { href: "#hackathons", label: "Hackathons" },
   { href: "#contact", label: "Contact" },
@@ -118,7 +119,7 @@ export default function Nav({ profile }: { profile: Profile }) {
 
       <div
         className={`md:hidden overflow-hidden bg-background/95 backdrop-blur border-b border-border transition-all duration-300 ease-out ${
-          open ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+          open ? "max-h-80 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <ul className="flex flex-col gap-4 px-6 py-4 text-text-secondary">

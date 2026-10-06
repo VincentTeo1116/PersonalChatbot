@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import About from "@/components/About";
 import TechMarquee from "@/components/TechMarquee";
 import GithubStats from "@/components/GithubStats";
+import GithubExhibition from "@/components/GithubExhibition";
 import WorkExperience from "@/components/WorkExperience";
 import Projects from "@/components/Projects";
 import Research from "@/components/Research";
@@ -13,15 +14,18 @@ import ChatWidgetLoader from "@/components/ChatWidgetLoader";
 import CommandPalette from "@/components/CommandPalette";
 import TerminalEasterEgg from "@/components/TerminalEasterEgg";
 import { getProfile, getProjects, getResearch, getHackathonPhotos, getWorkExperience, getTestimonials } from "@/lib/data";
+import { getGithubRepositories } from "@/lib/github";
 
 export default async function Home() {
-  const [profile, projects, research, hackathonPhotos, workExperience, testimonials] = await Promise.all([
-    getProfile(),
+  const profilePromise = getProfile();
+  const [profile, projects, research, hackathonPhotos, workExperience, testimonials, githubExhibition] = await Promise.all([
+    profilePromise,
     getProjects(),
     getResearch(),
     getHackathonPhotos(),
     getWorkExperience(),
     getTestimonials(),
+    profilePromise.then((value) => getGithubRepositories(value.contact.github)),
   ]);
 
   return (
@@ -34,6 +38,12 @@ export default async function Home() {
         <GithubStats githubUrl={profile.contact.github} />
         <WorkExperience experience={workExperience} />
         <Projects projects={projects} />
+        {githubExhibition && (
+          <GithubExhibition
+            username={githubExhibition.username}
+            repositories={githubExhibition.repositories}
+          />
+        )}
         <Research research={research} />
         <HackathonGallery hackathonPhotos={hackathonPhotos} />
         <Testimonials testimonials={testimonials} />
