@@ -117,21 +117,23 @@ export default function Nav({ profile }: { profile: Profile }) {
         </div>
       </nav>
 
-      <div
-        className={`md:hidden overflow-hidden bg-background/95 backdrop-blur border-b border-border transition-all duration-300 ease-out ${
-          open ? "max-h-80 opacity-100" : "max-h-0 opacity-0"
-        }`}
+      <motion.div
+        initial={false}
+        animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.25, ease: "easeInOut" }}
+        className="md:hidden max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain bg-background/95 backdrop-blur border-b border-border"
+        aria-hidden={!open}
       >
-        <ul className="flex flex-col gap-4 px-6 py-4 text-text-secondary">
+        <ul className="flex flex-col gap-1 px-6 py-3 text-text-secondary">
           {LINKS.map((l) => (
             <li key={l.href}>
-              <a href={l.href} onClick={() => setOpen(false)} className="block py-1">
+              <a href={l.href} onClick={() => setOpen(false)} tabIndex={open ? 0 : -1} className="block min-h-11 rounded-lg px-3 py-3 transition hover:bg-surface-hover hover:text-foreground">
                 {l.label}
               </a>
             </li>
           ))}
         </ul>
-      </div>
+      </motion.div>
     </motion.header>
   );
 }
