@@ -1,6 +1,6 @@
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/public";
 import type {
   ChatLog,
   EducationEntry,

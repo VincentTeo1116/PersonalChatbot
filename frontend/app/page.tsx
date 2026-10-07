@@ -17,6 +17,10 @@ import TerminalEasterEgg from "@/components/TerminalEasterEgg";
 import { getProfile, getProjects, getResearch, getFyp, getHackathonPhotos, getWorkExperience, getTestimonials } from "@/lib/data";
 import { getGithubRepositories } from "@/lib/github";
 
+// Prerendered + cached; admin saves bust this instantly via revalidatePath("/"), this is just
+// a safety-net refresh in case one of those is ever missed.
+export const revalidate = 3600;
+
 export default async function Home() {
   const profilePromise = getProfile();
   const [profile, projects, research, fyp, hackathonPhotos, workExperience, testimonials, githubExhibition] = await Promise.all([
