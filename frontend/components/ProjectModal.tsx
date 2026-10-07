@@ -13,8 +13,7 @@ export type PreviewItem = {
   screenshots?: string[];
   demoVideoUrl?: string;
   links: { label: string; url: string }[];
-  /** Link to a full write-up page, e.g. `/projects/{slug}`. Omit if there isn't one
-   * (research papers previewed with this same modal have no such page). */
+  // Link to a full write-up page, e.g. /projects/{slug}. Omit for things like research papers that have none.
   caseStudyHref?: string;
 };
 

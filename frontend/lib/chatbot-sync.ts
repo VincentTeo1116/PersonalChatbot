@@ -30,10 +30,7 @@ export async function syncChatbotNow(): Promise<SyncResult> {
   }
 }
 
-/**
- * Best-effort background sync for admin saves: runs after the response is sent, so a slow
- * or offline backend never delays or fails the save itself. No-ops if sync isn't configured.
- */
+// Runs after the response is sent, so a slow/offline backend never delays or fails the admin save itself.
 export function queueChatbotSync() {
   if (!process.env.CHATBOT_SYNC_URL) return;
   after(async () => {

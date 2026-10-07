@@ -12,12 +12,7 @@ declare global {
 
 const WIDGET_SCRIPT_ID = "portfolio-chatbot-widget-script";
 
-/**
- * Loads widget/chatbot-widget.js (copied from portfolio-chatbot-backend/widget/)
- * at runtime. Config MUST be set before the script executes, so we set it and
- * then inject the script tag ourselves rather than relying on next/script
- * load-order guarantees.
- */
+// Config must be set before the script runs, so we inject the tag ourselves instead of using next/script.
 export default function ChatWidgetLoader({ profile }: { profile: Profile }) {
   useEffect(() => {
     if (document.getElementById(WIDGET_SCRIPT_ID)) return;

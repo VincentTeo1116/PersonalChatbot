@@ -12,8 +12,7 @@ export type GithubStats = {
   followers: number;
   totalStars: number;
   topLanguages: string[];
-  /** null if GITHUB_TOKEN isn't set or the GraphQL call fails -- the rest of the stats
-   * above come from the unauthenticated REST API and work independently of this. */
+  // null if GITHUB_TOKEN isn't set or the GraphQL call fails; the other stats work fine without it.
   contributions: ContributionCalendar | null;
 };
 
@@ -34,9 +33,7 @@ export type GithubRepository = {
 type GithubRepo = { stargazers_count?: number; language?: string | null; fork?: boolean };
 type GithubUser = { public_repos?: number; followers?: number };
 
-/** Fetches the owner's public repositories for the interactive exhibition.
- * Forks and the portfolio's own repo are omitted; GitHub's anonymous API is cached
- * for six hours and failures leave the rest of the homepage unaffected. */
+// Public repos for the GitHub exhibition, minus forks and the portfolio's own repo. Cached 6h, fails quietly.
 export async function getGithubRepositories(
   githubUrl: string | undefined | null,
 ): Promise<{ username: string; repositories: GithubRepository[] } | null> {
@@ -89,8 +86,7 @@ export async function getGithubRepositories(
   }
 }
 
-/** Pulls the GitHub username out of a profile URL like "https://github.com/username".
- * Returns null for anything that isn't actually a github.com profile link. */
+// Pulls the username out of a github.com profile URL; null if it isn't actually one.
 function extractUsername(githubUrl: string): string | null {
   try {
     const u = new URL(githubUrl);
@@ -102,13 +98,7 @@ function extractUsername(githubUrl: string): string | null {
   }
 }
 
-/**
- * The green-square contribution calendar isn't available through GitHub's REST API at
- * all -- only the GraphQL API exposes it, which requires an authenticated token (no
- * special scopes needed, it's still just public data). Returns null if GITHUB_TOKEN
- * isn't configured or the request fails for any reason, same fail-open philosophy as
- * the rest of this module -- callers get the numeric stats regardless.
- */
+// The contribution calendar only exists via GraphQL (needs a token, still just public data). Null on any failure.
 async function getGithubContributions(username: string): Promise<ContributionCalendar | null> {
   const token = process.env.GITHUB_TOKEN;
   if (!token) return null;
@@ -158,19 +148,8 @@ async function getGithubContributions(username: string): Promise<ContributionCal
   }
 }
 
-/**
- * Fetches public GitHub stats via the unauthenticated REST API (no token needed) and
- * builds our own numbers, rather than embedding a third-party stats image, so the
- * result matches the site's own design/theme exactly.
- *
- * Cached for 6 hours (Next's fetch cache) -- comfortably inside GitHub's unauthenticated
- * rate limit (60 requests/hour per IP) even though every page load would otherwise
- * trigger two API calls.
- *
- * Returns null on ANY failure (bad/missing URL, rate limited, network error, private or
- * nonexistent account) so a GitHub hiccup can never break the homepage -- the section
- * just doesn't render that day.
- */
+// Builds our own stats from the unauthenticated REST API instead of a third-party image, so it matches our theme.
+// Cached 6h to stay well under GitHub's rate limit. Returns null on any failure so the section just doesn't render.
 export async function getGithubStats(githubUrl: string | undefined | null): Promise<GithubStats | null> {
   if (!githubUrl) return null;
   const username = extractUsername(githubUrl);

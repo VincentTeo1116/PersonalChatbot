@@ -20,10 +20,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
 };
 
-/** Below `sm`, the hero grid stacks into one column, so the avatar sits well below the
- * hero text -- much lower than on desktop's side-by-side layout. The fixed scroll-pixel
- * thresholds below assume the desktop height, so on mobile the fade-out finishes before
- * the avatar has even scrolled into view. Disable the scroll fade/lift there entirely. */
+// Scroll fade/lift thresholds assume desktop's side-by-side layout, so just skip them on mobile's stacked one.
 function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {

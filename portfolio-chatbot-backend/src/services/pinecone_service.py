@@ -38,10 +38,7 @@ def upsert_rows(vectors: list[dict[str, Any]]) -> int:
 
 
 def delete_missing_ids(keep_ids: set[str]) -> int:
-    """Remove any vectors in the namespace whose id is no longer in the sheet.
-
-    Keeps Pinecone in sync when a row is deleted from the spreadsheet.
-    """
+    """Removes vectors whose id is no longer in keep_ids, so Pinecone stays in sync with deleted rows."""
     index = get_index()
     existing_ids: set[str] = set()
     for batch in index.list(namespace=Config.PINECONE_NAMESPACE):

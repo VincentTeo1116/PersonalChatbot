@@ -1,11 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-/**
- * Refreshes the Supabase auth session cookie on every request to a matched
- * path, and reports whether the request is authenticated. Called from the
- * root `proxy.ts` (Next.js 16's replacement for `middleware.ts`).
- */
+// Refreshes the Supabase session cookie per request and reports whether it's authenticated. Called from root proxy.ts.
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 

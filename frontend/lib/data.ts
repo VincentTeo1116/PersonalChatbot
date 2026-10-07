@@ -23,10 +23,7 @@ function publicUrl(supabase: SupabaseClient, path: string | null | undefined, fa
   return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
-// items can be either the old shape (plain skill-name strings) or the new shape (with a
-// proficiency level) -- normalizeSkillItem() below is the one place that reconciles both,
-// so every other file in the app can assume SkillItem{name, level} and never has to know
-// this migration happened.
+// items are either plain strings (old skill rows) or {name, level} objects (new) -- normalizeSkillItem reconciles both.
 type RawSkillItem = string | { name: string; level?: number };
 type SkillsJson = { category: string; sort_order?: number; items: RawSkillItem[] }[];
 const DEFAULT_SKILL_LEVEL = 4; // shown for legacy plain-string skills with no saved level
@@ -75,9 +72,7 @@ export const getProfile = cache(async (): Promise<Profile> => {
   };
 });
 
-/** Testimonials/recommendations shown as social proof on the public site. Returns []
- * on any error (most likely 005_testimonials.sql hasn't been run yet) so the homepage
- * never crashes over this -- it just renders no testimonials section instead. */
+// Returns [] if 005_testimonials.sql hasn't been run yet, so the homepage just skips the section instead of crashing.
 export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase.from("testimonials").select("*").order("sort_order");
@@ -92,9 +87,7 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
   }));
 });
 
-/** The Final Year Project singleton (see supabase/008_fyp.sql). Returns null on any
- * error (most likely the migration hasn't been run yet) or if the row genuinely has no
- * title set -- either way the public site shows a "Coming Soon" card, never a crash. */
+// Returns null if the migration hasn't been run yet -- public site just shows "Coming Soon" instead of crashing.
 export const getFyp = cache(async (): Promise<Fyp | null> => {
   const supabase = await createClient();
   const { data: row, error } = await supabase.from("fyp").select("*").eq("id", 1).maybeSingle();
@@ -223,9 +216,7 @@ export const getWorkExperience = cache(async (): Promise<WorkExperience[]> => {
   }));
 });
 
-/** "Request a meeting" form submissions (see supabase/007_meeting_requests.sql).
- * Returns [] on any error -- most likely that migration hasn't been run yet -- so the
- * admin page never crashes over this, it just shows an empty state instead. */
+// "Request a meeting" submissions. Returns [] if the migration hasn't run yet -- admin page just shows empty state.
 export const getMeetingRequests = cache(async (): Promise<MeetingRequest[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -247,9 +238,7 @@ export const getMeetingRequests = cache(async (): Promise<MeetingRequest[]> => {
   }));
 });
 
-/** Recent questions visitors asked the chatbot (see supabase/004_chat_logs.sql).
- * Returns [] on any error -- most likely that migration hasn't been run yet -- so the
- * admin page never crashes over this, it just shows an empty state instead. */
+// Recent chatbot questions. Returns [] if the migration hasn't run yet -- admin page just shows empty state.
 export const getChatLogs = cache(async (limit = 50): Promise<ChatLog[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase

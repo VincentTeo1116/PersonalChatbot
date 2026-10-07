@@ -10,8 +10,7 @@ type Slide =
 
 const AUTO_ADVANCE_MS = 3000;
 
-/** Extracts the video id from any common YouTube URL shape, or null if it isn't one
- * (in which case the url is treated as a direct video file, e.g. an mp4 link). */
+// Pulls the video id out of any common YouTube URL shape; null means treat it as a direct video file instead.
 function getYouTubeEmbedId(url: string): string | null {
   try {
     const u = new URL(url);
@@ -28,12 +27,7 @@ function getYouTubeEmbedId(url: string): string | null {
   return null;
 }
 
-/**
- * The video-first, auto-advancing image carousel shared by the quick-preview modal
- * (ProjectModal) and the full case-study page. Self-contained: owns its own slide
- * index, hover state, and arrow-key navigation. `children` renders on top of the media
- * (e.g. the modal's close button) without this component needing to know about it.
- */
+// Video-first auto-advancing carousel shared by ProjectModal and the case-study page. Owns its own slide state.
 export default function ProjectMedia({
   title,
   image,
@@ -78,8 +72,7 @@ export default function ProjectMedia({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [total]);
 
-  // Auto-advance through images every 3s. Paused on a video slide (so it doesn't get
-  // cut off mid-playback) and while the visitor is hovering the media area.
+  // Auto-advance every 3s, but pause on a video slide or while hovering.
   useEffect(() => {
     if (total <= 1 || isHovering || slides[index]?.kind !== "image") return;
     const timer = setTimeout(goNext, AUTO_ADVANCE_MS);

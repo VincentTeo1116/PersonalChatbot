@@ -3,9 +3,7 @@ import SectionHeading from "@/components/SectionHeading";
 import StatCounter from "@/components/StatCounter";
 import { getGithubStats, type ContributionCalendar } from "@/lib/github";
 
-/** Renders the contribution calendar as a grid of weeks (columns) x days (rows), shaded
- * in the site's own indigo theme rather than GitHub's green -- so it looks like a native
- * part of the page, not an embedded badge. */
+// Contribution calendar as weeks x days, recolored indigo to match the site instead of GitHub's green.
 function ContributionGraph({ calendar }: { calendar: ContributionCalendar }) {
   const max = Math.max(1, ...calendar.weeks.flat().map((d) => d.count));
 
@@ -37,9 +35,7 @@ function ContributionGraph({ calendar }: { calendar: ContributionCalendar }) {
   );
 }
 
-/** Renders nothing if GitHub's API can't be reached, the URL isn't a real github.com
- * profile, or the account has no public data -- a GitHub hiccup should never break the
- * homepage, it should just mean this section quietly doesn't show up. */
+// Renders nothing if GitHub's API fails or the URL isn't valid -- don't let a GitHub hiccup break the homepage.
 export default async function GithubStats({ githubUrl }: { githubUrl: string | undefined }) {
   const stats = await getGithubStats(githubUrl);
   if (!stats) return null;

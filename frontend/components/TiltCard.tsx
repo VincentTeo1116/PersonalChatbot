@@ -3,10 +3,7 @@
 import { useRef, type ReactNode } from "react";
 import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from "motion/react";
 
-/**
- * A card that tilts toward the cursor in 3D, lifts on hover, and carries a soft light that
- * follows the pointer. Pass `group` in className if children use `group-hover:` styles.
- */
+// Card that tilts toward the cursor and carries a soft light that follows it. Pass `group` in className if needed.
 export default function TiltCard({
   children,
   className = "",

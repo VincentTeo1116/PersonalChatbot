@@ -1,13 +1,6 @@
-"""Builds the chatbot's knowledge base from the portfolio's Supabase tables.
-
-The portfolio site renders profile / education / work experience / projects / research
-straight from Supabase, so the chatbot reads the very same rows -- editing content in the
-site's /admin is the only step needed to update what the chatbot knows.
-
-Each entity becomes one FAQ-style row ({category, question, answer, tags}), the shape
-kb_sync.sync_rows() already knows how to embed and upsert. Only the public anon key is
-needed: the content tables allow public SELECT under Row Level Security.
-"""
+"""Builds the chatbot's knowledge base straight from the portfolio's Supabase tables -- editing
+content in /admin is the only step needed to update what the chatbot knows. Turns each row into
+an FAQ-style {category, question, answer, tags} dict for kb_sync.sync_rows()."""
 import logging
 from typing import Any
 

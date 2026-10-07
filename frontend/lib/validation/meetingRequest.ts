@@ -1,13 +1,5 @@
-/**
- * Shared between the client (live inline feedback as the visitor types) and the server
- * action (the authoritative check -- client-side validation can always be bypassed, so
- * the server re-runs this exact same logic before anything touches the database).
- *
- * This can only catch OBVIOUSLY fake/placeholder input (format + well-known junk
- * patterns) -- it cannot prove an email or phone number is real and reachable. Actually
- * verifying that would need a confirmation email or SMS OTP, which is a separate,
- * heavier feature than what was asked for here.
- */
+// Shared by the client (inline feedback) and the server action (the real check, since client-side
+// validation can be bypassed). Only catches obviously fake input -- can't verify it's a real address.
 
 export type MeetingRequestInput = {
   name: string;
@@ -20,9 +12,7 @@ export type MeetingRequestInput = {
 
 export type MeetingRequestErrors = Partial<Record<keyof MeetingRequestInput, string>>;
 
-// A handful of the most common disposable/throwaway email providers -- not exhaustive
-// (new ones appear constantly), but it filters the overwhelming majority of "didn't want
-// to use a real address" submissions.
+// The most common disposable email providers -- not exhaustive, but catches most throwaway addresses.
 const DISPOSABLE_EMAIL_DOMAINS = new Set([
   "mailinator.com",
   "10minutemail.com",
@@ -41,8 +31,7 @@ const DISPOSABLE_EMAIL_DOMAINS = new Set([
   "emailondeck.com",
 ]);
 
-// Local-parts (the bit before @) that are near-universally used for lazy test/joke
-// submissions rather than a real address -- e.g. "abc@gmail.com", "test@test.com".
+// Local-parts used for lazy test/joke submissions rather than a real address, e.g. "test@gmail.com".
 const PLACEHOLDER_LOCAL_PARTS = new Set([
   "test",
   "abc",
@@ -68,10 +57,7 @@ function normalizePhoneDigits(phone: string): string {
   return phone.replace(/\D/g, "");
 }
 
-/** Flags "0000000000", "0123456789", "9876543210", and any rotation of the ascending or
- * descending 0-9 run (e.g. "5678901234") -- the kind of input someone mashes in when they
- * don't want to give a real number, without being so strict it rejects real numbers that
- * merely contain a short repeated/sequential substring. */
+// Flags all-same-digit or sequential numbers like "0123456789" -- the kind people mash in when faking it.
 function isObviouslyFakePhone(digits: string): boolean {
   if (/^(\d)\1+$/.test(digits)) return true; // all one repeated digit
   const ascendingWrap = "01234567890123456789";

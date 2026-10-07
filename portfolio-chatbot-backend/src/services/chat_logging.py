@@ -1,10 +1,5 @@
-"""Logs each chat question to Supabase so the admin can see what visitors actually
-ask (see supabase/004_chat_logs.sql for the table + RLS policies).
-
-This is pure telemetry: if it fails for any reason (table not migrated yet, Supabase
-briefly unreachable, etc.) it must never break or slow down the chat response the
-visitor is waiting on. Every call is wrapped so it can only log a warning, never raise.
-"""
+"""Logs each chat question to Supabase for the admin to review (see supabase/004_chat_logs.sql).
+Pure telemetry -- wrapped so a failure here can only ever log a warning, never break the chat response."""
 import logging
 
 import httpx
@@ -45,7 +40,5 @@ def log_chat(
             timeout=5,
         ).raise_for_status()
     except Exception:
-        # Most likely cause: 004_chat_logs.sql hasn't been run yet in Supabase, or a
-        # transient network hiccup. Either way, the visitor already has their answer --
-        # this is best-effort analytics, never allowed to surface as a chat failure.
+        # Likely the migration hasn't run yet, or a network hiccup -- the visitor already has their answer.
         logger.warning("chat_logs insert failed (non-fatal)", exc_info=True)

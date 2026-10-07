@@ -27,11 +27,7 @@ def clear_cache() -> None:
 
 
 class ChatRequest(BaseModel):
-    # min_length=1 (not higher) deliberately -- a short real greeting like "Hi" or "Yo"
-    # is only 2 characters and was previously rejected by a min_length=3 here, which is
-    # what caused "Hi" to 422 while "hello" worked fine. strip_whitespace=True runs
-    # BEFORE the length check, so " " (whitespace-only) is correctly rejected too,
-    # rather than passing validation and only becoming empty later.
+    # min_length=1 so a short "Hi" isn't rejected like it used to be; strip_whitespace still catches blank input.
     question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
 
 
@@ -104,16 +100,9 @@ async def chat(payload: ChatRequest, background_tasks: BackgroundTasks) -> ChatR
 
 
 def _stream_chat(question: str) -> Iterator[str]:
-    """Yields newline-delimited JSON: any number of {"type":"chunk","text":...} lines
-    (raw text from Gemini, in real time), followed by exactly one terminal line --
-    either {"type":"done", answer, sources, cache_hit, latency_ms} or
-    {"type":"error", message}. The client should always prefer the "done" event's
-    `answer` as the final, authoritative (markdown-stripped) text over whatever the
-    streamed chunks concatenate to.
-
-    Plain `def` (not async), same reasoning as webhook.py: the Gemini stream call is
-    blocking, and Starlette runs a sync generator like this in a worker thread.
-    """
+    # Yields "chunk" lines as text streams in, then one "done" (or "error") line with the final
+    # markdown-stripped answer -- clients should trust that over the concatenated chunks.
+    # Plain def, not async: the Gemini call blocks, so Starlette runs this in a worker thread.
     start = time.monotonic()
     cache_key = question.lower()
 

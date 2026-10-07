@@ -1,15 +1,8 @@
 import "server-only";
 import type { MeetingRequestInput } from "@/lib/validation/meetingRequest";
 
-/**
- * Emails the site owner when a "Request a meeting" form is submitted, via Resend
- * (https://api.resend.com/emails -- plain fetch, no SDK, same style as lib/github.ts).
- *
- * Entirely optional: if RESEND_API_KEY isn't set, this silently no-ops -- the meeting
- * request itself is already saved to Supabase regardless, so a missing/misconfigured
- * email setup can never block or fail the visitor's submission. Call this from inside
- * next/server's after() so it runs after the response is already sent.
- */
+// Emails the owner on a new meeting request, via Resend. No-ops if RESEND_API_KEY isn't set -- the
+// request is already saved to Supabase either way. Call from inside after() so it runs post-response.
 export async function sendMeetingRequestEmail(input: MeetingRequestInput, toEmail: string): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey || !toEmail) return;

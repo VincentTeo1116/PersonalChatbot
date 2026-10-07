@@ -1,11 +1,5 @@
-"""Turns knowledge-base rows into Pinecone vectors.
-
-This is the "auto-update" half of the pipeline: the rows are built from the
-portfolio's Supabase tables (see supabase_source.py) every time the site's
-/admin triggers a sync. We re-embed and upsert everything — the knowledge base
-is small enough that a full resync is simpler and more reliable than diffing
-individual rows.
-"""
+"""Turns knowledge-base rows (built from Supabase, see supabase_source.py) into Pinecone vectors.
+Always a full re-embed + upsert -- the KB is small enough that this is simpler than diffing rows."""
 import hashlib
 import logging
 from typing import Any
@@ -33,11 +27,7 @@ def _embedding_text(row: dict[str, Any]) -> str:
 
 
 def sync_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """Embed and upsert every active row; delete vectors for removed rows.
-
-    Rows with is_active explicitly set to false/0/"" are skipped (and their
-    vector removed), so you can stage content in the sheet before publishing.
-    """
+    """Embed and upsert every active row; delete vectors for rows that are gone or marked inactive."""
     valid_rows = []
     skipped = 0
     for row in rows:

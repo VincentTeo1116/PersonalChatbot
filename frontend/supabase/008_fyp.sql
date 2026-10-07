@@ -1,7 +1,4 @@
--- Run this in the Supabase SQL Editor (after schema.sql has already been run once).
--- Adds the Final Year Project section. Singleton row (like `profile`) since there's
--- only ever one FYP -- left entirely empty is fine, the public site shows a "Coming
--- Soon" card until `title` is filled in via /admin/fyp.
+-- Run in the Supabase SQL Editor. Singleton row like `profile` -- leave it empty and the site shows "Coming Soon".
 
 create table public.fyp (
   id smallint primary key default 1,
@@ -37,6 +34,4 @@ create policy "admin write" on public.fyp for all
 create policy "admin write" on public.fyp_images for all
   using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
--- No new Storage policies needed: the "portfolio-content" bucket's existing
--- public-read / authenticated-write policies from schema.sql already cover
--- any new folder path (e.g. fyp/...).
+-- No new Storage policies needed -- the portfolio-content bucket already covers any folder.

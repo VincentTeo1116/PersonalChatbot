@@ -8,12 +8,7 @@ export function extOf(filename: string) {
   return dot === -1 ? "" : filename.slice(dot); // includes the leading "."
 }
 
-/**
- * Uploads a file into `{folder}/image-{n}.{ext}`, where n is one more than
- * the highest existing `image-N` in that folder. Not gap-filling: deleting
- * image-2 and uploading again produces image-4, not a reused image-2.
- * `upsert: false` so a same-name collision (a rare race) fails loudly.
- */
+// Uploads to {folder}/image-{n}.{ext}, n = highest existing + 1. Doesn't fill gaps from deleted images.
 export async function uploadNextImage(
   supabase: SupabaseClient,
   folder: string,
@@ -37,12 +32,7 @@ export async function uploadNextImage(
   return { path, publicUrl: supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl };
 }
 
-/**
- * Uploads a file to a FIXED path `{folder}/{filename}`, overwriting whatever was there
- * before (upsert: true). Use this for "there's only ever one current file" cases, like a
- * resume, unlike uploadNextImage's incrementing gallery numbering -- a re-upload replaces
- * the old file in place instead of accumulating image-1, image-2, image-3, ...
- */
+// Uploads to a fixed path, overwriting what's there -- for single-file cases like a resume, not a gallery.
 export async function uploadFixedFile(
   supabase: SupabaseClient,
   folder: string,

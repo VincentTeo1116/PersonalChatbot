@@ -106,8 +106,7 @@ export type Testimonial = {
   avatarUrl: string | null;
 };
 
-/** A "Request a meeting" form submission from a visitor -- see
- * supabase/007_meeting_requests.sql and /admin/meeting-requests. */
+// A "Request a meeting" form submission -- see supabase/007_meeting_requests.sql.
 export type MeetingRequest = {
   id: string;
   name: string;
@@ -121,9 +120,7 @@ export type MeetingRequest = {
 
 export type FypImage = { id: string; src: string };
 
-/** The Final Year Project section -- a singleton (there's only ever one), see
- * supabase/008_fyp.sql and /admin/fyp. All fields are nullable: left blank until
- * filled in, in which case the public site shows a "Coming Soon" card. */
+// Singleton -- there's only ever one FYP. Fields stay null until filled in via /admin/fyp.
 export type Fyp = {
   title: string | null;
   description: string | null;
@@ -135,8 +132,7 @@ export type Fyp = {
   images: FypImage[];
 };
 
-/** A question a visitor asked the chatbot, logged by the backend for review in
- * /admin/chatbot -- see supabase/004_chat_logs.sql. */
+// A chatbot question logged for review in /admin/chatbot -- see supabase/004_chat_logs.sql.
 export type ChatLog = {
   id: string;
   question: string;

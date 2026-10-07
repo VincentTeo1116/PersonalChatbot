@@ -1,9 +1,5 @@
-"""Answer generation via Groq (OpenAI-compatible chat completions on Groq's LPU
-hardware). Chosen over Gemini for this half of the pipeline because Groq's free tier
-is far less likely to be rate-limited for a low-to-moderate-traffic portfolio site.
-
-Embeddings still go through Gemini (see gemini_service.py) -- Groq doesn't offer an
-embeddings endpoint, so that half of the pipeline can't move here."""
+"""Answer generation via Groq -- its free tier is much less likely to get rate-limited than
+Gemini's for a portfolio site. Embeddings still go through Gemini since Groq has no such endpoint."""
 import logging
 from typing import Iterator
 
@@ -30,15 +26,8 @@ def generate_answer(question: str, context: str, owner_name: str = "Vincent") ->
 
 
 def generate_answer_stream(question: str, context: str, owner_name: str = "Vincent") -> Iterator[str]:
-    """Generate a grounded answer, yielding raw text chunks as Groq produces them.
-
-    Chunks are NOT markdown-stripped individually -- a marker like "**" can land split
-    across two chunks, and stripping each chunk independently could leave a stray
-    asterisk on screen. The prompt already asks the model not to use markdown at all,
-    so raw chunks are safe to show in real time; the caller should still run the final,
-    fully-assembled text through strip_markdown() once the stream ends (e.g. to
-    cache/log the canonical clean version and let the client snap to it).
-    """
+    """Yields raw text chunks as Groq produces them -- not markdown-stripped individually, since a
+    marker like "**" could land split across chunks. Caller should strip_markdown() the final text."""
     prompt = build_prompt(question, context, owner_name)
     stream = _client.chat.completions.create(
         model=Config.GROQ_CHAT_MODEL,

@@ -1,10 +1,6 @@
-"""Gemini is used for embeddings only -- see groq_service.py for answer generation
-(moved there because Groq's free tier is far less likely to be rate-limited; Groq has
-no embeddings endpoint, so this half of the pipeline stays on Gemini).
-
-Uses google-genai (the `google.genai` Client-based SDK) -- the older
-google-generativeai package this used to be built on has been fully
-end-of-lifed upstream (no more updates or bug fixes)."""
+"""Gemini handles embeddings only -- see groq_service.py for answer generation (Groq's free tier is
+more generous, but it has no embeddings endpoint). Uses the newer google-genai SDK, not the EOL'd
+google-generativeai package."""
 import logging
 
 from google import genai
@@ -18,9 +14,7 @@ _client = genai.Client(api_key=Config.GEMINI_API_KEY)
 
 
 def embed_text(text: str, task_type: str = "retrieval_document") -> list[float]:
-    """Embed a single string, truncated to Config.PINECONE_DIMENSION (768) so the
-    output always matches the existing Pinecone index regardless of the embedding
-    model's native size (gemini-embedding-001 defaults to 3072 dims)."""
+    """Embeds a string, truncated to PINECONE_DIMENSION so it matches the index regardless of model size."""
     result = _client.models.embed_content(
         model=Config.GEMINI_EMBEDDING_MODEL,
         contents=text,
