@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type {
   ChatLog,
   EducationEntry,
+  Fyp,
   HackathonPhoto,
   MeetingRequest,
   Profile,
@@ -89,6 +90,31 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
     quote: row.quote,
     avatarUrl: row.avatar_path ? publicUrl(supabase, row.avatar_path, "") : null,
   }));
+});
+
+/** The Final Year Project singleton (see supabase/008_fyp.sql). Returns null on any
+ * error (most likely the migration hasn't been run yet) or if the row genuinely has no
+ * title set -- either way the public site shows a "Coming Soon" card, never a crash. */
+export const getFyp = cache(async (): Promise<Fyp | null> => {
+  const supabase = await createClient();
+  const { data: row, error } = await supabase.from("fyp").select("*").eq("id", 1).maybeSingle();
+  if (error || !row) return null;
+
+  const { data: images } = await supabase.from("fyp_images").select("*").order("sort_order");
+
+  return {
+    title: row.title,
+    description: row.description,
+    githubUrl: row.github_url,
+    datasetDescription: row.dataset_description,
+    videoUrl: row.video_url,
+    supervisor: row.supervisor,
+    lecturerFeedback: row.lecturer_feedback,
+    images: (images ?? []).map((img) => ({
+      id: img.id,
+      src: publicUrl(supabase, img.storage_path, "/projects/placeholder.svg"),
+    })),
+  };
 });
 
 export const getEducation = cache(async (): Promise<EducationEntry[]> => {

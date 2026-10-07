@@ -44,6 +44,11 @@ def _detail_text(detail: str) -> str:
     return " ".join(line if line.endswith((".", "!", "?")) else f"{line}." for line in lines)
 
 
+def _skill_names(items: list[Any]) -> list[str]:
+    # items can be plain strings (old rows) or {"name", "level"} dicts (new) -- same dual shape frontend's normalizeSkillItem() handles.
+    return [item if isinstance(item, str) else item.get("name", "") for item in items]
+
+
 def _profile_rows(profile: dict[str, Any]) -> list[dict[str, str]]:
     name = profile["name"]
     rows = [
@@ -89,16 +94,17 @@ def _profile_rows(profile: dict[str, Any]) -> list[dict[str, str]]:
     skills = sorted(profile.get("skills") or [], key=lambda s: s.get("sort_order", 0))
     for skill in skills:
         if skill.get("category") and skill.get("items"):
+            names = _skill_names(skill["items"])
             rows.append(
                 {
                     "category": "Skills",
                     "question": f"What {skill['category']} skills does {name} have?",
-                    "answer": f"{name}'s {skill['category']} skills: {', '.join(skill['items'])}.",
-                    "tags": ", ".join(skill["items"]),
+                    "answer": f"{name}'s {skill['category']} skills: {', '.join(names)}.",
+                    "tags": ", ".join(names),
                 }
             )
     if skills:
-        overview = "; ".join(f"{s['category']}: {', '.join(s['items'])}" for s in skills if s.get("items"))
+        overview = "; ".join(f"{s['category']}: {', '.join(_skill_names(s['items']))}" for s in skills if s.get("items"))
         rows.append(
             {"category": "Skills", "question": f"What are {name}'s technical skills?", "answer": overview + "."}
         )

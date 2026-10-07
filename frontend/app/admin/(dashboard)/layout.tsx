@@ -10,6 +10,7 @@ const NAV = [
   { href: "/admin/experience", label: "Experience" },
   { href: "/admin/projects", label: "Projects" },
   { href: "/admin/research", label: "Research" },
+  { href: "/admin/fyp", label: "Final Year Project" },
   { href: "/admin/testimonials", label: "Testimonials" },
   { href: "/admin/hackathons", label: "Hackathons" },
   { href: "/admin/meeting-requests", label: "Meeting requests" },

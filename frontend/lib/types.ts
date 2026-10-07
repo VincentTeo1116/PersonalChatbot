@@ -119,6 +119,22 @@ export type MeetingRequest = {
   createdAt: string;
 };
 
+export type FypImage = { id: string; src: string };
+
+/** The Final Year Project section -- a singleton (there's only ever one), see
+ * supabase/008_fyp.sql and /admin/fyp. All fields are nullable: left blank until
+ * filled in, in which case the public site shows a "Coming Soon" card. */
+export type Fyp = {
+  title: string | null;
+  description: string | null;
+  githubUrl: string | null;
+  datasetDescription: string | null;
+  videoUrl: string | null;
+  supervisor: string | null;
+  lecturerFeedback: string | null;
+  images: FypImage[];
+};
+
 /** A question a visitor asked the chatbot, logged by the backend for review in
  * /admin/chatbot -- see supabase/004_chat_logs.sql. */
 export type ChatLog = {

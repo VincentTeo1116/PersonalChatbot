@@ -1,12 +1,12 @@
 import json
 import logging
 import time
-from typing import Iterator
+from typing import Annotated, Iterator
 
 from cachetools import TTLCache
 from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, StringConstraints
 
 from src.config import Config
 from src.services import pinecone_service
@@ -27,7 +27,12 @@ def clear_cache() -> None:
 
 
 class ChatRequest(BaseModel):
-    question: str = Field(..., min_length=3, max_length=500)
+    # min_length=1 (not higher) deliberately -- a short real greeting like "Hi" or "Yo"
+    # is only 2 characters and was previously rejected by a min_length=3 here, which is
+    # what caused "Hi" to 422 while "hello" worked fine. strip_whitespace=True runs
+    # BEFORE the length check, so " " (whitespace-only) is correctly rejected too,
+    # rather than passing validation and only becoming empty later.
+    question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
 
 
 class Source(BaseModel):

@@ -12,6 +12,7 @@ const LINKS = [
   { href: "#projects", label: "Projects" },
   { href: "#github-exhibition", label: "GitHub Gallery" },
   { href: "#research", label: "Research" },
+  { href: "#fyp", label: "FYP" },
   { href: "#hackathons", label: "Hackathons" },
   { href: "#contact", label: "Contact" },
 ];

@@ -15,6 +15,12 @@ Reply in plain text only -- the chat widget does not render markdown. Do not use
 underscores, backticks, or "#" headers for emphasis or formatting. For a list, put each item on
 its own line starting with "- " instead of using markdown bullets or bold labels.
 
+Detect the language the visitor's question is written in and reply in that SAME language --
+for example, English, Mandarin Chinese, or Bahasa Melayu. The context below is always in
+English; translate or paraphrase it naturally into the visitor's language rather than
+answering in English by default. If the question mixes languages, reply in whichever one
+makes up most of it.
+
 Context:
 {context}
 
