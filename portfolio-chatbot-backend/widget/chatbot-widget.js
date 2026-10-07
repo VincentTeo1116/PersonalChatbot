@@ -276,6 +276,16 @@
     this._scrollToBottom();
   };
 
+  // Fires when the backend's tool-calling pass detects the visitor wants to connect -- opens
+  // the site's own "Request a meeting" modal pre-filled with whatever it drafted, same
+  // custom-event pattern the nav uses for the command palette/terminal. The visitor still
+  // reviews and sends it themselves; nothing here submits on their behalf. No extra chat
+  // message here -- the backend's own "answer" text (already shown) is the confirmation.
+  ChatbotWidget.prototype._handleMeetingPrefill = function (prefill) {
+    if (!prefill) return;
+    window.dispatchEvent(new CustomEvent("portfolio:open-meeting-request", { detail: prefill }));
+  };
+
   ChatbotWidget.prototype._showTyping = function () {
     this.typingEl = el("div", "pcw-typing", { "aria-label": "Assistant is typing" });
     this.typingEl.appendChild(el("span"));
@@ -430,6 +440,7 @@
           // raw streamed chunks briefly differed from it.
           bubble.textContent = msg.answer || text || "Sorry, I couldn't find an answer to that.";
           self._addSources(msg.sources);
+          self._handleMeetingPrefill(msg.meeting_prefill);
         } else if (msg.type === "error") {
           gotDone = true;
           if (!bubble) self._hideTyping();
@@ -493,6 +504,7 @@
         self._hideTyping();
         self._addMessage("bot", data.answer || "Sorry, I couldn't find an answer to that.");
         self._addSources(data.sources);
+        self._handleMeetingPrefill(data.meeting_prefill);
       });
   };
 

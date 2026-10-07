@@ -110,12 +110,16 @@ export default function Hero({ profile }: { profile: Profile }) {
                 </a>
               </MagneticButton>
               <MagneticButton>
-                <a
-                  href="#contact"
+                <button
+                  type="button"
+                  // The widget script attaches itself to window.portfolioChatbot once loaded.
+                  onClick={() =>
+                    (window as unknown as { portfolioChatbot?: { open?: () => void } }).portfolioChatbot?.open?.()
+                  }
                   className="rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-foreground/5 active:scale-95 inline-block"
                 >
                   Chat with my AI assistant {"↓"}
-                </a>
+                </button>
               </MagneticButton>
             </motion.div>
 

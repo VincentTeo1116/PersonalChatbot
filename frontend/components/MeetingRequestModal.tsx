@@ -11,9 +11,17 @@ const labelClass = "text-sm text-text-secondary";
 
 const EMPTY: MeetingRequestInput = { name: "", position: "", company: "", email: "", phone: "", message: "" };
 
-export default function MeetingRequestModal({ onClose }: { onClose: () => void }) {
+export default function MeetingRequestModal({
+  onClose,
+  initialValues,
+}: {
+  onClose: () => void;
+  // Lets the chat widget pre-fill this from what the visitor already told it -- the visitor
+  // still has to review and hit "Send request" themselves, nothing here auto-submits.
+  initialValues?: Partial<MeetingRequestInput>;
+}) {
   const [state, action, pending] = useActionState<MeetingRequestState, FormData>(submitMeetingRequest, undefined);
-  const [values, setValues] = useState<MeetingRequestInput>(EMPTY);
+  const [values, setValues] = useState<MeetingRequestInput>({ ...EMPTY, ...initialValues });
   const [touched, setTouched] = useState<Partial<Record<keyof MeetingRequestInput, boolean>>>({});
 
   const liveErrors = validateMeetingRequest(values);

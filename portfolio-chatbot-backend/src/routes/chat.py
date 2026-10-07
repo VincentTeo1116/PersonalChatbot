@@ -12,7 +12,7 @@ from src.config import Config
 from src.services import pinecone_service
 from src.services.chat_logging import log_chat
 from src.services.gemini_service import embed_text
-from src.services.groq_service import generate_answer, generate_answer_stream
+from src.services.groq_service import detect_meeting_intent, generate_answer, generate_answer_stream
 from src.services.text_utils import strip_markdown
 
 logger = logging.getLogger(__name__)
@@ -37,11 +37,21 @@ class Source(BaseModel):
     score: float
 
 
+class MeetingPrefill(BaseModel):
+    name: str = ""
+    position: str = ""
+    company: str = ""
+    email: str = ""
+    phone: str = ""
+    message: str = ""
+
+
 class ChatResponse(BaseModel):
     answer: str
     sources: list[Source]
     cache_hit: bool
     latency_ms: int
+    meeting_prefill: MeetingPrefill | None = None
 
 
 def _build_context(matches: list[dict]) -> str:
@@ -73,11 +83,40 @@ def _top_score(sources: list[dict]) -> float | None:
     return max((s["score"] for s in sources), default=None)
 
 
+MEETING_CONFIRMATION_MESSAGE = (
+    "Got it! I've opened the meeting request form for you with what you've shared -- "
+    "feel free to review the details and hit Send when you're ready."
+)
+
+
+def _detect_meeting_prefill(question: str) -> MeetingPrefill | None:
+    try:
+        fields = detect_meeting_intent(question)
+    except Exception:
+        logger.warning("Meeting-intent detection failed (non-fatal)", exc_info=True)
+        return None
+    return MeetingPrefill.model_validate(fields) if fields is not None else None
+
+
 @router.post("", response_model=ChatResponse)
 async def chat(payload: ChatRequest, background_tasks: BackgroundTasks) -> ChatResponse:
     start = time.monotonic()
     clean_question = payload.question.strip()
     cache_key = clean_question.lower()
+
+    # Checked first and short-circuits everything else below -- a meeting request gets the
+    # one confirmation message, never also the normal grounded (and often unhelpful, "I can't
+    # schedule that") answer. Never cached either: the drafted fields are specific to this
+    # visitor's own wording, so two different people phrasing it the same way shouldn't reuse
+    # each other's prefill.
+    meeting_prefill = _detect_meeting_prefill(clean_question)
+    if meeting_prefill is not None:
+        latency_ms = int((time.monotonic() - start) * 1000)
+        background_tasks.add_task(log_chat, clean_question, MEETING_CONFIRMATION_MESSAGE, False, None, False, latency_ms)
+        return ChatResponse(
+            answer=MEETING_CONFIRMATION_MESSAGE, sources=[], cache_hit=False, latency_ms=latency_ms,
+            meeting_prefill=meeting_prefill,
+        )
 
     if cache_key in _cache:
         cached = _cache[cache_key]
@@ -105,6 +144,18 @@ def _stream_chat(question: str) -> Iterator[str]:
     # Plain def, not async: the Gemini call blocks, so Starlette runs this in a worker thread.
     start = time.monotonic()
     cache_key = question.lower()
+
+    # Checked first, same as the non-streaming endpoint: a meeting request short-circuits
+    # straight to the one confirmation line, skipping retrieval/generation and the cache entirely.
+    meeting_prefill = _detect_meeting_prefill(question)
+    if meeting_prefill is not None:
+        latency_ms = int((time.monotonic() - start) * 1000)
+        yield json.dumps({
+            "type": "done", "answer": MEETING_CONFIRMATION_MESSAGE, "sources": [], "cache_hit": False,
+            "latency_ms": latency_ms, "meeting_prefill": meeting_prefill.model_dump(),
+        }) + "\n"
+        log_chat(question, MEETING_CONFIRMATION_MESSAGE, False, None, False, latency_ms)
+        return
 
     if cache_key in _cache:
         cached = _cache[cache_key]

@@ -14,6 +14,7 @@ import Contact from "@/components/Contact";
 import ChatWidgetLoader from "@/components/ChatWidgetLoader";
 import CommandPalette from "@/components/CommandPalette";
 import TerminalEasterEgg from "@/components/TerminalEasterEgg";
+import MeetingRequestLauncher from "@/components/MeetingRequestLauncher";
 import { getProfile, getProjects, getResearch, getFyp, getHackathonPhotos, getWorkExperience, getTestimonials } from "@/lib/data";
 import { getGithubRepositories } from "@/lib/github";
 
@@ -59,6 +60,7 @@ export default async function Home() {
       <ChatWidgetLoader profile={profile} />
       <CommandPalette profile={profile} projects={projects} research={research} />
       <TerminalEasterEgg profile={profile} projects={projects} hackathonPhotos={hackathonPhotos} />
+      <MeetingRequestLauncher />
     </>
   );
 }
