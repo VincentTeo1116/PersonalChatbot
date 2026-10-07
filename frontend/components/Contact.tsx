@@ -27,6 +27,12 @@ export default function Contact({ profile }: { profile: Profile }) {
             Open to opportunities, collaborations, or just a chat about AI engineering. Reach out
             through any of the channels below, or use the chat assistant in the corner.
           </p>
+          {profile.availability && (
+            <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-500 dark:text-indigo-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              {profile.availability}
+            </span>
+          )}
         </SectionHeading>
 
         <div className="mt-10 flex flex-wrap justify-center gap-4">

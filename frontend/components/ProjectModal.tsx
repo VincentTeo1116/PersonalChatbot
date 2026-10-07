@@ -15,6 +15,8 @@ export type PreviewItem = {
   links: { label: string; url: string }[];
   // Link to a full write-up page, e.g. /projects/{slug}. Omit for things like research papers that have none.
   caseStudyHref?: string;
+  role?: string;
+  impact?: string;
 };
 
 export default function ProjectModal({
@@ -72,7 +74,13 @@ export default function ProjectModal({
 
         <div className="overflow-y-auto p-6">
           <h3 className="font-semibold text-foreground text-lg">{project.title}</h3>
+          {project.role && <p className="mt-1 text-xs text-text-subtle">{project.role}</p>}
           <p className="mt-2 text-sm text-text-secondary leading-relaxed">{project.description}</p>
+          {project.impact && (
+            <p className="mt-3 rounded-lg border border-indigo-400/30 bg-indigo-500/10 px-3 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-300">
+              {project.impact}
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap gap-2">
             {(project.tags ?? []).map((t) => (
               <span

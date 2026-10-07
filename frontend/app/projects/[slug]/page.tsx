@@ -62,6 +62,7 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
         )}
 
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{project.title}</h1>
+        {project.role && <p className="mt-1 text-sm text-text-subtle">{project.role}</p>}
 
         <div className="mt-4 flex flex-wrap gap-2">
           {project.tags.map((t) => (
@@ -70,6 +71,12 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
             </span>
           ))}
         </div>
+
+        {project.impact && (
+          <p className="mt-6 rounded-xl border border-indigo-400/30 bg-indigo-500/10 px-4 py-3 text-base font-medium text-indigo-600 dark:text-indigo-300">
+            {project.impact}
+          </p>
+        )}
 
         <p className="mt-6 whitespace-pre-line text-base leading-relaxed text-text-secondary">{project.description}</p>
 

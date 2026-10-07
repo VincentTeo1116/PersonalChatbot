@@ -72,6 +72,15 @@ export default function ProjectForm({
         <label className={labelClass} htmlFor="award">Award badge</label>
         <input id="award" name="award" defaultValue={project?.award} placeholder="e.g. 3rd Place" className={inputClass} />
       </div>
+      <div>
+        <label className={labelClass} htmlFor="role">Your role</label>
+        <input id="role" name="role" defaultValue={project?.role} placeholder="e.g. Solo project, or: Led backend, teammate built frontend" className={inputClass} />
+      </div>
+      <div>
+        <label className={labelClass} htmlFor="impact">Impact</label>
+        <input id="impact" name="impact" defaultValue={project?.impact} placeholder="e.g. Cut manual grading time by ~60%, used by 50+ students" className={inputClass} />
+        <p className="mt-1 text-xs text-text-secondary">A concrete outcome or number -- this is what recruiters scan for first.</p>
+      </div>
       <label className="flex items-center gap-2 text-sm text-text-secondary">
         <input type="checkbox" name="featured" defaultChecked={project?.featured} />
         Featured

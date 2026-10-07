@@ -46,6 +46,7 @@ export async function saveProfile(
       skills: cleanSkills,
       stat_cgpa: statCgpaRaw ? Number(statCgpaRaw) : null,
       stat_hackathons: statHackathonsRaw ? Number(statHackathonsRaw) : null,
+      availability: String(formData.get("availability") ?? "") || null,
       contact_email: String(formData.get("contactEmail") ?? ""),
       contact_github: String(formData.get("contactGithub") ?? ""),
       contact_linkedin: String(formData.get("contactLinkedin") ?? ""),

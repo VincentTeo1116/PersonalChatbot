@@ -61,6 +61,7 @@ export const getProfile = cache(async (): Promise<Profile> => {
     skills,
     statCgpa: profileRow.stat_cgpa,
     statHackathons: profileRow.stat_hackathons,
+    availability: profileRow.availability ?? null,
     contact: {
       email: profileRow.contact_email,
       github: profileRow.contact_github,
@@ -158,6 +159,8 @@ export const getProjects = cache(async (): Promise<Project[]> => {
       links: row.links ?? [],
       featured: row.featured ?? undefined,
       award: row.award ?? undefined,
+      role: row.role ?? undefined,
+      impact: row.impact ?? undefined,
     };
   });
 });

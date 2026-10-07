@@ -36,6 +36,8 @@ export async function createProject(formData: FormData) {
       demo_video_url: String(formData.get("demoVideoUrl") ?? "") || null,
       featured: formData.get("featured") === "on",
       award: String(formData.get("award") ?? "") || null,
+      role: String(formData.get("role") ?? "") || null,
+      impact: String(formData.get("impact") ?? "") || null,
       sort_order: count ?? 0,
     })
     .select("id")
@@ -62,6 +64,8 @@ export async function updateProject(formData: FormData) {
       demo_video_url: String(formData.get("demoVideoUrl") ?? "") || null,
       featured: formData.get("featured") === "on",
       award: String(formData.get("award") ?? "") || null,
+      role: String(formData.get("role") ?? "") || null,
+      impact: String(formData.get("impact") ?? "") || null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);

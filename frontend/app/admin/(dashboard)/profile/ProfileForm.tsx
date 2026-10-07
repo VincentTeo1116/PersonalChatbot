@@ -160,6 +160,17 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
         </div>
       </section>
 
+      <div>
+        <label className={labelClass} htmlFor="availability">Availability (shown near Contact, blank hides it)</label>
+        <input
+          id="availability"
+          name="availability"
+          defaultValue={profile.availability ?? ""}
+          placeholder="e.g. Open to full-time roles, available from August 2026"
+          className={inputClass}
+        />
+      </div>
+
       <section className="space-y-4">
         <h2 className="text-sm font-semibold text-foreground">Contact</h2>
         <div>

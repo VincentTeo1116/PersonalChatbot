@@ -34,6 +34,8 @@ export type Profile = {
   skills: SkillCategory[];
   statCgpa: number | null;
   statHackathons: number | null;
+  // Short "open to work" line shown near Contact, e.g. "Open to full-time roles from Aug 2026". Blank hides it.
+  availability: string | null;
   contact: {
     email: string;
     github: string;
@@ -77,6 +79,10 @@ export type Project = {
   featured?: boolean;
   /** Short award/result badge, e.g. "3rd Place". */
   award?: string;
+  /** What you personally did, e.g. "Solo project" or "Led backend, teammate built frontend". */
+  role?: string;
+  /** A concrete outcome, e.g. "Cut manual grading time by ~60%, used by 50+ students". */
+  impact?: string;
 };
 
 export type Publication = {
