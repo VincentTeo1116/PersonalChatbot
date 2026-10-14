@@ -100,13 +100,15 @@ Supabase's REST API with `httpx`, then each row is turned into a FAQ-style entry
 
 | Source | Entries produced |
 |---|---|
-| `profile` | "Who is …?" (tagline, location, hero summary, about), "How can I contact …?", CGPA, hackathon count, one per skill category, plus an overall skills entry |
+| `profile` | "Who is …?" (tagline, location, hero summary, about), "How can I contact …?", CGPA, hackathon count, availability line, one per skill category, plus an overall skills entry |
 | `education` | one per degree: "Tell me about <degree> at <institution>" |
 | `work_experience` | one per job: "What did … do as <role> at <company>?" (bullet lines flattened to sentences) |
-| `projects` | one per project: description, award, tech tags, links |
+| `projects` | one per project: description, role, impact, award, tech tags, links |
 | `research` | one per paper: venue, authors, supervisor, DOI, description |
+| `fyp` | one entry, title/description/dataset/supervisor/feedback/GitHub — only emitted once the admin fills it in (skipped while it's still the blank "Coming Soon" state) |
 
-Hackathon photos are not included (captions only, no substantive content).
+Hackathon photos, testimonials, and chat logs are not included — captions/quotes/logs aren't
+the kind of thing a visitor asks the chatbot about.
 
 **4. Embedding and upsert** (`src/services/kb_sync.py`, unchanged from the Sheet era):
 - **Stable IDs**: `md5(f"{category}|{question}".lower().strip())`. Editing an entry's

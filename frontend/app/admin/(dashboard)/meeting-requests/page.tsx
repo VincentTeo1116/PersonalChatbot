@@ -1,5 +1,6 @@
 import { getMeetingRequests } from "@/lib/data";
 import { deleteMeetingRequest } from "./actions";
+import ReplyForm from "./ReplyForm";
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleString(undefined, {
@@ -33,7 +34,18 @@ export default async function MeetingRequestsPage() {
             <li key={r.id} className="rounded-xl border border-border bg-surface p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <p className="font-semibold text-foreground">{r.name}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-foreground">{r.name}</p>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                        r.status === "replied"
+                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                      }`}
+                    >
+                      {r.status === "replied" ? "Replied" : "Pending"}
+                    </span>
+                  </div>
                   <p className="text-sm text-text-muted">
                     {r.position} at {r.company}
                   </p>
@@ -49,6 +61,18 @@ export default async function MeetingRequestsPage() {
                 </a>
               </div>
               {r.message && <p className="mt-2 text-sm text-text-secondary">{r.message}</p>}
+
+              {r.status === "replied" ? (
+                <div className="mt-3 rounded-lg border border-border bg-surface-hover/40 p-3">
+                  <p className="text-xs font-medium text-text-muted">
+                    Your reply{r.repliedAt ? ` · ${formatTime(r.repliedAt)}` : ""}
+                  </p>
+                  <p className="mt-1 text-sm text-text-secondary">{r.replyMessage}</p>
+                </div>
+              ) : (
+                <ReplyForm request={r} />
+              )}
+
               <form action={deleteMeetingRequest} className="mt-3">
                 <input type="hidden" name="id" value={r.id} />
                 <button type="submit" className="rounded-lg border border-border px-3 py-1 text-xs text-text-secondary hover:text-red-500">

@@ -66,6 +66,17 @@ export default function Contact({ profile }: { profile: Profile }) {
               </MagneticButton>
             </Reveal>
           )}
+          <Reveal delay={150} direction="up">
+            <MagneticButton>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("portfolio:open-testimonial-request"))}
+                className={OUTLINE_BUTTON}
+              >
+                Leave a testimonial
+              </button>
+            </MagneticButton>
+          </Reveal>
           <Reveal delay={200} direction="up">
             <MagneticButton>
               <a href={profile.contact.linkedin} target="_blank" rel="noreferrer" className={OUTLINE_BUTTON}>

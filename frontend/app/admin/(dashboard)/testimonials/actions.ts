@@ -11,6 +11,14 @@ function refresh() {
   revalidatePath("/admin/testimonials");
 }
 
+export async function approveTestimonial(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const supabase = await createClient();
+  const { error } = await supabase.from("testimonials").update({ status: "approved" }).eq("id", id);
+  if (error) throw new Error(error.message);
+  refresh();
+}
+
 export async function createTestimonial(formData: FormData) {
   queueChatbotSync();
   const supabase = await createClient();

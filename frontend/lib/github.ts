@@ -86,6 +86,41 @@ export async function getGithubRepositories(
   }
 }
 
+export type RepoLanguage = { name: string; percent: number | null };
+
+async function fetchLanguages(url: string, token?: string): Promise<Response> {
+  const headers: Record<string, string> = { Accept: "application/vnd.github+json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return fetch(url, { headers, next: { revalidate: 21600 } });
+}
+
+// Top languages by code size for one repo. Cached 6h server-side (shared across every
+// visitor, not just within one person's session). Uses GITHUB_TOKEN if set for the higher
+// authenticated rate limit, but falls back to an unauthenticated request if that token is
+// missing or has gone bad (expired/revoked) -- never worse than the old client-side fetch,
+// which never had a token at all.
+export async function getRepoLanguages(owner: string, repo: string): Promise<RepoLanguage[]> {
+  const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/languages`;
+  const token = process.env.GITHUB_TOKEN;
+
+  try {
+    let response = await fetchLanguages(url, token);
+    if (!response.ok && token && (response.status === 401 || response.status === 403)) {
+      response = await fetchLanguages(url);
+    }
+    if (!response.ok) return [];
+
+    const bytesByLanguage = (await response.json()) as Record<string, number>;
+    const totalBytes = Object.values(bytesByLanguage).reduce((total, bytes) => total + bytes, 0);
+    return Object.entries(bytesByLanguage)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([name, bytes]) => ({ name, percent: totalBytes > 0 ? Math.round((bytes / totalBytes) * 100) : null }));
+  } catch {
+    return [];
+  }
+}
+
 // Pulls the username out of a github.com profile URL; null if it isn't actually one.
 function extractUsername(githubUrl: string): string | null {
   try {

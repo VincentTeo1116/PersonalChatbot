@@ -1,6 +1,10 @@
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/public";
+// chat_logs and meeting_requests deliberately have NO public-read RLS policy (they hold
+// visitor questions and contact details) -- only an authenticated admin session can read
+// them back, so their getters below use this client instead of the public one above.
+import { createClient as createAdminClient } from "@/lib/supabase/server";
 import type {
   ChatLog,
   EducationEntry,
@@ -83,6 +87,7 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
     id: row.id,
     authorName: row.author_name,
     authorRole: row.author_role,
+    status: row.status ?? "approved",
     quote: row.quote,
     avatarUrl: row.avatar_path ? publicUrl(supabase, row.avatar_path, "") : null,
   }));
@@ -221,7 +226,7 @@ export const getWorkExperience = cache(async (): Promise<WorkExperience[]> => {
 
 // "Request a meeting" submissions. Returns [] if the migration hasn't run yet -- admin page just shows empty state.
 export const getMeetingRequests = cache(async (): Promise<MeetingRequest[]> => {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from("meeting_requests")
     .select("*")
@@ -238,17 +243,19 @@ export const getMeetingRequests = cache(async (): Promise<MeetingRequest[]> => {
     phone: row.phone,
     message: row.message,
     createdAt: row.created_at,
+    // Default to "pending" so this reads correctly even before 011_meeting_request_replies.sql has run.
+    status: row.status ?? "pending",
+    replyMessage: row.reply_message ?? null,
+    repliedAt: row.replied_at ?? null,
   }));
 });
 
 // Recent chatbot questions. Returns [] if the migration hasn't run yet -- admin page just shows empty state.
-export const getChatLogs = cache(async (limit = 50): Promise<ChatLog[]> => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("chat_logs")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(limit);
+export const getChatLogs = cache(async (limit = 50, filter?: "unmatched"): Promise<ChatLog[]> => {
+  const supabase = await createAdminClient();
+  let query = supabase.from("chat_logs").select("*").order("created_at", { ascending: false }).limit(limit);
+  if (filter === "unmatched") query = query.eq("matched", false);
+  const { data, error } = await query;
 
   if (error || !data) return [];
 
@@ -262,4 +269,14 @@ export const getChatLogs = cache(async (limit = 50): Promise<ChatLog[]> => {
     latencyMs: row.latency_ms,
     createdAt: row.created_at,
   }));
+});
+
+// Cheap counts for the "All / Unanswered" tabs in /admin/chatbot -- avoids fetching full rows just to count them.
+export const getChatLogStats = cache(async (): Promise<{ total: number; unmatched: number }> => {
+  const supabase = await createAdminClient();
+  const [{ count: total }, { count: unmatched }] = await Promise.all([
+    supabase.from("chat_logs").select("*", { count: "exact", head: true }),
+    supabase.from("chat_logs").select("*", { count: "exact", head: true }).eq("matched", false),
+  ]);
+  return { total: total ?? 0, unmatched: unmatched ?? 0 };
 });

@@ -83,6 +83,14 @@ def _profile_rows(profile: dict[str, Any]) -> list[dict[str, str]]:
                 "answer": f"{name} has taken part in {profile['stat_hackathons']} hackathons.",
             }
         )
+    if profile.get("availability"):
+        rows.append(
+            {
+                "category": "About",
+                "question": f"Is {name} available for work?",
+                "answer": profile["availability"],
+            }
+        )
 
     skills = sorted(profile.get("skills") or [], key=lambda s: s.get("sort_order", 0))
     for skill in skills:
@@ -137,6 +145,8 @@ def _project_rows(projects: list[dict[str, Any]]) -> list[dict[str, str]]:
                 "question": f"Tell me about the {p['title']} project",
                 "answer": _join(
                     p["description"],
+                    f"Role: {p['role']}." if p.get("role") else "",
+                    f"Impact: {p['impact']}." if p.get("impact") else "",
                     f"Award: {p['award']}." if p.get("award") else "",
                     f"Built with: {', '.join(tags)}." if tags else "",
                     f"Links — {'; '.join(links)}." if links else "",
@@ -166,6 +176,26 @@ def _research_rows(papers: list[dict[str, Any]]) -> list[dict[str, str]]:
     return rows
 
 
+def _fyp_rows(fyp: dict[str, Any] | None, name: str) -> list[dict[str, str]]:
+    # Singleton row, left blank ("Coming Soon" on the site) until the admin fills it in.
+    if not fyp or not (fyp.get("title") or fyp.get("description")):
+        return []
+    return [
+        {
+            "category": "Final Year Project",
+            "question": f"What is {name}'s final year project?",
+            "answer": _join(
+                fyp.get("title"),
+                fyp.get("description"),
+                f"Dataset: {fyp['dataset_description']}." if fyp.get("dataset_description") else "",
+                f"Supervised by {fyp['supervisor']}." if fyp.get("supervisor") else "",
+                f"Feedback: {fyp['lecturer_feedback']}." if fyp.get("lecturer_feedback") else "",
+                f"GitHub: {fyp['github_url']}." if fyp.get("github_url") else "",
+            ),
+        }
+    ]
+
+
 def build_rows() -> list[dict[str, str]]:
     """Fetch every content table and convert it into KB rows for sync_rows()."""
     headers = {
@@ -181,6 +211,8 @@ def build_rows() -> list[dict[str, str]]:
         rows += _experience_rows(_get(client, "work_experience"), profiles[0]["name"])
         rows += _project_rows(_get(client, "projects"))
         rows += _research_rows(_get(client, "research"))
+        fyp_table = _get(client, "fyp", order=None)
+        rows += _fyp_rows(fyp_table[0] if fyp_table else None, profiles[0]["name"])
 
     logger.info("Built %d knowledge-base rows from Supabase", len(rows))
     return rows

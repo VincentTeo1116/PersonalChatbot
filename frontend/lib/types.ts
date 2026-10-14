@@ -104,15 +104,23 @@ export type HackathonPhoto = {
   caption: string;
 };
 
+export type TestimonialStatus = "pending" | "approved";
+
+// See supabase/010_testimonial_status.sql. "pending" ones are only ever visible to the
+// admin (RLS); the public site only ever receives "approved" rows.
 export type Testimonial = {
   id: string;
   authorName: string;
   authorRole: string;
   quote: string;
   avatarUrl: string | null;
+  status: TestimonialStatus;
 };
 
-// A "Request a meeting" form submission -- see supabase/007_meeting_requests.sql.
+export type MeetingRequestStatus = "pending" | "replied";
+
+// A "Request a meeting" form submission -- see supabase/007_meeting_requests.sql and
+// supabase/011_meeting_request_replies.sql.
 export type MeetingRequest = {
   id: string;
   name: string;
@@ -122,6 +130,9 @@ export type MeetingRequest = {
   phone: string;
   message: string | null;
   createdAt: string;
+  status: MeetingRequestStatus;
+  replyMessage: string | null;
+  repliedAt: string | null;
 };
 
 export type FypImage = { id: string; src: string };

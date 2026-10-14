@@ -28,6 +28,7 @@ export default async function EditTestimonialPage({ params }: { params: Promise<
             authorRole: testimonial.author_role,
             quote: testimonial.quote,
             avatarUrl,
+            status: testimonial.status ?? "approved",
           }}
           action={updateTestimonial}
           submitLabel="Save changes"

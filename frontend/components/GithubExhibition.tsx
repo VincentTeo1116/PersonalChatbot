@@ -57,19 +57,15 @@ export default function GithubExhibition({
     if (!selected || languageMix[selected.id] !== undefined) return;
 
     let cancelled = false;
-    fetch(`https://api.github.com/repos/${encodeURIComponent(username)}/${encodeURIComponent(selected.name)}/languages`, {
-      headers: { Accept: "application/vnd.github+json" },
-    })
+    // Routed through our own cached server endpoint (lib/github.ts:getRepoLanguages) instead
+    // of calling GitHub directly from the browser -- shares one 6h-cached result across every
+    // visitor instead of every visitor spending their own unauthenticated rate limit.
+    fetch(`/api/github/languages?owner=${encodeURIComponent(username)}&repo=${encodeURIComponent(selected.name)}`)
       .then((response) => {
         if (!response.ok) throw new Error("Could not load this repository's languages");
-        return response.json() as Promise<Record<string, number>>;
+        return response.json() as Promise<LanguageShare[]>;
       })
-      .then((bytesByLanguage) => {
-        const totalBytes = Object.values(bytesByLanguage).reduce((total, bytes) => total + bytes, 0);
-        const topLanguages = Object.entries(bytesByLanguage)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3)
-          .map(([name, bytes]) => ({ name, percent: totalBytes > 0 ? Math.round((bytes / totalBytes) * 100) : null }));
+      .then((topLanguages) => {
         if (!cancelled) setLanguageMix((current) => ({ ...current, [selected.id]: topLanguages }));
       })
       .catch(() => {
@@ -290,7 +286,7 @@ export default function GithubExhibition({
 
                         <div className="mt-5 flex flex-wrap gap-3">
                           <a href={selected.htmlUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-indigo-500 px-5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-indigo-400">Open recipe on GitHub <span aria-hidden>↗</span></a>
-                          {/* {selected.homepage && <a href={selected.homepage} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm font-medium text-foreground transition hover:border-indigo-400/50 hover:bg-surface-hover">Taste the live demo ↗</a>} */}
+                          {selected.homepage && <a href={selected.homepage} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm font-medium text-foreground transition hover:border-indigo-400/50 hover:bg-surface-hover">Taste the live demo ↗</a>}
                         </div>
                       </motion.div>
                     ) : (

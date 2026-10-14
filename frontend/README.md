@@ -35,15 +35,16 @@ fetches its content from it.
 6. **Storage → New bucket**: name it `portfolio-content`, toggle **Public bucket** on.
 7. **SQL Editor**, run these files in order (copy-paste each one's contents, Run):
    - `supabase/schema.sql` — all tables, indexes, and Row Level Security policies
-   - `supabase/002_work_experience.sql` — the Working Experience section's tables
-     (already folded into `schema.sql` too, so only needed if you ran an older
-     `schema.sql` before this section existed)
+     (includes the Working Experience tables already; `002_work_experience.sql` is only
+     needed if you ran an older copy of `schema.sql` before that section existed)
    - `supabase/seed.sql` — your real profile/education/projects/research content (edit
      this file first if you want different starting content — it's plain SQL, safe to
      read before running)
-   - `supabase/004_chat_logs.sql` — lets the chatbot backend log visitor questions for
-     review in `/admin/chatbot`; safe to skip, the admin page just shows an empty state
-     until this has been run
+   - `supabase/003_fix_storage_policies.sql` through `009_project_impact.sql` — later
+     additions (chat logs, testimonials, resume upload, meeting requests, the Final Year
+     Project section, and project role/impact/availability fields). Each file says at the
+     top what it adds and is safe to run even if you're not using that feature yet — the
+     admin page for it just shows an empty state until you add content.
 
 ## 3. Add images (optional, can do later via `/admin`)
 
@@ -62,8 +63,29 @@ npm run dev
 Open http://localhost:3000 — this is the public site, reading live from your Supabase
 project. To edit content, go to **http://localhost:3000/admin** (redirects to
 `/admin/login`) and sign in with the admin account you created in step 2.5. From there
-you can edit Profile, Education, Experience, Projects, Research, and Hackathons —
-changes appear on the public site immediately.
+you can edit Profile, Education, Experience, Projects, Research, Hackathons,
+Testimonials, and the Final Year Project section, plus review meeting requests and
+chatbot questions (see **Chatbot** in the sidebar) — changes appear on the public site
+immediately.
+
+### Optional: GitHub stats and meeting-request emails
+
+Two sections work without any setup, with a graceful fallback if you skip this:
+
+- **GitHub stats/exhibition** (`components/GithubStats.tsx`, `GithubExhibition.tsx`):
+  repo/star/follower counts and the repo list work with no token via GitHub's public REST
+  API. The green-square contribution calendar needs GraphQL, which requires
+  `GITHUB_TOKEN` in `.env.local` (a classic token with **no scopes checked** is enough —
+  it only ever reads public data). Without it, the calendar is just skipped.
+- **Meeting request emails** (`components/MeetingRequestModal.tsx`, sent via
+  [Resend](https://resend.com)): every submission is always saved to Supabase and visible
+  in `/admin/meeting-requests` regardless of this setup. Set `RESEND_API_KEY` in
+  `.env.local` to also get an email notification (sent to the address in
+  `/admin/profile`'s Contact section); `RESEND_FROM_EMAIL` can stay at its default until
+  you verify your own sending domain in Resend.
+
+Both vars are documented inline in `.env.local.example` — copy them in, restart
+`npm run dev`, done.
 
 ## 5. Connect the chat widget to your backend
 
@@ -98,11 +120,13 @@ Vercel is the path of least resistance for Next.js:
 npx vercel
 ```
 
-or connect the GitHub repo at vercel.com/new. Set all five env vars
-(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_CHATBOT_API_URL`,
-`CHATBOT_SYNC_URL`, `CHATBOT_SYNC_SECRET`; pointing the last two at your deployed backend)
-in the Vercel project settings — `.env.local` isn't committed, so nothing works on a
-deploy without them set there too.
+or connect the GitHub repo at vercel.com/new. Set every var from `.env.local` in the
+Vercel project settings too — `.env.local` isn't committed, so nothing works on a deploy
+without them set there: the five required ones (`NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_CHATBOT_API_URL`, `CHATBOT_SYNC_URL`,
+`CHATBOT_SYNC_SECRET`; pointing the last two at your deployed backend) plus whichever of
+the optional `GITHUB_TOKEN` / `RESEND_API_KEY` / `RESEND_FROM_EMAIL` you're using
+locally — skip a var and its feature just falls back the same way it does locally.
 
 Netlify works too via its Next.js runtime — same environment variable requirement.
 
