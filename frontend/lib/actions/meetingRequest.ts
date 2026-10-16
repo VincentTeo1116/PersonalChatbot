@@ -15,6 +15,10 @@ export async function submitMeetingRequest(
   _prevState: MeetingRequestState,
   formData: FormData
 ): Promise<MeetingRequestState> {
+  // Honeypot: real visitors never see or fill this field, so a non-empty value means a bot.
+  // Fake success rather than an error, so the bot doesn't learn to adjust and try again.
+  if (String(formData.get("website") ?? "").trim()) return { ok: true };
+
   const input = {
     name: String(formData.get("name") ?? ""),
     position: String(formData.get("position") ?? ""),

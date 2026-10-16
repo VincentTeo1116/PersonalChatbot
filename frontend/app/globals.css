@@ -2,6 +2,15 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Honeypot field for the public forms -- off-screen rather than display:none, since some bots skip hidden inputs but still blindly fill anything visually absent. */
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;

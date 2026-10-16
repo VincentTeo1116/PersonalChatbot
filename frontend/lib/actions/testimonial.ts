@@ -12,6 +12,10 @@ export async function submitTestimonial(
   _prevState: TestimonialState,
   formData: FormData
 ): Promise<TestimonialState> {
+  // Honeypot: real visitors never see or fill this field, so a non-empty value means a bot.
+  // Fake success rather than an error, so the bot doesn't learn to adjust and try again.
+  if (String(formData.get("website") ?? "").trim()) return { ok: true };
+
   const input = {
     authorName: String(formData.get("authorName") ?? ""),
     authorRole: String(formData.get("authorRole") ?? ""),

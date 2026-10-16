@@ -102,6 +102,12 @@ export default function MeetingRequestModal({
                 Tell me a bit about yourself and I&apos;ll follow up by email to set up a time.
               </p>
 
+              {/* Honeypot -- real visitors never see or fill this; a non-empty value marks the submission as a bot. */}
+              <label className="hp-field" aria-hidden="true">
+                Leave this empty
+                <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+              </label>
+
               <div>
                 <label className={labelClass} htmlFor="mr-name">Full name</label>
                 <input id="mr-name" className={inputClass} placeholder="David Ali Muthu" {...field("name")} />

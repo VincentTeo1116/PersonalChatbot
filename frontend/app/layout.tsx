@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { getProfile } from "@/lib/data";
 import MotionProvider from "@/components/MotionProvider";
@@ -39,7 +40,23 @@ const THEME_INIT_SCRIPT = `
 })();
 `;
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const profile = await getProfile();
+
+  // Person structured data -- lets Google build a richer result (and potential knowledge
+  // panel) when someone searches the name, instead of just a plain blue link.
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: profile.name,
+    jobTitle: profile.tagline,
+    url: SITE_URL,
+    image: profile.avatarUrl,
+    description: profile.heroSummary,
+    address: profile.location || undefined,
+    sameAs: [profile.contact.github, profile.contact.linkedin].filter(Boolean),
+  };
+
   return (
     <html
       lang="en"
@@ -48,12 +65,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
       </head>
       <body
         className="min-h-full flex flex-col bg-background text-foreground"
         suppressHydrationWarning
       >
         <MotionProvider>{children}</MotionProvider>
+        <Analytics />
       </body>
     </html>
   );

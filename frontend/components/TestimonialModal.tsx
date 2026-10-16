@@ -95,6 +95,12 @@ export default function TestimonialModal({ onClose }: { onClose: () => void }) {
                 words — it&apos;s reviewed before it goes live.
               </p>
 
+              {/* Honeypot -- real visitors never see or fill this; a non-empty value marks the submission as a bot. */}
+              <label className="hp-field" aria-hidden="true">
+                Leave this empty
+                <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+              </label>
+
               <div>
                 <label className={labelClass} htmlFor="t-name">Your name</label>
                 <input id="t-name" className={inputClass} placeholder="Jane Doe" {...field("authorName")} />
