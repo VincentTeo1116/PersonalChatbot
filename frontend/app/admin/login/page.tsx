@@ -7,48 +7,33 @@ export default function LoginPage() {
   const [state, action, pending] = useActionState<LoginState, FormData>(login, undefined);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-6">
-      <form
-        action={action}
-        className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-surface p-8"
-      >
-        <h1 className="text-lg font-semibold text-foreground">Admin login</h1>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="animate-float-slow absolute left-1/2 top-1/3 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-indigo-500 opacity-[var(--blob-opacity)] blur-[120px]" />
+        <div className="animate-float absolute bottom-0 right-1/4 h-[260px] w-[260px] rounded-full bg-fuchsia-500 opacity-[var(--blob-opacity)] blur-[100px]" />
+      </div>
 
-        <div className="space-y-1">
-          <label htmlFor="email" className="text-sm text-text-secondary">
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autoComplete="username"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400"
-          />
+      <form action={action} className="admin-card w-full max-w-sm space-y-4 p-8">
+        <div>
+          <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-xl font-bold text-transparent">
+            Portfolio
+          </span>
+          <span className="ml-1.5 text-base font-medium text-text-secondary">admin</span>
         </div>
 
-        <div className="space-y-1">
-          <label htmlFor="password" className="text-sm text-text-secondary">
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            autoComplete="current-password"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400"
-          />
+        <div>
+          <label htmlFor="email" className="admin-label">Email</label>
+          <input id="email" name="email" type="email" required autoComplete="username" className="admin-input" />
+        </div>
+
+        <div>
+          <label htmlFor="password" className="admin-label">Password</label>
+          <input id="password" name="password" type="password" required autoComplete="current-password" className="admin-input" />
         </div>
 
         {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="w-full rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:opacity-60"
-        >
+        <button type="submit" disabled={pending} className="admin-btn admin-btn-primary w-full">
           {pending ? "Signing in…" : "Sign in"}
         </button>
       </form>

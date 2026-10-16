@@ -1,10 +1,11 @@
+import PageHeader from "@/components/admin/PageHeader";
 import ExperienceForm from "../ExperienceForm";
 import { createExperience } from "../actions";
 
 export default function NewExperiencePage() {
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold text-foreground">New work experience entry</h1>
+      <PageHeader eyebrow="Content" title="New work experience entry" />
       <ExperienceForm action={createExperience} submitLabel="Create" />
     </div>
   );

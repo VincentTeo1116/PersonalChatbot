@@ -1,10 +1,11 @@
+import PageHeader from "@/components/admin/PageHeader";
 import EducationForm from "../EducationForm";
 import { createEducation } from "../actions";
 
 export default function NewEducationPage() {
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold text-foreground">New education entry</h1>
+      <PageHeader eyebrow="Content" title="New education entry" />
       <EducationForm action={createEducation} submitLabel="Create" />
     </div>
   );

@@ -1,22 +1,24 @@
 :root {
   --pcw-primary: #4f46e5;
+  --pcw-gradient: linear-gradient(135deg, #6366f1, #a855f7 60%, #d946ef);
   --pcw-primary-fg: #ffffff;
   --pcw-bg: #ffffff;
   --pcw-fg: #1f2937;
   --pcw-muted: #6b7280;
   --pcw-border: #e5e7eb;
   --pcw-bot-bubble: #f3f4f6;
-  --pcw-radius: 14px;
-  --pcw-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  --pcw-radius: 18px;
+  --pcw-shadow: 0 20px 45px -15px rgba(79, 70, 229, 0.35);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --pcw-bg: #1f2430;
+    --pcw-bg: #1a1e2b;
     --pcw-fg: #f3f4f6;
     --pcw-muted: #9ca3af;
     --pcw-border: #333a4d;
-    --pcw-bot-bubble: #2a3040;
+    --pcw-bot-bubble: #272d3d;
+    --pcw-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.55);
   }
 }
 
@@ -24,10 +26,10 @@
   position: fixed;
   right: 20px;
   bottom: 20px;
-  width: 56px;
-  height: 56px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
-  background: var(--pcw-primary);
+  background: var(--pcw-gradient);
   color: var(--pcw-primary-fg);
   border: none;
   box-shadow: var(--pcw-shadow);
@@ -37,13 +39,14 @@
   justify-content: center;
   z-index: 9999;
   font-size: 24px;
-  transition: transform 0.15s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .pcw-launcher:hover {
-  transform: scale(1.06);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 24px 50px -12px rgba(79, 70, 229, 0.5);
 }
 .pcw-launcher:focus-visible {
-  outline: 2px solid var(--pcw-primary);
+  outline: 2px solid #a855f7;
   outline-offset: 3px;
 }
 
@@ -65,17 +68,23 @@
   z-index: 9999;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   border: 1px solid var(--pcw-border);
+  opacity: 0;
+  transform: translateY(14px) scale(0.97);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.pcw-panel[hidden] {
-  display: none;
+.pcw-panel--open {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
 }
 
 .pcw-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
-  background: var(--pcw-primary);
+  padding: 16px 18px;
+  background: var(--pcw-gradient);
   color: var(--pcw-primary-fg);
   flex-shrink: 0;
 }
@@ -144,11 +153,16 @@
 .pcw-msg {
   max-width: 85%;
   font-size: 13.5px;
-  line-height: 1.45;
-  padding: 9px 12px;
-  border-radius: 12px;
+  line-height: 1.5;
+  padding: 10px 13px;
+  border-radius: 14px;
   white-space: pre-wrap;
   word-wrap: break-word;
+  animation: pcw-msg-in 0.2s ease;
+}
+@keyframes pcw-msg-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
 }
 .pcw-msg-bot {
   align-self: flex-start;
@@ -158,9 +172,10 @@
 }
 .pcw-msg-user {
   align-self: flex-end;
-  background: var(--pcw-primary);
+  background: var(--pcw-gradient);
   color: var(--pcw-primary-fg);
   border-bottom-right-radius: 4px;
+  box-shadow: 0 6px 16px -6px rgba(79, 70, 229, 0.5);
 }
 .pcw-msg-error {
   align-self: flex-start;
@@ -185,12 +200,14 @@
   border-radius: 999px;
   padding: 6px 12px;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 .pcw-suggestion-chip:hover,
 .pcw-suggestion-chip:focus-visible {
-  background: var(--pcw-primary);
+  background: var(--pcw-gradient);
+  border-color: transparent;
   color: var(--pcw-primary-fg);
+  transform: translateY(-1px);
 }
 
 .pcw-sources {
@@ -252,11 +269,11 @@
   color: var(--pcw-fg);
 }
 .pcw-input:focus {
-  outline: 2px solid var(--pcw-primary);
+  outline: 2px solid #a855f7;
   outline-offset: 1px;
 }
 .pcw-send {
-  background: var(--pcw-primary);
+  background: var(--pcw-gradient);
   color: var(--pcw-primary-fg);
   border: none;
   border-radius: 10px;
@@ -267,6 +284,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.15s ease;
+}
+.pcw-send:hover:not(:disabled) {
+  transform: scale(1.06);
 }
 .pcw-send:disabled {
   opacity: 0.5;
@@ -283,5 +304,19 @@
   .pcw-launcher {
     right: 14px;
     bottom: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pcw-launcher,
+  .pcw-send,
+  .pcw-suggestion-chip,
+  .pcw-panel {
+    transition: none;
+  }
+  .pcw-msg,
+  .pcw-status-dot--waking,
+  .pcw-typing span {
+    animation: none;
   }
 }

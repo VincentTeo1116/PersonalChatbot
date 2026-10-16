@@ -8,11 +8,7 @@ export default function SyncForm() {
 
   return (
     <form action={action} className="space-y-4">
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-lg bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:opacity-60"
-      >
+      <button type="submit" disabled={pending} className="admin-btn admin-btn-primary">
         {pending ? "Syncing… (can take ~10s)" : "Sync chatbot now"}
       </button>
 

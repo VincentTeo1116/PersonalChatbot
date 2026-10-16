@@ -1,8 +1,7 @@
 import type { Publication } from "@/lib/types";
 
-const inputClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400";
-const labelClass = "text-sm text-text-secondary";
+const inputClass = "admin-input";
+const labelClass = "admin-label";
 
 export default function ResearchForm({
   research,
@@ -14,7 +13,7 @@ export default function ResearchForm({
   submitLabel: string;
 }) {
   return (
-    <form action={action} className="max-w-2xl space-y-4">
+    <form action={action} className="admin-card max-w-2xl space-y-4 p-6">
       {research && <input type="hidden" name="id" value={research.id} />}
 
       <div>
@@ -50,10 +49,7 @@ export default function ResearchForm({
         <textarea id="description" name="description" defaultValue={research?.description} rows={4} className={inputClass} required />
       </div>
 
-      <button
-        type="submit"
-        className="rounded-lg bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400"
-      >
+      <button type="submit" className="admin-btn admin-btn-primary">
         {submitLabel}
       </button>
     </form>

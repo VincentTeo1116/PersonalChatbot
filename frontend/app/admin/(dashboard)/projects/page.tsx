@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getProjects } from "@/lib/data";
+import PageHeader from "@/components/admin/PageHeader";
 import { deleteProject, moveProject } from "./actions";
 
 export default async function ProjectsListPage() {
@@ -7,20 +8,23 @@ export default async function ProjectsListPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-foreground">Projects</h1>
-        <Link
-          href="/admin/projects/new"
-          className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
-        >
-          + Add project
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow="Content"
+        title="Projects"
+        description="Shown on the homepage and as individual case-study pages."
+        action={
+          <Link href="/admin/projects/new" className="admin-btn admin-btn-primary">
+            + Add project
+          </Link>
+        }
+      />
 
-      <ul className="space-y-3">
-        {projects.map((p, i) => (
-          <li key={p.id} className="rounded-xl border border-border bg-surface p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+      {projects.length === 0 ? (
+        <p className="admin-card p-6 text-sm text-text-secondary">No projects yet -- add your first one above.</p>
+      ) : (
+        <ul className="space-y-3">
+          {projects.map((p, i) => (
+            <li key={p.id} className="admin-card flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div className="min-w-0">
                 <p className="font-semibold text-foreground">{p.title}</p>
                 <p className="text-sm text-text-muted">{p.slug}</p>
@@ -30,31 +34,23 @@ export default async function ProjectsListPage() {
                 <form action={moveProject}>
                   <input type="hidden" name="id" value={p.id} />
                   <input type="hidden" name="direction" value="up" />
-                  <button type="submit" disabled={i === 0} className="rounded-lg border border-border px-2 py-1 text-xs text-text-secondary disabled:opacity-30">
-                    ↑
-                  </button>
+                  <button type="submit" disabled={i === 0} className="admin-btn admin-btn-ghost px-2.5 py-1.5 text-xs disabled:opacity-30">↑</button>
                 </form>
                 <form action={moveProject}>
                   <input type="hidden" name="id" value={p.id} />
                   <input type="hidden" name="direction" value="down" />
-                  <button type="submit" disabled={i === projects.length - 1} className="rounded-lg border border-border px-2 py-1 text-xs text-text-secondary disabled:opacity-30">
-                    ↓
-                  </button>
+                  <button type="submit" disabled={i === projects.length - 1} className="admin-btn admin-btn-ghost px-2.5 py-1.5 text-xs disabled:opacity-30">↓</button>
                 </form>
-                <Link href={`/admin/projects/${p.id}`} className="rounded-lg border border-border px-3 py-1 text-xs text-text-secondary hover:text-foreground">
-                  Edit
-                </Link>
+                <Link href={`/admin/projects/${p.id}`} className="admin-btn admin-btn-ghost px-3 py-1.5 text-xs">Edit</Link>
                 <form action={deleteProject}>
                   <input type="hidden" name="id" value={p.id} />
-                  <button type="submit" className="rounded-lg border border-border px-3 py-1 text-xs text-text-secondary hover:text-red-500">
-                    Delete
-                  </button>
+                  <button type="submit" className="admin-btn admin-btn-danger px-3 py-1.5 text-xs">Delete</button>
                 </form>
               </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

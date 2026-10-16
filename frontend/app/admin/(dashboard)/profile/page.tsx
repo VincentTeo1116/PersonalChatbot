@@ -1,4 +1,5 @@
 import { getProfile } from "@/lib/data";
+import PageHeader from "@/components/admin/PageHeader";
 import ProfileForm from "./ProfileForm";
 
 export default async function ProfilePage() {
@@ -6,7 +7,7 @@ export default async function ProfilePage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold text-foreground">Profile</h1>
+      <PageHeader eyebrow="Content" title="Profile" description="The bio, skills, stats, and contact details shown across the whole site." />
       <ProfileForm profile={profile} />
     </div>
   );

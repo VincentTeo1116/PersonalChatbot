@@ -6,9 +6,8 @@ import Image from "next/image";
 import type { Profile } from "@/lib/types";
 import { saveProfile, uploadAvatar, uploadResume, type ProfileFormState } from "./actions";
 
-const inputClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400";
-const labelClass = "text-sm text-text-secondary";
+const inputClass = "admin-input";
+const labelClass = "admin-label";
 const LEVELS = [1, 2, 3, 4, 5];
 
 type SkillRow = { category: string; itemsText: string; levels: Record<string, number> };
@@ -83,10 +82,10 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
   }
 
   return (
-    <form action={action} className="max-w-2xl space-y-8">
+    <form action={action} className="max-w-2xl space-y-6">
       <input type="hidden" name="skills" value={skillsJson} />
 
-      <section className="space-y-4">
+      <section className="admin-card space-y-4 p-6">
         <div className="flex items-center gap-4">
           <div className="relative h-20 w-20 overflow-hidden rounded-xl border border-border">
             <Image src={avatarUrl} alt="Avatar" fill className="object-cover" />
@@ -136,7 +135,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <section className="admin-card grid grid-cols-1 gap-4 p-6 sm:grid-cols-2">
         <div>
           <label className={labelClass} htmlFor="statCgpa">Stat: CGPA</label>
           <input
@@ -160,7 +159,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
         </div>
       </section>
 
-      <div>
+      <div className="admin-card p-6">
         <label className={labelClass} htmlFor="availability">Availability (shown near Contact, blank hides it)</label>
         <input
           id="availability"
@@ -171,7 +170,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
         />
       </div>
 
-      <section className="space-y-4">
+      <section className="admin-card space-y-4 p-6">
         <h2 className="text-sm font-semibold text-foreground">Contact</h2>
         <div>
           <label className={labelClass} htmlFor="contactEmail">Email</label>
@@ -228,7 +227,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
         </div>
       </section>
 
-      <section className="space-y-3">
+      <section className="admin-card space-y-3 p-6">
         <h2 className="text-sm font-semibold text-foreground">Skills</h2>
         <p className="text-xs text-text-subtle">
           List names comma-separated as before, then set each one&apos;s proficiency (1 = learning, 5 = expert) below —
@@ -237,7 +236,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
         {skills.map((row, i) => {
           const names = parseSkillNames(row.itemsText);
           return (
-            <div key={i} className="space-y-2 rounded-lg border border-border p-3">
+            <div key={i} className="space-y-2 rounded-xl border border-border bg-background/60 p-3">
               <div className="flex flex-col gap-2 sm:flex-row">
                 <input
                   value={row.category}
@@ -258,7 +257,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
                 <button
                   type="button"
                   onClick={() => setSkills((prev) => prev.filter((_, idx) => idx !== i))}
-                  className="shrink-0 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:text-red-500 sm:py-0"
+                  className="admin-btn admin-btn-danger shrink-0 sm:py-0"
                 >
                   Remove
                 </button>
@@ -294,7 +293,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
         <button
           type="button"
           onClick={() => setSkills((prev) => [...prev, { category: "", itemsText: "", levels: {} }])}
-          className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:text-foreground"
+          className="admin-btn admin-btn-ghost"
         >
           + Add category
         </button>
@@ -303,11 +302,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
       {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
       {state?.success && <p className="text-sm text-emerald-500">Saved.</p>}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-lg bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:opacity-60"
-      >
+      <button type="submit" disabled={pending} className="admin-btn admin-btn-primary">
         {pending ? "Saving…" : "Save changes"}
       </button>
     </form>

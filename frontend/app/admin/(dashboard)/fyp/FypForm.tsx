@@ -4,15 +4,14 @@ import { useActionState } from "react";
 import type { Fyp } from "@/lib/types";
 import { saveFyp, type FypFormState } from "./actions";
 
-const inputClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400";
-const labelClass = "text-sm text-text-secondary";
+const inputClass = "admin-input";
+const labelClass = "admin-label";
 
 export default function FypForm({ fyp }: { fyp: Fyp }) {
   const [state, action, pending] = useActionState<FypFormState, FormData>(saveFyp, undefined);
 
   return (
-    <form action={action} className="max-w-2xl space-y-4">
+    <form action={action} className="admin-card max-w-2xl space-y-4 p-6">
       <div>
         <label className={labelClass} htmlFor="title">Title</label>
         <input
@@ -70,11 +69,7 @@ export default function FypForm({ fyp }: { fyp: Fyp }) {
       {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
       {state?.success && <p className="text-sm text-emerald-500">Saved.</p>}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-lg bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:opacity-60"
-      >
+      <button type="submit" disabled={pending} className="admin-btn admin-btn-primary">
         {pending ? "Saving…" : "Save changes"}
       </button>
     </form>

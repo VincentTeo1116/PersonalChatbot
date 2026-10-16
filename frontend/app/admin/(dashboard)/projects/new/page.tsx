@@ -1,10 +1,11 @@
+import PageHeader from "@/components/admin/PageHeader";
 import ProjectForm from "../ProjectForm";
 import { createProject } from "../actions";
 
 export default function NewProjectPage() {
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold text-foreground">New project</h1>
+      <PageHeader eyebrow="Content" title="New project" />
       <ProjectForm action={createProject} submitLabel="Create" />
     </div>
   );

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import PageHeader from "@/components/admin/PageHeader";
 import ExperienceForm from "../ExperienceForm";
 import {
   deleteExperiencePhoto,
@@ -30,87 +31,76 @@ export default async function EditExperiencePage({ params }: { params: Promise<{
     : null;
 
   return (
-    <div className="space-y-10">
-      <div>
-        <h1 className="mb-6 text-xl font-semibold text-foreground">Edit work experience entry</h1>
-        <ExperienceForm
-          experience={{
-            id: experience.id,
-            role: experience.role,
-            company: experience.company,
-            period: experience.period,
-            detail: experience.detail,
-            logoUrl,
-            images: [],
-          }}
-          action={updateExperience}
-          submitLabel="Save changes"
-        />
-      </div>
+    <div className="space-y-6">
+      <PageHeader eyebrow="Content" title="Edit work experience entry" />
 
-      <section className="max-w-2xl space-y-3">
+      <ExperienceForm
+        experience={{
+          id: experience.id,
+          role: experience.role,
+          company: experience.company,
+          period: experience.period,
+          detail: experience.detail,
+          logoUrl,
+          images: [],
+        }}
+        action={updateExperience}
+        submitLabel="Save changes"
+      />
+
+      <section className="admin-card max-w-2xl space-y-3 p-6">
         <h2 className="text-sm font-semibold text-foreground">Company logo</h2>
         <div className="flex flex-wrap items-center gap-4">
-          <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-border bg-surface">
+          <div className="relative h-16 w-16 overflow-hidden rounded-xl border border-border bg-background">
             {logoUrl && <Image src={logoUrl} alt="Company logo" fill className="object-cover" />}
           </div>
-          <form action={uploadExperienceLogo} className="flex flex-wrap items-end gap-2">
+          <form action={uploadExperienceLogo} className="flex flex-wrap items-end gap-3">
             <input type="hidden" name="id" value={id} />
             <input name="file" type="file" accept="image/*" required className="block text-sm" />
-            <button type="submit" className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400">
-              Upload
-            </button>
+            <button type="submit" className="admin-btn admin-btn-primary">Upload</button>
           </form>
         </div>
       </section>
 
-      <section className="max-w-2xl space-y-4">
+      <section className="admin-card max-w-2xl space-y-4 p-6">
         <h2 className="text-sm font-semibold text-foreground">Workplace photos ({(photos ?? []).length}/{MAX_PHOTOS})</h2>
 
-        <div className="flex flex-wrap gap-3">
-          {(photos ?? []).map((img) => (
-            <div key={img.id} className="w-28 space-y-1">
-              <div className="relative aspect-square overflow-hidden rounded-lg border border-border">
-                <Image
-                  src={supabase.storage.from(BUCKET).getPublicUrl(img.storage_path).data.publicUrl}
-                  alt={img.caption}
-                  fill
-                  className="object-cover"
-                />
+        {photos && photos.length > 0 && (
+          <div className="flex flex-wrap gap-3">
+            {photos.map((img) => (
+              <div key={img.id} className="w-28 space-y-1.5">
+                <div className="relative aspect-square overflow-hidden rounded-xl border border-border">
+                  <Image
+                    src={supabase.storage.from(BUCKET).getPublicUrl(img.storage_path).data.publicUrl}
+                    alt={img.caption}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <p className="truncate text-xs text-text-subtle" title={img.caption}>{img.caption || "—"}</p>
+                <form action={deleteExperiencePhoto}>
+                  <input type="hidden" name="imageId" value={img.id} />
+                  <input type="hidden" name="experienceId" value={id} />
+                  <input type="hidden" name="storagePath" value={img.storage_path} />
+                  <button type="submit" className="admin-btn admin-btn-danger w-full px-2 py-1 text-xs">Delete</button>
+                </form>
               </div>
-              <p className="truncate text-xs text-text-subtle" title={img.caption}>
-                {img.caption || "—"}
-              </p>
-              <form action={deleteExperiencePhoto}>
-                <input type="hidden" name="imageId" value={img.id} />
-                <input type="hidden" name="experienceId" value={id} />
-                <input type="hidden" name="storagePath" value={img.storage_path} />
-                <button type="submit" className="w-full rounded-lg border border-border px-2 py-1 text-xs text-text-secondary hover:text-red-500">
-                  Delete
-                </button>
-              </form>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {(photos ?? []).length < MAX_PHOTOS ? (
-          <form action={uploadExperiencePhoto} className="flex flex-wrap items-end gap-2">
+          <form action={uploadExperiencePhoto} className="flex flex-wrap items-end gap-3">
             <input type="hidden" name="id" value={id} />
             <div>
-              <label className="text-sm text-text-secondary" htmlFor="caption">Caption</label>
-              <input
-                id="caption"
-                name="caption"
-                className="block rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400"
-              />
+              <label className="admin-label" htmlFor="caption">Caption</label>
+              <input id="caption" name="caption" className="admin-input" />
             </div>
             <div>
-              <label className="text-sm text-text-secondary" htmlFor="file">Photo</label>
+              <label className="admin-label" htmlFor="file">Photo</label>
               <input id="file" name="file" type="file" accept="image/*" required className="block text-sm" />
             </div>
-            <button type="submit" className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400">
-              Upload
-            </button>
+            <button type="submit" className="admin-btn admin-btn-primary">Upload</button>
           </form>
         ) : (
           <p className="text-xs text-text-subtle">Maximum of {MAX_PHOTOS} photos reached — delete one to add another.</p>

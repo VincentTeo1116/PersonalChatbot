@@ -3,9 +3,8 @@
 import { useState } from "react";
 import type { Project } from "@/lib/types";
 
-const inputClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400";
-const labelClass = "text-sm text-text-secondary";
+const inputClass = "admin-input";
+const labelClass = "admin-label";
 
 const LIVE_SITE_LABEL = "Live site";
 
@@ -18,8 +17,7 @@ export default function ProjectForm({
   action: (formData: FormData) => void;
   submitLabel: string;
 }) {
-  // The "Live site" link gets its own field below (auto-saved into `links` as the
-  // first entry) so it doesn't need to be typed twice into the generic list.
+  // "Live site" gets its own field below, auto-saved as the first links entry, so it's not typed twice.
   const [liveSiteUrl, setLiveSiteUrl] = useState(
     project?.links.find((l) => l.label === LIVE_SITE_LABEL)?.url ?? ""
   );
@@ -31,7 +29,7 @@ export default function ProjectForm({
   ];
 
   return (
-    <form action={action} className="max-w-2xl space-y-4">
+    <form action={action} className="admin-card max-w-2xl space-y-4 p-6">
       {project && <input type="hidden" name="id" value={project.id} />}
       <input type="hidden" name="links" value={JSON.stringify(allLinks)} />
 
@@ -105,7 +103,7 @@ export default function ProjectForm({
             <button
               type="button"
               onClick={() => setLinks((prev) => prev.filter((_, idx) => idx !== i))}
-              className="shrink-0 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:text-red-500 sm:py-0"
+              className="admin-btn admin-btn-danger shrink-0 sm:py-0"
             >
               Remove
             </button>
@@ -114,16 +112,13 @@ export default function ProjectForm({
         <button
           type="button"
           onClick={() => setLinks((prev) => [...prev, { label: "", url: "" }])}
-          className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:text-foreground"
+          className="admin-btn admin-btn-ghost"
         >
           + Add link
         </button>
       </div>
 
-      <button
-        type="submit"
-        className="rounded-lg bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400"
-      >
+      <button type="submit" className="admin-btn admin-btn-primary">
         {submitLabel}
       </button>
     </form>

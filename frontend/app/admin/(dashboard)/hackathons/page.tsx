@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
+import PageHeader from "@/components/admin/PageHeader";
 import {
   deleteHackathonPhoto,
   moveHackathonPhoto,
@@ -21,72 +22,57 @@ export default async function HackathonsAdminPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold text-foreground">Hackathons</h1>
+      <PageHeader eyebrow="Content" title="Hackathons" description="Photos shown in the Hackathons gallery on the public site." />
 
-      <form action={uploadHackathonPhoto} className="mb-8 flex flex-wrap items-end gap-2">
+      <form action={uploadHackathonPhoto} className="admin-card mb-6 flex flex-wrap items-end gap-3 p-6">
         <div>
-          <label className="text-sm text-text-secondary" htmlFor="caption">Caption</label>
-          <input
-            id="caption"
-            name="caption"
-            placeholder="[Hackathon name] — [Year], [what happened]"
-            className="block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400 sm:w-72"
-          />
+          <label className="admin-label" htmlFor="caption">Caption</label>
+          <input id="caption" name="caption" placeholder="[Hackathon name] — [Year], [what happened]" className="admin-input sm:w-72" />
         </div>
         <div>
-          <label className="text-sm text-text-secondary" htmlFor="file">Photo</label>
+          <label className="admin-label" htmlFor="file">Photo</label>
           <input id="file" name="file" type="file" accept="image/*" required className="block text-sm" />
         </div>
-        <button type="submit" className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400">
-          Upload
-        </button>
+        <button type="submit" className="admin-btn admin-btn-primary">Upload</button>
       </form>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {photos.map((photo, i) => (
-          <div key={photo.id} className="space-y-2 rounded-xl border border-border bg-surface p-3">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
-              <Image src={photo.src} alt={photo.caption} fill className="object-cover" />
-            </div>
+      {photos.length === 0 ? (
+        <p className="admin-card p-6 text-sm text-text-secondary">No hackathon photos yet -- upload your first one above.</p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {photos.map((photo, i) => (
+            <div key={photo.id} className="admin-card space-y-2 p-3">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
+                <Image src={photo.src} alt={photo.caption} fill className="object-cover" />
+              </div>
 
-            <form action={updateHackathonCaption} className="flex gap-2">
-              <input type="hidden" name="id" value={photo.id} />
-              <input
-                name="caption"
-                defaultValue={photo.caption}
-                className="flex-1 rounded-lg border border-border bg-background px-2 py-1 text-xs text-foreground outline-none focus:border-indigo-400"
-              />
-              <button type="submit" className="rounded-lg border border-border px-2 py-1 text-xs text-text-secondary hover:text-foreground">
-                Save
-              </button>
-            </form>
+              <form action={updateHackathonCaption} className="flex gap-2">
+                <input type="hidden" name="id" value={photo.id} />
+                <input name="caption" defaultValue={photo.caption} className="admin-input flex-1 px-2 py-1 text-xs" />
+                <button type="submit" className="admin-btn admin-btn-ghost px-2 py-1 text-xs">Save</button>
+              </form>
 
-            <div className="flex items-center gap-2">
-              <form action={moveHackathonPhoto}>
-                <input type="hidden" name="id" value={photo.id} />
-                <input type="hidden" name="direction" value="up" />
-                <button type="submit" disabled={i === 0} className="rounded-lg border border-border px-2 py-1 text-xs text-text-secondary disabled:opacity-30">
-                  ↑
-                </button>
-              </form>
-              <form action={moveHackathonPhoto}>
-                <input type="hidden" name="id" value={photo.id} />
-                <input type="hidden" name="direction" value="down" />
-                <button type="submit" disabled={i === photos.length - 1} className="rounded-lg border border-border px-2 py-1 text-xs text-text-secondary disabled:opacity-30">
-                  ↓
-                </button>
-              </form>
-              <form action={deleteHackathonPhoto} className="ml-auto">
-                <input type="hidden" name="id" value={photo.id} />
-                <input type="hidden" name="storagePath" value={photo.storagePath} />
-                <button type="submit" className="rounded-lg border border-border px-2 py-1 text-xs text-text-secondary hover:text-red-500">
-                  Delete
-                </button>
-              </form>
+              <div className="flex items-center gap-2">
+                <form action={moveHackathonPhoto}>
+                  <input type="hidden" name="id" value={photo.id} />
+                  <input type="hidden" name="direction" value="up" />
+                  <button type="submit" disabled={i === 0} className="admin-btn admin-btn-ghost px-2 py-1 text-xs disabled:opacity-30">↑</button>
+                </form>
+                <form action={moveHackathonPhoto}>
+                  <input type="hidden" name="id" value={photo.id} />
+                  <input type="hidden" name="direction" value="down" />
+                  <button type="submit" disabled={i === photos.length - 1} className="admin-btn admin-btn-ghost px-2 py-1 text-xs disabled:opacity-30">↓</button>
+                </form>
+                <form action={deleteHackathonPhoto} className="ml-auto">
+                  <input type="hidden" name="id" value={photo.id} />
+                  <input type="hidden" name="storagePath" value={photo.storagePath} />
+                  <button type="submit" className="admin-btn admin-btn-danger px-2 py-1 text-xs">Delete</button>
+                </form>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

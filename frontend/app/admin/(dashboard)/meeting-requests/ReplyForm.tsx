@@ -17,14 +17,10 @@ export default function ReplyForm({ request }: { request: MeetingRequest }) {
         rows={3}
         required
         placeholder={`Hi ${request.name}, ...`}
-        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400"
+        className="admin-input"
       />
       {state?.ok === false && <p className="text-xs text-red-500">{state.error}</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-lg bg-indigo-500 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-indigo-400 disabled:opacity-60"
-      >
+      <button type="submit" disabled={pending} className="admin-btn admin-btn-primary px-4 py-1.5 text-xs">
         {pending ? "Sending…" : "Send reply"}
       </button>
     </form>

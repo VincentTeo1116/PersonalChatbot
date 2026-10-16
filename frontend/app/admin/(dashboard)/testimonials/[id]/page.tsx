@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import PageHeader from "@/components/admin/PageHeader";
 import TestimonialForm from "../TestimonialForm";
 import { updateTestimonial, uploadTestimonialAvatar } from "../actions";
 
@@ -18,34 +19,31 @@ export default async function EditTestimonialPage({ params }: { params: Promise<
     : null;
 
   return (
-    <div className="space-y-10">
-      <div>
-        <h1 className="mb-6 text-xl font-semibold text-foreground">Edit testimonial</h1>
-        <TestimonialForm
-          testimonial={{
-            id: testimonial.id,
-            authorName: testimonial.author_name,
-            authorRole: testimonial.author_role,
-            quote: testimonial.quote,
-            avatarUrl,
-            status: testimonial.status ?? "approved",
-          }}
-          action={updateTestimonial}
-          submitLabel="Save changes"
-        />
-      </div>
+    <div className="space-y-6">
+      <PageHeader eyebrow="Content" title="Edit testimonial" />
 
-      <section className="max-w-2xl space-y-4">
+      <TestimonialForm
+        testimonial={{
+          id: testimonial.id,
+          authorName: testimonial.author_name,
+          authorRole: testimonial.author_role,
+          quote: testimonial.quote,
+          avatarUrl,
+          status: testimonial.status ?? "approved",
+        }}
+        action={updateTestimonial}
+        submitLabel="Save changes"
+      />
+
+      <section className="admin-card max-w-2xl space-y-4 p-6">
         <h2 className="text-sm font-semibold text-foreground">Photo (optional)</h2>
-        <div className="relative h-20 w-20 overflow-hidden rounded-full border border-border bg-surface">
+        <div className="relative h-20 w-20 overflow-hidden rounded-full border border-border bg-background">
           {avatarUrl && <Image src={avatarUrl} alt={testimonial.author_name} fill className="object-cover" />}
         </div>
-        <form action={uploadTestimonialAvatar} className="flex flex-wrap items-end gap-2">
+        <form action={uploadTestimonialAvatar} className="flex flex-wrap items-end gap-3">
           <input type="hidden" name="id" value={id} />
           <input id="file" name="file" type="file" accept="image/*" required className="block text-sm" />
-          <button type="submit" className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400">
-            Upload
-          </button>
+          <button type="submit" className="admin-btn admin-btn-primary">Upload</button>
         </form>
       </section>
     </div>

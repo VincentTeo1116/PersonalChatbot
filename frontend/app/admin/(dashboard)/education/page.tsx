@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getEducation } from "@/lib/data";
+import PageHeader from "@/components/admin/PageHeader";
 import { deleteEducation, moveEducation } from "./actions";
 
 export default async function EducationListPage() {
@@ -7,20 +8,22 @@ export default async function EducationListPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-foreground">Education</h1>
-        <Link
-          href="/admin/education/new"
-          className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
-        >
-          + Add entry
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow="Content"
+        title="Education"
+        action={
+          <Link href="/admin/education/new" className="admin-btn admin-btn-primary">
+            + Add entry
+          </Link>
+        }
+      />
 
-      <ul className="space-y-3">
-        {education.map((ed, i) => (
-          <li key={ed.id} className="rounded-xl border border-border bg-surface p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+      {education.length === 0 ? (
+        <p className="admin-card p-6 text-sm text-text-secondary">No education entries yet -- add your first one above.</p>
+      ) : (
+        <ul className="space-y-3">
+          {education.map((ed, i) => (
+            <li key={ed.id} className="admin-card flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div className="min-w-0">
                 <p className="text-xs font-medium text-indigo-500 dark:text-indigo-300">{ed.period}</p>
                 <p className="font-semibold text-foreground">{ed.degree}</p>
@@ -31,42 +34,23 @@ export default async function EducationListPage() {
                 <form action={moveEducation}>
                   <input type="hidden" name="id" value={ed.id} />
                   <input type="hidden" name="direction" value="up" />
-                  <button
-                    type="submit"
-                    disabled={i === 0}
-                    className="rounded-lg border border-border px-2 py-1 text-xs text-text-secondary disabled:opacity-30"
-                  >
-                    ↑
-                  </button>
+                  <button type="submit" disabled={i === 0} className="admin-btn admin-btn-ghost px-2.5 py-1.5 text-xs disabled:opacity-30">↑</button>
                 </form>
                 <form action={moveEducation}>
                   <input type="hidden" name="id" value={ed.id} />
                   <input type="hidden" name="direction" value="down" />
-                  <button
-                    type="submit"
-                    disabled={i === education.length - 1}
-                    className="rounded-lg border border-border px-2 py-1 text-xs text-text-secondary disabled:opacity-30"
-                  >
-                    ↓
-                  </button>
+                  <button type="submit" disabled={i === education.length - 1} className="admin-btn admin-btn-ghost px-2.5 py-1.5 text-xs disabled:opacity-30">↓</button>
                 </form>
-                <Link
-                  href={`/admin/education/${ed.id}`}
-                  className="rounded-lg border border-border px-3 py-1 text-xs text-text-secondary hover:text-foreground"
-                >
-                  Edit
-                </Link>
+                <Link href={`/admin/education/${ed.id}`} className="admin-btn admin-btn-ghost px-3 py-1.5 text-xs">Edit</Link>
                 <form action={deleteEducation}>
                   <input type="hidden" name="id" value={ed.id} />
-                  <button type="submit" className="rounded-lg border border-border px-3 py-1 text-xs text-text-secondary hover:text-red-500">
-                    Delete
-                  </button>
+                  <button type="submit" className="admin-btn admin-btn-danger px-3 py-1.5 text-xs">Delete</button>
                 </form>
               </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

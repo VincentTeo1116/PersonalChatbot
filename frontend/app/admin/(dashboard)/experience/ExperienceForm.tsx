@@ -1,8 +1,7 @@
 import type { WorkExperience } from "@/lib/types";
 
-const inputClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400";
-const labelClass = "text-sm text-text-secondary";
+const inputClass = "admin-input";
+const labelClass = "admin-label";
 
 export default function ExperienceForm({
   experience,
@@ -14,7 +13,7 @@ export default function ExperienceForm({
   submitLabel: string;
 }) {
   return (
-    <form action={action} className="max-w-2xl space-y-4">
+    <form action={action} className="admin-card max-w-2xl space-y-4 p-6">
       {experience && <input type="hidden" name="id" value={experience.id} />}
 
       <div>
@@ -41,10 +40,7 @@ export default function ExperienceForm({
         <textarea id="detail" name="detail" defaultValue={experience?.detail} rows={4} className={inputClass} required />
       </div>
 
-      <button
-        type="submit"
-        className="rounded-lg bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400"
-      >
+      <button type="submit" className="admin-btn admin-btn-primary">
         {submitLabel}
       </button>
     </form>

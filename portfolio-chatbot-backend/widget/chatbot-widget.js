@@ -164,7 +164,8 @@
       self.toggle();
     });
 
-    this.panel = el("div", "pcw-panel", { hidden: "hidden", role: "dialog", "aria-label": "Chat" });
+    this.panel = el("div", "pcw-panel", { role: "dialog", "aria-label": "Chat" });
+    this.panel.inert = true;
 
     this._defaultSubtitle = "AI assistant · answers from my portfolio";
     var header = el("div", "pcw-header");
@@ -222,14 +223,16 @@
 
   ChatbotWidget.prototype.open = function () {
     this.isOpen = true;
-    this.panel.hidden = false;
+    this.panel.inert = false;
+    this.panel.classList.add("pcw-panel--open");
     this.launcher.setAttribute("aria-expanded", "true");
     this.inputEl.focus();
   };
 
   ChatbotWidget.prototype.close = function () {
     this.isOpen = false;
-    this.panel.hidden = true;
+    this.panel.inert = true;
+    this.panel.classList.remove("pcw-panel--open");
     this.launcher.setAttribute("aria-expanded", "false");
   };
 
