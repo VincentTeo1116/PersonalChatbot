@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { getProfile } from "@/lib/data";
 import MotionProvider from "@/components/MotionProvider";
+import GoogleAnalyticsLoader from "@/components/GoogleAnalyticsLoader";
 import { SITE_URL, absoluteUrl, jsonLdString } from "@/lib/seo";
 
 const geistSans = Geist({
@@ -28,6 +29,10 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: SITE_DESCRIPTION,
     alternates: { canonical: "/" },
+    // Search Console "HTML tag" verification token (the content="..." value); omitted when unset.
+    verification: process.env.NEXT_PUBLIC_GSC_VERIFICATION
+      ? { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION }
+      : undefined,
     openGraph: {
       type: "website",
       url: SITE_URL,
@@ -99,6 +104,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       >
         <MotionProvider>{children}</MotionProvider>
         <Analytics />
+        <GoogleAnalyticsLoader />
       </body>
     </html>
   );
