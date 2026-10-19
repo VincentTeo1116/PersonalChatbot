@@ -8,9 +8,9 @@ insert into public.profile (
 ) values (
   1,
   'Vincent Teo',
-  'Aspiring Software Engineer, specializing in AI/ML',
+  'Aspiring AI/ML Engineer | Full-Stack Web Developer',
   'Kuala Lumpur, Malaysia',
-  'I build full-stack products with a focus on practical AI - from a real-time LMS serving APU students to hackathon platforms that turn CVE data, medical reports, and fake news into plain-English insights using RAG and LLM integrations (Gemini, AWS PartyRock, Z.AI GLM).',
+  'AI/ML and full-stack web developer in Kuala Lumpur, Malaysia. I build practical AI products, RAG applications, and web experiences — including a real-time LMS and award-winning AI tools that turn complex data into clear, useful insights.',
   'I''m a Computer Science (Artificial Intelligence) undergraduate at Asia Pacific University, having moved from a Software Engineering diploma into a deeper focus on AI/ML — currently holding a 4.00 CGPA. Outside class, I''ve trained people-counting models as a Software Intern at FootfallCam, built APMoodle (a full-stack LMS with real-time chat and live progress tracking) with a team of five, and shipped four hackathon projects in under a year — including an AI CVE-summarising assistant that won 3rd place at the GTD x APU Hackathon. I also tutor kids aged 8–17 in programming, which keeps me honest about explaining things simply.',
   '[
     {"category": "Languages", "sort_order": 0, "items": ["Python", "Java", "TypeScript", "JavaScript", "C#", "PHP"]},

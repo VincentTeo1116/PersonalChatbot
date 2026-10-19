@@ -11,12 +11,27 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const project = projects.find((p) => p.slug === slug);
   if (!project) return { title: "Project not found" };
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vincent16.vercel.app";
+  const title = `${project.title} | Vincent Teo's AI & Web Development Portfolio`;
+  const description = project.description.length > 150
+    ? `${project.description.slice(0, 147).replace(/\s+\S*$/, "").trimEnd()}…`
+    : project.description;
+
   return {
-    title: `${project.title} — Case study`,
-    description: project.description,
+    title: { absolute: title },
+    description,
+    alternates: { canonical: `${siteUrl}/projects/${project.slug}` },
     openGraph: {
-      title: project.title,
-      description: project.description,
+      type: "article",
+      url: `${siteUrl}/projects/${project.slug}`,
+      title,
+      description,
+      images: [project.image],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
       images: [project.image],
     },
   };

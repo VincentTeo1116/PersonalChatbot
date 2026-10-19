@@ -15,18 +15,34 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Required so the og:image/twitter:image tags Next.js generates from opengraph-image.tsx
-// resolve to absolute URLs -- social crawlers (Slack, iMessage, LinkedIn, ...) won't
-// follow a relative one. Falls back to the known production URL; override with
-// NEXT_PUBLIC_SITE_URL if the domain ever changes.
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vincent16-portfolio.vercel.app";
+// Keep metadata, canonical links, robots.txt, and sitemap on the public domain.
+// Override this in deployment environments if the preferred domain changes.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vincent16.vercel.app";
+const SITE_DESCRIPTION =
+  "Vincent Teo is an AI and machine learning developer in Kuala Lumpur, Malaysia, building practical AI products, RAG applications, and full-stack web experiences.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getProfile();
   return {
     metadataBase: new URL(SITE_URL),
-    title: `${profile.name}'s Portfolio`,
-    description: profile.heroSummary,
+    title: {
+      absolute: `${profile.name} | AI/ML Developer & Web Developer in Kuala Lumpur`,
+    },
+    description: SITE_DESCRIPTION,
+    alternates: { canonical: "/" },
+    openGraph: {
+      type: "website",
+      url: SITE_URL,
+      siteName: `${profile.name}'s Portfolio`,
+      title: `${profile.name} | AI/ML Developer & Web Developer in Kuala Lumpur`,
+      description: SITE_DESCRIPTION,
+      locale: "en_MY",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${profile.name} | AI/ML Developer & Web Developer in Kuala Lumpur`,
+      description: SITE_DESCRIPTION,
+    },
   };
 }
 
