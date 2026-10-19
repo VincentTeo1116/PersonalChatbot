@@ -30,6 +30,7 @@ export type Profile = {
   heroSummary: string;
   about: string;
   avatarUrl: string;
+  updatedAt: string;
   education: EducationEntry[];
   skills: SkillCategory[];
   statCgpa: number | null;
@@ -83,6 +84,7 @@ export type Project = {
   role?: string;
   /** A concrete outcome, e.g. "Cut manual grading time by ~60%, used by 50+ students". */
   impact?: string;
+  updatedAt: string;
 };
 
 export type Publication = {

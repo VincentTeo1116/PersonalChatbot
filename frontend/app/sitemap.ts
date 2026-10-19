@@ -1,17 +1,21 @@
 import type { MetadataRoute } from "next";
-import { getProjects } from "@/lib/data";
+import { getProfile, getProjects } from "@/lib/data";
+import { SITE_URL } from "@/lib/seo";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vincent16.vercel.app";
+// Same cadence as the homepage: newly added projects show up without waiting for a redeploy.
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const projects = await getProjects();
+  const [profile, projects] = await Promise.all([getProfile(), getProjects()]);
+
+  // The homepage shows every section, so it changed whenever the profile or any project did.
+  const latest = [profile.updatedAt, ...projects.map((p) => p.updatedAt)].sort().at(-1);
 
   return [
-    { url: SITE_URL, changeFrequency: "weekly", priority: 1 },
+    { url: SITE_URL, lastModified: latest },
     ...projects.map((p) => ({
       url: `${SITE_URL}/projects/${p.slug}`,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
+      lastModified: p.updatedAt,
     })),
   ];
 }

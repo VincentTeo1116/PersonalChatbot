@@ -38,6 +38,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           award: project.award ?? undefined,
           role: project.role ?? undefined,
           impact: project.impact ?? undefined,
+          updatedAt: project.updated_at,
         }}
         action={updateProject}
         submitLabel="Save changes"

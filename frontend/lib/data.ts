@@ -61,6 +61,7 @@ export const getProfile = cache(async (): Promise<Profile> => {
     heroSummary: profileRow.hero_summary,
     about: profileRow.about,
     avatarUrl: publicUrl(supabase, profileRow.avatar_path, "/avatar-placeholder.svg"),
+    updatedAt: profileRow.updated_at,
     education,
     skills,
     statCgpa: profileRow.stat_cgpa,
@@ -166,6 +167,7 @@ export const getProjects = cache(async (): Promise<Project[]> => {
       award: row.award ?? undefined,
       role: row.role ?? undefined,
       impact: row.impact ?? undefined,
+      updatedAt: row.updated_at,
     };
   });
 });

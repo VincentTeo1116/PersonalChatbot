@@ -4,15 +4,15 @@ import { notFound } from "next/navigation";
 import ProjectMedia from "@/components/ProjectMedia";
 import ThemeToggle from "@/components/ThemeToggle";
 import { getProfile, getProjects } from "@/lib/data";
+import { SITE_URL, absoluteUrl, jsonLdString } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const projects = await getProjects();
+  const [profile, projects] = await Promise.all([getProfile(), getProjects()]);
   const project = projects.find((p) => p.slug === slug);
   if (!project) return { title: "Project not found" };
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://vincent16.vercel.app";
-  const title = `${project.title} | Vincent Teo's AI & Web Development Portfolio`;
+  const title = `${project.title} | ${profile.name}'s AI & Web Development Portfolio`;
   const description = project.description.length > 150
     ? `${project.description.slice(0, 147).replace(/\s+\S*$/, "").trimEnd()}…`
     : project.description;
@@ -20,19 +20,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: { absolute: title },
     description,
-    alternates: { canonical: `${siteUrl}/projects/${project.slug}` },
+    alternates: { canonical: `${SITE_URL}/projects/${project.slug}` },
     openGraph: {
       type: "article",
-      url: `${siteUrl}/projects/${project.slug}`,
+      url: `${SITE_URL}/projects/${project.slug}`,
       title,
       description,
-      images: [project.image],
+      modifiedTime: project.updatedAt,
+      tags: project.tags,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [project.image],
     },
   };
 }
@@ -44,9 +44,38 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
   if (!project) notFound();
 
   const primaryLink = project.links[0];
+  const repoLink = project.links.find((l) => /github\.com/i.test(l.url));
+  const projectUrl = `${SITE_URL}/projects/${project.slug}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": repoLink ? "SoftwareSourceCode" : "CreativeWork",
+        "@id": `${projectUrl}#project`,
+        name: project.title,
+        description: project.description,
+        url: projectUrl,
+        image: absoluteUrl(project.image),
+        keywords: project.tags.join(", "),
+        dateModified: project.updatedAt,
+        author: { "@id": `${SITE_URL}/#person` },
+        ...(repoLink && { codeRepositoryUrl: repoLink.url }),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: `${profile.name}'s Portfolio`, item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Projects", item: `${SITE_URL}/#projects` },
+          { "@type": "ListItem", position: 3, name: project.title, item: projectUrl },
+        ],
+      },
+    ],
+  };
 
   return (
     <main className="flex-1">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }} />
       <header className="mx-auto flex max-w-3xl items-center justify-between px-6 pt-8">
         <Link href="/#projects" className="text-sm font-medium text-text-secondary transition-colors hover:text-foreground">
           &larr; Back to {profile.name}&apos;s portfolio

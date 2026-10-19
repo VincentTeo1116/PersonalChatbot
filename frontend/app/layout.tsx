@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { getProfile } from "@/lib/data";
 import MotionProvider from "@/components/MotionProvider";
+import { SITE_URL, absoluteUrl, jsonLdString } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,9 +16,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Keep metadata, canonical links, robots.txt, and sitemap on the public domain.
-// Override this in deployment environments if the preferred domain changes.
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://vincent16.vercel.app";
 const SITE_DESCRIPTION =
   "Vincent Teo is an AI and machine learning developer in Kuala Lumpur, Malaysia, building practical AI products, RAG applications, and full-stack web experiences.";
 
@@ -61,17 +59,29 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
   // Person structured data -- lets Google build a richer result (and potential knowledge
   // panel) when someone searches the name, instead of just a plain blue link.
+  const personId = `${SITE_URL}/#person`;
   const personJsonLd = {
-    "@context": "https://schema.org",
     "@type": "Person",
+    "@id": personId,
     name: profile.name,
     jobTitle: profile.tagline,
     url: SITE_URL,
-    image: profile.avatarUrl,
+    image: absoluteUrl(profile.avatarUrl),
     description: profile.heroSummary,
     address: profile.location || undefined,
+    knowsAbout: profile.skills.flatMap((s) => s.items.map((i) => i.name)),
+    alumniOf: [...new Set(profile.education.map((e) => e.institution))].map((name) => ({ "@type": "EducationalOrganization", name })),
     sameAs: [profile.contact.github, profile.contact.linkedin].filter(Boolean),
   };
+  const websiteJsonLd = {
+    "@type": "WebSite",
+    "@id": `${SITE_URL}/#website`,
+    url: SITE_URL,
+    name: `${profile.name}'s Portfolio`,
+    inLanguage: "en",
+    publisher: { "@id": personId },
+  };
+  const jsonLd = { "@context": "https://schema.org", "@graph": [personJsonLd, websiteJsonLd] };
 
   return (
     <html
@@ -81,7 +91,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }} />
       </head>
       <body
         className="min-h-full flex flex-col bg-background text-foreground"
