@@ -55,7 +55,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                         {p.title}
                       </Link>
                     </h3>
-                    <p className="mt-2 text-sm text-text-secondary leading-relaxed">{p.description}</p>
+                    <p className="mt-2 line-clamp-4 text-sm text-text-secondary leading-relaxed">{p.description}</p>
                     {p.impact && (
                       <p className="mt-2 text-xs font-medium text-indigo-600 dark:text-indigo-300">{p.impact}</p>
                     )}

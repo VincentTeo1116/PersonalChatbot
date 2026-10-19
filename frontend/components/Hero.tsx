@@ -121,6 +121,18 @@ export default function Hero({ profile }: { profile: Profile }) {
                   Chat with my AI assistant {"↓"}
                 </button>
               </MagneticButton>
+              {profile.contact.linkedin && (
+                <MagneticButton>
+                  <a
+                    href={profile.contact.linkedin}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-foreground/5 active:scale-95 inline-block"
+                  >
+                    Connect on LinkedIn
+                  </a>
+                </MagneticButton>
+              )}
             </motion.div>
 
             <motion.p variants={item} className="mt-6 text-xs text-text-subtle">

@@ -17,6 +17,14 @@ const LINKS = [
   { href: "#contact", label: "Contact" },
 ];
 
+function LinkedInIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden>
+      <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z" />
+    </svg>
+  );
+}
+
 export default function Nav({ profile }: { profile: Profile }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -88,6 +96,17 @@ export default function Nav({ profile }: { profile: Profile }) {
             Search
             <kbd className="rounded border border-border bg-surface px-1.5 py-0.5 text-[10px]">{"⌘K"}</kbd>
           </button>
+          {profile.contact.linkedin && (
+            <a
+              href={profile.contact.linkedin}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="LinkedIn profile"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-text-secondary transition-all duration-200 hover:border-indigo-400/40 hover:text-foreground hover:scale-105"
+            >
+              <LinkedInIcon />
+            </a>
+          )}
           <ThemeToggle />
           <MagneticButton>
             <a
@@ -133,6 +152,13 @@ export default function Nav({ profile }: { profile: Profile }) {
               </a>
             </li>
           ))}
+          {profile.contact.linkedin && (
+            <li>
+              <a href={profile.contact.linkedin} target="_blank" rel="noreferrer" onClick={() => setOpen(false)} tabIndex={open ? 0 : -1} className="block min-h-11 rounded-lg px-3 py-3 transition hover:bg-surface-hover hover:text-foreground">
+                LinkedIn
+              </a>
+            </li>
+          )}
         </ul>
       </motion.div>
     </motion.header>

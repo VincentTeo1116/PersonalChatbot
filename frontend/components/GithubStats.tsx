@@ -48,8 +48,9 @@ export default async function GithubStats({ githubUrl }: { githubUrl: string | u
         <Reveal delay={100}>
           <div className="mt-10 flex flex-wrap justify-center gap-x-14 gap-y-6">
             <StatCounter value={stats.publicRepos} label="Public repos" />
-            <StatCounter value={stats.totalStars} label="Stars earned" />
-            <StatCounter value={stats.followers} label="Followers" />
+            {/* A zero reads as "nobody cares" rather than "just starting", so only show these once they're non-zero. */}
+            {stats.totalStars > 0 && <StatCounter value={stats.totalStars} label="Stars earned" />}
+            {stats.followers > 0 && <StatCounter value={stats.followers} label="Followers" />}
             {stats.contributions && (
               <StatCounter value={stats.contributions.totalContributions} label="Contributions (1y)" />
             )}
