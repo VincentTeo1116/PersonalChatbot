@@ -7,8 +7,7 @@ import MagneticButton from "@/components/MagneticButton";
 import SplitText from "@/components/SplitText";
 import type { Profile } from "@/lib/types";
 
-// Entrance animations are CSS (.enter-*, see globals.css) so they start at first paint instead of
-// waiting for the JS bundle to hydrate; this just sets each element's start delay.
+// Entrance animations are CSS (.enter-*, see globals.css) so they start at first paint instead of waiting for the JS bundle to hydrate; this just sets each element's start delay.
 const delay = (seconds: number) => ({ "--enter-delay": `${seconds}s` }) as CSSProperties;
 
 // Scroll fade/lift thresholds assume desktop's side-by-side layout, so just skip them on mobile's stacked one.
@@ -73,8 +72,7 @@ export default function Hero({ profile }: { profile: Profile }) {
           <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
             <SplitText text={`Hi, I'm ${profile.name}.`} delay={0.15} />
             <span className="block overflow-hidden pb-[0.15em] -mb-[0.15em]">
-              {/* Two layers on purpose: the outer one plays the one-off slide-in, the inner one keeps the
-                  looping gradient shimmer. Both set `animation`, so sharing an element made the slide repeat. */}
+              {/* Two layers on purpose: the outer one plays the one-off slide-in, the inner one keeps the looping gradient shimmer. Both set `animation`, so sharing an element made the slide repeat. */}
               <span style={delay(0.4)} className="enter-word block">
                 <span className="block animate-gradient-x bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
                   {profile.tagline}

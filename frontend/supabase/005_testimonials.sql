@@ -1,7 +1,4 @@
--- Run this in the Supabase SQL Editor (after schema.sql has already been run once).
--- Adds testimonials/recommendations: a short quote + who said it, shown on the public
--- site as social proof. Optional small avatar photo per entry, same upload pattern as
--- the other single-image sections (research, work experience logo).
+-- Adds testimonials/recommendations: a short quote + who said it, shown on the public site as social proof. Optional small avatar photo per entry, same upload pattern as the other single-image sections (research, work experience logo).
 
 create table public.testimonials (
   id uuid primary key default gen_random_uuid(),
@@ -21,6 +18,4 @@ create policy "public read" on public.testimonials for select using (true);
 create policy "admin write" on public.testimonials for all
   using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
--- No new Storage policies needed: the "portfolio-content" bucket's existing
--- public-read / authenticated-write policies from schema.sql already cover
--- any new folder path (e.g. testimonials/{id}/...).
+-- No new Storage policies needed: the "portfolio-content" bucket's existing public-read / authenticated-write policies from schema.sql already cover any new folder path (e.g. testimonials/{id}/...).

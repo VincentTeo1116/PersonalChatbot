@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import type { Profile, Project, Publication } from "@/lib/types";
 
-// cmdk (the palette UI) is only needed once someone actually opens it, so it's split out of the
-// initial bundle. This shell stays tiny and always mounted so Cmd/Ctrl+K and the nav's Search
-// button keep working from the first moment.
+// cmdk (the palette UI) is only needed once someone actually opens it, so it's split out of the initial bundle. This shell stays tiny and always mounted so Cmd/Ctrl+K and the nav's Search button keep working from the first moment.
 const CommandPaletteDialog = dynamic(() => import("@/components/CommandPaletteDialog"));
 
 export default function CommandPalette({

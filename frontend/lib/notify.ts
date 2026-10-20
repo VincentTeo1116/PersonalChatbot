@@ -1,8 +1,7 @@
 import "server-only";
 import type { MeetingRequestInput } from "@/lib/validation/meetingRequest";
 
-// Emails the owner on a new meeting request, via Resend. No-ops if RESEND_API_KEY isn't set -- the
-// request is already saved to Supabase either way. Call from inside after() so it runs post-response.
+// Emails the owner on a new meeting request, via Resend. No-ops if RESEND_API_KEY isn't set -- the request is already saved to Supabase either way. Call from inside after() so it runs post-response.
 export async function sendMeetingRequestEmail(input: MeetingRequestInput, toEmail: string): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey || !toEmail) return;
@@ -29,8 +28,7 @@ export async function sendMeetingRequestEmail(input: MeetingRequestInput, toEmai
       body: JSON.stringify({
         from,
         to: [toEmail],
-        // Lets you just hit "Reply" in your email client to respond straight to the
-        // requester, instead of copying their address out of the message body.
+        // Lets you just hit "Reply" in your email client to respond straight to the requester, instead of copying their address out of the message body.
         reply_to: input.email,
         subject: `New meeting request from ${input.name} (${input.company})`,
         text,
@@ -48,9 +46,7 @@ export async function sendMeetingRequestEmail(input: MeetingRequestInput, toEmai
 
 export type EmailResult = { sent: true } | { sent: false; error: string };
 
-// Sends the admin's reply to a meeting request, via Resend. Unlike the notification above
-// (fire-and-forget, called from inside after()), this one's result is shown to the admin
-// directly -- replyToMeetingRequest() only marks the request "replied" if this reports sent.
+// Sends the admin's reply to a meeting request, via Resend. Unlike the notification above (fire-and-forget, called from inside after()), this one's result is shown to the admin directly -- replyToMeetingRequest() only marks the request "replied" if this reports sent.
 export async function sendMeetingReplyEmail(input: {
   to: string;
   requesterName: string;

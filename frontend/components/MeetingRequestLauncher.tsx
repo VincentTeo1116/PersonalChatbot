@@ -8,9 +8,7 @@ import type { MeetingRequestInput } from "@/lib/validation/meetingRequest";
 // Loaded on first open: most visitors never open it, so it shouldn't be in the initial bundle.
 const MeetingRequestModal = dynamic(() => import("@/components/MeetingRequestModal"));
 
-// Mounted once at the page root (like CommandPalette/TerminalEasterEgg) so it can be opened
-// from anywhere -- the Contact section's own button, or the chat widget dispatching
-// "portfolio:open-meeting-request" with whatever it drafted from the conversation.
+// Mounted once at the page root (like CommandPalette/TerminalEasterEgg) so it can be opened from anywhere -- the Contact section's own button, or the chat widget dispatching "portfolio:open-meeting-request" with whatever it drafted from the conversation.
 export default function MeetingRequestLauncher() {
   const [isOpen, setIsOpen] = useState(false);
   const [prefill, setPrefill] = useState<Partial<MeetingRequestInput> | undefined>(undefined);

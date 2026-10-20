@@ -1,3 +1,4 @@
+import DeleteButton from "@/components/admin/DeleteButton";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/admin/PageHeader";
@@ -67,7 +68,7 @@ export default async function HackathonsAdminPage() {
                 <AdminForm action={deleteHackathonPhoto} message="Photo deleted" className="ml-auto">
                   <input type="hidden" name="id" value={photo.id} />
                   <input type="hidden" name="storagePath" value={photo.storagePath} />
-                  <button type="submit" className="admin-btn admin-btn-danger px-2 py-1 text-xs">Delete</button>
+                  <DeleteButton what="this photo" className="admin-btn admin-btn-danger px-2 py-1 text-xs" />
                 </AdminForm>
               </div>
             </div>

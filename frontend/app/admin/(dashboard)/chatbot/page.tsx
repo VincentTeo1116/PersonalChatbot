@@ -67,11 +67,7 @@ export default async function ChatbotAdminPage({
           <p className="admin-card p-4 text-sm text-text-subtle">
             {onlyUnmatched
               ? "No unanswered questions — every logged question matched something in the knowledge base."
-              : <>
-                  No questions logged yet. If visitors have already been chatting, make sure{" "}
-                  <code className="rounded bg-surface-hover px-1 py-0.5">supabase/004_chat_logs.sql</code>{" "}
-                  has been run in the Supabase SQL editor.
-                </>}
+              : "No questions logged yet."}
           </p>
         ) : (
           <ul className="space-y-2">

@@ -10,8 +10,7 @@ const labelClass = "text-sm text-text-secondary";
 
 const EMPTY: TestimonialInput = { authorName: "", authorRole: "", quote: "" };
 
-// Shared by the on-site modal and the shareable /testimonial invite page, so both go through
-// the same validation, honeypot and pending-until-approved flow.
+// Shared by the on-site modal and the shareable /testimonial invite page, so both go through the same validation, honeypot and pending-until-approved flow.
 export default function TestimonialSubmitForm({
   done,
 }: {

@@ -13,8 +13,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Defense-in-depth alongside proxy.ts, which already redirects unauthenticated
-  // requests to /admin/login before this layout ever renders.
+  // Defense-in-depth alongside proxy.ts, which already redirects unauthenticated requests to /admin/login before this layout ever renders.
   if (!user) redirect("/admin/login");
 
   return (

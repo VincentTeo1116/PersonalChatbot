@@ -1,3 +1,4 @@
+import DeleteButton from "@/components/admin/DeleteButton";
 import Link from "next/link";
 import { getProjects } from "@/lib/data";
 import PageHeader from "@/components/admin/PageHeader";
@@ -45,7 +46,7 @@ export default async function ProjectsListPage() {
                 <Link href={`/admin/projects/${p.id}`} className="admin-btn admin-btn-ghost px-3 py-1.5 text-xs">Edit</Link>
                 <AdminForm action={deleteProject} message="Project deleted">
                   <input type="hidden" name="id" value={p.id} />
-                  <button type="submit" className="admin-btn admin-btn-danger px-3 py-1.5 text-xs">Delete</button>
+                  <DeleteButton what="this project" className="admin-btn admin-btn-danger px-3 py-1.5 text-xs" />
                 </AdminForm>
               </div>
             </li>

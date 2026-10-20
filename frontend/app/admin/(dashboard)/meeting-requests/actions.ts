@@ -33,8 +33,7 @@ export async function replyToMeetingRequest(_prevState: ReplyState, formData: Fo
     ownerName: profile.name,
   });
 
-  // Only mark it "replied" if the email actually went out -- otherwise the admin would
-  // believe they responded when nothing was sent.
+  // Only mark it "replied" if the email actually went out -- otherwise the admin would believe they responded when nothing was sent.
   if (!result.sent) return { ok: false, error: result.error };
 
   const supabase = await createClient();

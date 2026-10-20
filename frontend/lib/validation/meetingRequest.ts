@@ -1,5 +1,4 @@
-// Shared by the client (inline feedback) and the server action (the real check, since client-side
-// validation can be bypassed). Only catches obviously fake input -- can't verify it's a real address.
+// Shared by the client (inline feedback) and the server action (the real check, since client-side validation can be bypassed). Only catches obviously fake input -- can't verify it's a real address.
 
 export type MeetingRequestInput = {
   name: string;

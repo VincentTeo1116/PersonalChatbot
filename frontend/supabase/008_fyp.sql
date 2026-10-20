@@ -1,4 +1,4 @@
--- Run in the Supabase SQL Editor. Singleton row like `profile` -- leave it empty and the site shows "Coming Soon".
+-- Singleton row like `profile` -- leave it empty and the site shows "Coming Soon".
 
 create table public.fyp (
   id smallint primary key default 1,

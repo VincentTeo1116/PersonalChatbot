@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 
-// Lets the admin hand people a link to the public /testimonial page. Submissions still land
-// as "pending" in the list below until approved, same as the form on the home page.
+// Lets the admin hand people a link to the public /testimonial page. Submissions still land as "pending" in the list below until approved, same as the form on the home page.
 export default function InviteLinkCard({ url, ownerName }: { url: string; ownerName: string }) {
   const [status, setStatus] = useState<"idle" | "copied" | "failed">("idle");
 
@@ -12,8 +11,7 @@ export default function InviteLinkCard({ url, ownerName }: { url: string; ownerN
   async function copy() {
     let ok = false;
     try {
-      // Raced against a short timeout: in some browser states writeText neither resolves nor
-      // rejects (e.g. a pending permission prompt), which would leave the button stuck.
+      // Raced against a short timeout: in some browser states writeText neither resolves nor rejects (e.g. a pending permission prompt), which would leave the button stuck.
       await Promise.race([
         navigator.clipboard.writeText(url),
         new Promise((_, reject) => window.setTimeout(() => reject(new Error("timeout")), 1500)),

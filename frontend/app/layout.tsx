@@ -62,8 +62,7 @@ const THEME_INIT_SCRIPT = `
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const profile = await getProfile();
 
-  // Person structured data -- lets Google build a richer result (and potential knowledge
-  // panel) when someone searches the name, instead of just a plain blue link.
+  // Person structured data -- lets Google build a richer result (and potential knowledge panel) when someone searches the name, instead of just a plain blue link.
   const personId = `${SITE_URL}/#person`;
   const personJsonLd = {
     "@type": "Person",

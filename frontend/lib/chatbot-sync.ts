@@ -5,6 +5,13 @@ export type SyncResult =
   | { ok: true; upserted: number; removed: number; skipped: number }
   | { ok: false; error: string };
 
+// Free hosts put idle backends to sleep and answer 502/503 until they wake (~30 s), so ping /health first and wait for it.
+async function wakeBackend(syncUrl: string) {
+  try {
+    await fetch(new URL("/health", syncUrl), { cache: "no-store", signal: AbortSignal.timeout(50_000) });
+  } catch {}
+}
+
 /** Tells the chatbot backend to re-read Supabase and re-embed everything into Pinecone. */
 export async function syncChatbotNow(): Promise<SyncResult> {
   const url = process.env.CHATBOT_SYNC_URL;
@@ -14,11 +21,12 @@ export async function syncChatbotNow(): Promise<SyncResult> {
   }
 
   try {
+    await wakeBackend(url);
     const res = await fetch(url, {
       method: "POST",
       headers: { "X-Sync-Secret": secret },
       cache: "no-store",
-      signal: AbortSignal.timeout(60_000),
+      signal: AbortSignal.timeout(90_000),
     });
     const body = await res.json().catch(() => ({}));
     if (!res.ok) {

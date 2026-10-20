@@ -1,3 +1,4 @@
+import DeleteButton from "@/components/admin/DeleteButton";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -78,7 +79,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
                   <input type="hidden" name="imageId" value={img.id} />
                   <input type="hidden" name="projectId" value={id} />
                   <input type="hidden" name="storagePath" value={img.storage_path} />
-                  <button type="submit" className="admin-btn admin-btn-danger w-full px-2 py-1 text-xs">Delete</button>
+                  <DeleteButton what="this image" className="admin-btn admin-btn-danger w-full px-2 py-1 text-xs" />
                 </AdminForm>
               </div>
             ))}

@@ -1,9 +1,7 @@
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/public";
-// chat_logs and meeting_requests deliberately have NO public-read RLS policy (they hold
-// visitor questions and contact details) -- only an authenticated admin session can read
-// them back, so their getters below use this client instead of the public one above.
+// chat_logs and meeting_requests deliberately have NO public-read RLS policy (they hold visitor questions and contact details) -- only an authenticated admin session can read them back, so their getters below use this client instead of the public one above.
 import { createClient as createAdminClient } from "@/lib/supabase/server";
 import type {
   ChatLog,
@@ -46,7 +44,7 @@ export const getProfile = cache(async (): Promise<Profile> => {
   ]);
 
   if (!profileRow) {
-    throw new Error("profile row (id=1) not found — run supabase/seed.sql first");
+    throw new Error("Profile row (id=1) not found");
   }
 
   const skillsJson = (profileRow.skills ?? []) as SkillsJson;
@@ -71,14 +69,12 @@ export const getProfile = cache(async (): Promise<Profile> => {
       email: profileRow.contact_email,
       github: profileRow.contact_github,
       linkedin: profileRow.contact_linkedin,
-      // An uploaded resume (resume_path, via Storage) takes priority over a manually
-      // typed external URL, so re-uploading a new PDF from /admin always wins.
+      // An uploaded resume (resume_path, via Storage) takes priority over a manually typed external URL, so re-uploading a new PDF from /admin always wins.
       resumeUrl: publicUrl(supabase, profileRow.resume_path, profileRow.contact_resume_url ?? ""),
     },
   };
 });
 
-// Returns [] if 005_testimonials.sql hasn't been run yet, so the homepage just skips the section instead of crashing.
 export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase.from("testimonials").select("*").order("sort_order");
@@ -94,7 +90,6 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
   }));
 });
 
-// Returns null if the migration hasn't been run yet -- public site just shows "Coming Soon" instead of crashing.
 export const getFyp = cache(async (): Promise<Fyp | null> => {
   const supabase = await createClient();
   const { data: row, error } = await supabase.from("fyp").select("*").eq("id", 1).maybeSingle();
@@ -226,7 +221,7 @@ export const getWorkExperience = cache(async (): Promise<WorkExperience[]> => {
   }));
 });
 
-// "Request a meeting" submissions. Returns [] if the migration hasn't run yet -- admin page just shows empty state.
+// "Request a meeting" submissions.
 export const getMeetingRequests = cache(async (): Promise<MeetingRequest[]> => {
   const supabase = await createAdminClient();
   const { data, error } = await supabase
@@ -245,14 +240,13 @@ export const getMeetingRequests = cache(async (): Promise<MeetingRequest[]> => {
     phone: row.phone,
     message: row.message,
     createdAt: row.created_at,
-    // Default to "pending" so this reads correctly even before 011_meeting_request_replies.sql has run.
     status: row.status ?? "pending",
     replyMessage: row.reply_message ?? null,
     repliedAt: row.replied_at ?? null,
   }));
 });
 
-// Recent chatbot questions. Returns [] if the migration hasn't run yet -- admin page just shows empty state.
+// Recent chatbot questions.
 export const getChatLogs = cache(async (limit = 50, filter?: "unmatched"): Promise<ChatLog[]> => {
   const supabase = await createAdminClient();
   let query = supabase.from("chat_logs").select("*").order("created_at", { ascending: false }).limit(limit);

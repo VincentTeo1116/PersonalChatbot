@@ -26,8 +26,7 @@ function ProficiencyDots({ level }: { level: number }) {
   );
 }
 
-/** One skill category: its pills pop in one by one, then bounce on hover. Each pill
- * carries a small proficiency-dot rating next to the skill name. */
+/** One skill category: its pills pop in one by one, then bounce on hover. Each pill carries a small proficiency-dot rating next to the skill name. */
 export default function SkillGroup({ category, items }: { category: string; items: SkillItem[] }) {
   return (
     <div>

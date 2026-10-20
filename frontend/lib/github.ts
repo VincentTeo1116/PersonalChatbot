@@ -94,11 +94,7 @@ async function fetchLanguages(url: string, token?: string): Promise<Response> {
   return fetch(url, { headers, next: { revalidate: 21600 } });
 }
 
-// Top languages by code size for one repo. Cached 6h server-side (shared across every
-// visitor, not just within one person's session). Uses GITHUB_TOKEN if set for the higher
-// authenticated rate limit, but falls back to an unauthenticated request if that token is
-// missing or has gone bad (expired/revoked) -- never worse than the old client-side fetch,
-// which never had a token at all.
+// Top languages by code size for one repo. Cached 6h server-side (shared across every visitor, not just within one person's session). Uses GITHUB_TOKEN if set for the higher authenticated rate limit, but falls back to an unauthenticated request if that token is missing or has gone bad (expired/revoked) -- never worse than the old client-side fetch, which never had a token at all.
 export async function getRepoLanguages(owner: string, repo: string): Promise<RepoLanguage[]> {
   const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/languages`;
   const token = process.env.GITHUB_TOKEN;
@@ -183,8 +179,7 @@ async function getGithubContributions(username: string): Promise<ContributionCal
   }
 }
 
-// Builds our own stats from the unauthenticated REST API instead of a third-party image, so it matches our theme.
-// Cached 6h to stay well under GitHub's rate limit. Returns null on any failure so the section just doesn't render.
+// Builds our own stats from the unauthenticated REST API instead of a third-party image, so it matches our theme. Cached 6h to stay well under GitHub's rate limit. Returns null on any failure so the section just doesn't render.
 export async function getGithubStats(githubUrl: string | undefined | null): Promise<GithubStats | null> {
   if (!githubUrl) return null;
   const username = extractUsername(githubUrl);

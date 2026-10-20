@@ -30,7 +30,6 @@ export default function GithubExhibition({
 }) {
   const [query, setQuery] = useState("");
   const [room, setRoom] = useState("All exhibits");
-  const [order, setOrder] = useState<"recent" | "stars">("recent");
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(repositories[0]?.id ?? null);
   const [tab, setTab] = useState<DetailTab>("idea");
@@ -45,8 +44,8 @@ export default function GithubExhibition({
     return repositories
       .filter((repo) => room === "All exhibits" || repo.language === room)
       .filter((repo) => !search || [repo.name, repo.description ?? "", repo.language ?? "", ...repo.topics].join(" ").toLowerCase().includes(search))
-      .sort((a, b) => order === "stars" ? b.stars - a.stars : Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
-  }, [repositories, room, query, order]);
+      .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
+  }, [repositories, room, query]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / LAYER_WIDTHS.length));
   const currentPage = Math.min(page, pageCount - 1);
@@ -57,9 +56,7 @@ export default function GithubExhibition({
     if (!selected || languageMix[selected.id] !== undefined) return;
 
     let cancelled = false;
-    // Routed through our own cached server endpoint (lib/github.ts:getRepoLanguages) instead
-    // of calling GitHub directly from the browser -- shares one 6h-cached result across every
-    // visitor instead of every visitor spending their own unauthenticated rate limit.
+    // Routed through our own cached server endpoint (lib/github.ts:getRepoLanguages) instead of calling GitHub directly from the browser -- shares one 6h-cached result across every visitor instead of every visitor spending their own unauthenticated rate limit.
     fetch(`/api/github/languages?owner=${encodeURIComponent(username)}&repo=${encodeURIComponent(selected.name)}`)
       .then((response) => {
         if (!response.ok) throw new Error("Could not load this repository's languages");
@@ -123,13 +120,6 @@ export default function GithubExhibition({
                     placeholder="Find a project or ingredient…"
                     className="min-h-11 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 sm:w-64"
                   />
-                  <button
-                    type="button"
-                    onClick={() => { setOrder((current) => current === "recent" ? "stars" : "recent"); resetGallery(); }}
-                    className="min-h-11 rounded-xl border border-border px-4 text-sm text-text-secondary transition hover:border-indigo-400/50 hover:text-foreground"
-                  >
-                    {order === "recent" ? "Fresh from the oven ↓" : "Most loved ★"}
-                  </button>
                 </div>
               </div>
 
@@ -238,10 +228,8 @@ export default function GithubExhibition({
                           <span className="rounded-full border border-border bg-background px-3 py-1.5 text-xs text-text-muted">{selected.archived ? "Archived" : "Fresh build"}</span>
                         </div>
 
-                        <div className="mt-6 grid grid-cols-3 gap-2 border-y border-border py-4 text-center">
-                          <div><p className="text-lg font-semibold text-foreground">★ {selected.stars}</p><p className="mt-1 text-[10px] uppercase tracking-wider text-text-muted">Stars</p></div>
-                          <div><p className="text-lg font-semibold text-foreground">⑂ {selected.forks}</p><p className="mt-1 text-[10px] uppercase tracking-wider text-text-muted">Forks</p></div>
-                          <div><p className="truncate text-sm font-semibold text-foreground">{formatDate(selected.updatedAt)}</p><p className="mt-1 text-[10px] uppercase tracking-wider text-text-muted">Last baked</p></div>
+                        <div className="mt-6 border-y border-border py-4 text-center">
+                          <p className="truncate text-sm font-semibold text-foreground">{formatDate(selected.updatedAt)}</p><p className="mt-1 text-[10px] uppercase tracking-wider text-text-muted">Last baked</p>
                         </div>
 
                         <div className="mt-5 flex gap-2" role="tablist" aria-label="Explore project details">
@@ -278,7 +266,7 @@ export default function GithubExhibition({
                               </>}
                               {tab === "bake" && <>
                                 <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-300">Baking notes</p>
-                                <p className="mt-2 text-sm leading-relaxed text-text-secondary">Updated {formatDate(selected.updatedAt)} · {selected.stars} {selected.stars === 1 ? "star" : "stars"} · {selected.forks} {selected.forks === 1 ? "fork" : "forks"}. {selected.archived ? "This repository is archived." : "This repository is active."}</p>
+                                <p className="mt-2 text-sm leading-relaxed text-text-secondary">Updated {formatDate(selected.updatedAt)}. {selected.archived ? "This repository is archived." : "This repository is active."}</p>
                               </>}
                             </motion.div>
                           </AnimatePresence>

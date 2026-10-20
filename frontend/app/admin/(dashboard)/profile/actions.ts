@@ -21,8 +21,7 @@ export async function saveProfile(
     return { error: "Invalid skills data." };
   }
 
-  // Defensive clamp -- the admin UI only ever sends 1-5, but guard the stored data
-  // against anything malformed slipping through (e.g. a hand-edited request).
+  // Defensive clamp -- the admin UI only ever sends 1-5, but guard the stored data against anything malformed slipping through (e.g. a hand-edited request).
   const cleanSkills = skills.map((s, i) => ({
     category: s.category,
     sort_order: i,
@@ -84,9 +83,7 @@ export async function uploadAvatar(formData: FormData): Promise<{ publicUrl?: st
 export async function uploadResume(formData: FormData): Promise<{ publicUrl?: string; error?: string }> {
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
-  // The inline preview modal embeds this in an <iframe>, which only reliably renders
-  // PDFs across browsers -- reject anything else up front rather than accept a file
-  // that would silently fail to preview later.
+  // The inline preview modal embeds this in an <iframe>, which only reliably renders PDFs across browsers -- reject anything else up front rather than accept a file that would silently fail to preview later.
   if (file.type !== "application/pdf") return { error: "Please upload a PDF file." };
 
   const supabase = await createClient();
@@ -94,8 +91,7 @@ export async function uploadResume(formData: FormData): Promise<{ publicUrl?: st
     const { data: current } = await supabase.from("profile").select("resume_path").eq("id", 1).single();
     const { path, publicUrl } = await uploadFixedFile(supabase, "profile", `resume${extOf(file.name)}`, file);
 
-    // Clean up a stale file from a previous upload with a different extension (rare,
-    // since we only accept PDFs now, but harmless to guard against old data).
+    // Clean up a stale file from a previous upload with a different extension (rare, since we only accept PDFs now, but harmless to guard against old data).
     if (current?.resume_path && current.resume_path !== path) {
       await deleteImage(supabase, current.resume_path).catch(() => {});
     }

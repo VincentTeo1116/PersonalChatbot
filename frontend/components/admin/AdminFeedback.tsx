@@ -28,8 +28,7 @@ export function useAdminFeedback(): FeedbackApi {
   return ctx;
 }
 
-// Mounted once in the admin layout (not inside each form) so the confirmation survives the
-// form that triggered it disappearing -- e.g. a deleted row vanishing when the list refreshes.
+// Mounted once in the admin layout (not inside each form) so the confirmation survives the form that triggered it disappearing -- e.g. a deleted row vanishing when the list refreshes.
 export function AdminFeedbackProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [feedback, setFeedback] = useState<Feedback | null>(null);
@@ -163,11 +162,7 @@ function StatusIcon({ kind }: { kind: Feedback["kind"] }) {
   );
 }
 
-/**
- * Drop-in replacement for `<form action={serverAction}>` in the admin. Runs the action, then
- * confirms it in the shared modal -- showing the action's own error if it returned one, and
- * sending the admin to `redirectTo` (or the action's `redirectTo`) after a success.
- */
+/** Drop-in replacement for `<form action={serverAction}>` in the admin. Runs the action, then confirms it in the shared modal -- showing the action's own error if it returned one, and sending the admin to `redirectTo` (or the action's `redirectTo`) after a success. */
 export function AdminForm({
   action,
   message = "Changes saved",

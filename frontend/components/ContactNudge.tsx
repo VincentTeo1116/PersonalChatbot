@@ -5,8 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { track } from "@vercel/analytics";
 import type { Profile } from "@/lib/types";
 
-// A time-only popup interrupts people who are simply reading, so it waits for real engagement:
-// enough time with the tab in view AND enough of the page scrolled.
+// A time-only popup interrupts people who are simply reading, so it waits for real engagement: enough time with the tab in view AND enough of the page scrolled.
 const MIN_ACTIVE_SECONDS = 45;
 const MIN_SCROLL_RATIO = 0.6;
 const SNOOZE_DAYS = 14;
@@ -33,9 +32,7 @@ function safeTrack(name: string) {
   } catch {}
 }
 
-// Modals lock body scroll, the palette and other dialogs use role="dialog", and the chat widget
-// flags its open panel with a class. Never stack the nudge on top of any of them. The widget's
-// panel stays in the DOM with role="dialog" even when closed, so it only counts once opened.
+// Modals lock body scroll, the palette and other dialogs use role="dialog", and the chat widget flags its open panel with a class. Never stack the nudge on top of any of them. The widget's panel stays in the DOM with role="dialog" even when closed, so it only counts once opened.
 function anotherLayerOpen() {
   return (
     document.body.style.overflow === "hidden" ||

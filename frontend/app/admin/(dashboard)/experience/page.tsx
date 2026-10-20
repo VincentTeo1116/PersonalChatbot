@@ -1,3 +1,4 @@
+import DeleteButton from "@/components/admin/DeleteButton";
 import Link from "next/link";
 import { getWorkExperience } from "@/lib/data";
 import PageHeader from "@/components/admin/PageHeader";
@@ -47,7 +48,7 @@ export default async function ExperienceListPage() {
                 <Link href={`/admin/experience/${exp.id}`} className="admin-btn admin-btn-ghost px-3 py-1.5 text-xs">Edit</Link>
                 <AdminForm action={deleteExperience} message="Entry deleted">
                   <input type="hidden" name="id" value={exp.id} />
-                  <button type="submit" className="admin-btn admin-btn-danger px-3 py-1.5 text-xs">Delete</button>
+                  <DeleteButton what="this entry" className="admin-btn admin-btn-danger px-3 py-1.5 text-xs" />
                 </AdminForm>
               </div>
             </li>

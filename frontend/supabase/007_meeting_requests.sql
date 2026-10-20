@@ -1,8 +1,4 @@
--- Run this in the Supabase SQL Editor (after schema.sql has already been run once).
--- Lets visitors (recruiters/hiring managers) submit a "request a meeting" form instead
--- of needing a working mailto: client. Insert-only from any visitor (anon); only an
--- authenticated admin session can read or clear these -- the same privacy posture as
--- chat_logs (004_chat_logs.sql).
+-- Lets visitors (recruiters/hiring managers) submit a "request a meeting" form instead of needing a working mailto: client. Insert-only from any visitor (anon); only an authenticated admin session can read or clear these -- the same privacy posture as chat_logs (004_chat_logs.sql).
 
 create table public.meeting_requests (
   id uuid primary key default gen_random_uuid(),

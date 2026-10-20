@@ -1,3 +1,4 @@
+import DeleteButton from "@/components/admin/DeleteButton";
 import { getMeetingRequests } from "@/lib/data";
 import PageHeader from "@/components/admin/PageHeader";
 import { deleteMeetingRequest } from "./actions";
@@ -26,11 +27,7 @@ export default async function MeetingRequestsPage() {
       />
 
       {requests.length === 0 ? (
-        <p className="admin-card p-4 text-sm text-text-subtle">
-          No requests yet. If people have already tried, make sure{" "}
-          <code className="rounded bg-surface-hover px-1 py-0.5">supabase/007_meeting_requests.sql</code> has been run
-          in the Supabase SQL editor.
-        </p>
+        <p className="admin-card p-4 text-sm text-text-subtle">No requests yet.</p>
       ) : (
         <ul className="space-y-3">
           {requests.map((r) => (
@@ -74,7 +71,7 @@ export default async function MeetingRequestsPage() {
 
               <AdminForm action={deleteMeetingRequest} message="Request deleted" className="mt-3">
                 <input type="hidden" name="id" value={r.id} />
-                <button type="submit" className="admin-btn admin-btn-danger px-3 py-1 text-xs">Delete</button>
+                <DeleteButton what="this request" className="admin-btn admin-btn-danger px-3 py-1 text-xs" />
               </AdminForm>
             </li>
           ))}

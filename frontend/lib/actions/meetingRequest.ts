@@ -15,8 +15,7 @@ export async function submitMeetingRequest(
   _prevState: MeetingRequestState,
   formData: FormData
 ): Promise<MeetingRequestState> {
-  // Honeypot: real visitors never see or fill this field, so a non-empty value means a bot.
-  // Fake success rather than an error, so the bot doesn't learn to adjust and try again.
+  // Honeypot: real visitors never see or fill this field, so a non-empty value means a bot. Fake success rather than an error, so the bot doesn't learn to adjust and try again.
   if (String(formData.get("website") ?? "").trim()) return { ok: true };
 
   const input = {
@@ -28,9 +27,7 @@ export async function submitMeetingRequest(
     message: String(formData.get("message") ?? ""),
   };
 
-  // Re-validate here even though the client already checked -- client-side validation
-  // is only ever a UX convenience, never a security boundary; it can be bypassed by
-  // anyone submitting the form directly.
+  // Re-validate here even though the client already checked -- client-side validation is only ever a UX convenience, never a security boundary; it can be bypassed by anyone submitting the form directly.
   const errors = validateMeetingRequest(input);
   if (hasErrors(errors)) return { ok: false, errors };
 
@@ -45,15 +42,12 @@ export async function submitMeetingRequest(
   });
 
   if (error) {
-    // Logged server-side (never shown to the visitor) -- most likely cause is
-    // 007_meeting_requests.sql not having been run yet in Supabase.
+    // Logged server-side only, never shown to the visitor.
     console.error("meeting_requests insert failed:", error.message);
     return { ok: false, error: "Something went wrong submitting your request. Please try again or email me directly." };
   }
 
-  // Runs after the response is already sent, so a slow/misconfigured/unset email
-  // provider can never delay or fail the visitor's submission -- it already succeeded
-  // above regardless of whether this notification goes out.
+  // Runs after the response is already sent, so a slow/misconfigured/unset email provider can never delay or fail the visitor's submission -- it already succeeded above regardless of whether this notification goes out.
   after(async () => {
     const profile = await getProfile().catch(() => null);
     if (profile?.contact.email) {

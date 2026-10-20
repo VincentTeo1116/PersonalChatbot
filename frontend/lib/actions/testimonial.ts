@@ -12,8 +12,7 @@ export async function submitTestimonial(
   _prevState: TestimonialState,
   formData: FormData
 ): Promise<TestimonialState> {
-  // Honeypot: real visitors never see or fill this field, so a non-empty value means a bot.
-  // Fake success rather than an error, so the bot doesn't learn to adjust and try again.
+  // Honeypot: real visitors never see or fill this field, so a non-empty value means a bot. Fake success rather than an error, so the bot doesn't learn to adjust and try again.
   if (String(formData.get("website") ?? "").trim()) return { ok: true };
 
   const input = {
@@ -22,8 +21,7 @@ export async function submitTestimonial(
     quote: String(formData.get("quote") ?? ""),
   };
 
-  // Re-validate here even though the client already checked -- client-side validation is
-  // only ever a UX convenience, it can be bypassed by anyone submitting the form directly.
+  // Re-validate here even though the client already checked -- client-side validation is only ever a UX convenience, it can be bypassed by anyone submitting the form directly.
   const errors = validateTestimonial(input);
   if (hasErrors(errors)) return { ok: false, errors };
 
@@ -32,14 +30,12 @@ export async function submitTestimonial(
     author_name: input.authorName.trim().replace(/\s+/g, " "),
     author_role: input.authorRole.trim(),
     quote: input.quote.trim(),
-    // Explicit even though it's also the column default and RLS-enforced on this insert
-    // policy -- a submitted testimonial is never visible until an admin approves it.
+    // Explicit even though it's also the column default and RLS-enforced on this insert policy -- a submitted testimonial is never visible until an admin approves it.
     status: "pending",
   });
 
   if (error) {
-    // Logged server-side (never shown to the visitor) -- most likely cause is
-    // 010_testimonial_status.sql not having been run yet.
+    // Logged server-side only, never shown to the visitor.
     console.error("testimonials insert failed:", error.message);
     return { ok: false, error: "Something went wrong submitting your testimonial. Please try again." };
   }

@@ -7,8 +7,7 @@ import dynamic from "next/dynamic";
 // Loaded on first open: most visitors never open it, so it shouldn't be in the initial bundle.
 const TestimonialModal = dynamic(() => import("@/components/TestimonialModal"));
 
-// Mounted once at the page root (like MeetingRequestLauncher) so it can be opened from
-// anywhere -- currently just the Contact section's "Leave a testimonial" button.
+// Mounted once at the page root (like MeetingRequestLauncher) so it can be opened from anywhere -- currently just the Contact section's "Leave a testimonial" button.
 export default function TestimonialLauncher() {
   const [isOpen, setIsOpen] = useState(false);
 

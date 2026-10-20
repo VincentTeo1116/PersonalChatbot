@@ -16,8 +16,7 @@ export default function MeetingRequestModal({
   initialValues,
 }: {
   onClose: () => void;
-  // Lets the chat widget pre-fill this from what the visitor already told it -- the visitor
-  // still has to review and hit "Send request" themselves, nothing here auto-submits.
+  // Lets the chat widget pre-fill this from what the visitor already told it -- the visitor still has to review and hit "Send request" themselves, nothing here auto-submits.
   initialValues?: Partial<MeetingRequestInput>;
 }) {
   const [state, action, pending] = useActionState<MeetingRequestState, FormData>(submitMeetingRequest, undefined);

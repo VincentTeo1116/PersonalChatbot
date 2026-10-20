@@ -108,8 +108,7 @@ export type HackathonPhoto = {
 
 export type TestimonialStatus = "pending" | "approved";
 
-// See supabase/010_testimonial_status.sql. "pending" ones are only ever visible to the
-// admin (RLS); the public site only ever receives "approved" rows.
+// "pending" ones are only visible to the admin (RLS); the public site only receives "approved" rows.
 export type Testimonial = {
   id: string;
   authorName: string;
@@ -121,8 +120,7 @@ export type Testimonial = {
 
 export type MeetingRequestStatus = "pending" | "replied";
 
-// A "Request a meeting" form submission -- see supabase/007_meeting_requests.sql and
-// supabase/011_meeting_request_replies.sql.
+// A "Request a meeting" form submission.
 export type MeetingRequest = {
   id: string;
   name: string;
@@ -151,7 +149,7 @@ export type Fyp = {
   images: FypImage[];
 };
 
-// A chatbot question logged for review in /admin/chatbot -- see supabase/004_chat_logs.sql.
+// A chatbot question logged for review in /admin/chatbot.
 export type ChatLog = {
   id: string;
   question: string;

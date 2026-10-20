@@ -164,13 +164,7 @@ export default function TerminalEasterEgg({
     term.write(data);
   }
 
-  // handleData is a plain function redefined every render (it closes over `commands`,
-  // which depends on the profile/projects/hackathonPhotos props). The effect below only
-  // wants to create the xterm.js Terminal once per open, not tear it down and recreate it
-  // whenever those props change -- so instead of listing handleData as a dependency (which
-  // would force exactly that), keep a ref that's always up to date and have term.onData
-  // call through it. The assignment happens in its own effect (not during render) so it
-  // always reflects the latest closure by the time an actual keystroke comes in.
+  // handleData is a plain function redefined every render (it closes over `commands`, which depends on the profile/projects/hackathonPhotos props). The effect below only wants to create the xterm.js Terminal once per open, not tear it down and recreate it whenever those props change -- so instead of listing handleData as a dependency (which would force exactly that), keep a ref that's always up to date and have term.onData call through it. The assignment happens in its own effect (not during render) so it always reflects the latest closure by the time an actual keystroke comes in.
   const handleDataRef = useRef(handleData);
   useEffect(() => {
     handleDataRef.current = handleData;

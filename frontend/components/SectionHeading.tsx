@@ -3,10 +3,7 @@
 import type { ReactNode } from "react";
 import { motion } from "motion/react";
 
-/**
- * Eyebrow label with a gradient line that draws itself, a title that slides up out of a
- * mask, and an optional description that fades in after.
- */
+/** Eyebrow label with a gradient line that draws itself, a title that slides up out of a mask, and an optional description that fades in after. */
 export default function SectionHeading({
   eyebrow,
   title,
@@ -37,8 +34,7 @@ export default function SectionHeading({
       </div>
 
       {title && (
-        // The in-view trigger must sit on this unclipped wrapper: the text itself starts
-        // below the mask, where the browser never counts it as visible.
+        // The in-view trigger must sit on this unclipped wrapper: the text itself starts below the mask, where the browser never counts it as visible.
         <motion.div
           initial="hidden"
           whileInView="show"

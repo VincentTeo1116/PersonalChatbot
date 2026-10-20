@@ -1,6 +1,4 @@
--- Run this in the Supabase SQL Editor (after schema.sql has already been run once).
--- Adds the Working Experience section: a timeline entry per job, with one small
--- company logo and up to 2 workplace photos each.
+-- Adds the Working Experience section: a timeline entry per job, with one small company logo and up to 2 workplace photos each.
 
 create table public.work_experience (
   id uuid primary key default gen_random_uuid(),
@@ -35,6 +33,4 @@ create policy "admin write" on public.work_experience for all
 create policy "admin write" on public.work_experience_images for all
   using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
--- No new Storage policies needed: the "portfolio-content" bucket's existing
--- public-read / authenticated-write policies from schema.sql already cover
--- any new folder path (e.g. work-experience/{id}/...).
+-- No new Storage policies needed: the "portfolio-content" bucket's existing public-read / authenticated-write policies from schema.sql already cover any new folder path (e.g. work-experience/{id}/...).

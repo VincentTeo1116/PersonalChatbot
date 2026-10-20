@@ -22,8 +22,7 @@ function parseSkillNames(itemsText: string): string[] {
 
 export default function ProfileForm({ profile }: { profile: Profile }) {
   const { showSuccess } = useAdminFeedback();
-  // Confirmed from inside the action (not an effect on its result) so it still fires if the
-  // page re-renders around this form after the save.
+  // Confirmed from inside the action (not an effect on its result) so it still fires if the page re-renders around this form after the save.
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(async (prev, formData) => {
     const result = await saveProfile(prev, formData);
     if (result?.success) showSuccess({ title: "Profile saved", detail: "Your site has been updated." });

@@ -35,8 +35,7 @@ export default function ResumeModal({ resumeUrl, onClose }: { resumeUrl: string;
         <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
           <p className="text-sm font-semibold text-foreground">Resume</p>
           <div className="flex items-center gap-3">
-            {/* Always-visible escape hatch: inline PDF rendering can be unreliable on some
-                mobile browsers, so this never leaves the visitor stuck with a blank frame. */}
+            {/* Always-visible escape hatch: inline PDF rendering can be unreliable on some mobile browsers, so this never leaves the visitor stuck with a blank frame. */}
             <a
               href={resumeUrl}
               target="_blank"

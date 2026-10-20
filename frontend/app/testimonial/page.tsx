@@ -5,14 +5,12 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { getProfile } from "@/lib/data";
 import { SITE_URL } from "@/lib/seo";
 
-// The shareable invite page for /admin's "Invite link". Kept out of search results: it's a
-// form people reach from a message you send them, not something to rank.
+// The shareable invite page for /admin's "Invite link". Kept out of search results: it's a form people reach from a message you send them, not something to rank.
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getProfile();
   const title = `Leave a testimonial for ${profile.name}`;
   const description = `Share a few words about working with ${profile.name}. Testimonials are reviewed before they appear on the portfolio.`;
-  // Setting openGraph here replaces the root layout's, which drops its generated card, so point
-  // at it explicitly or shared links would preview without an image.
+  // Setting openGraph here replaces the root layout's, which drops its generated card, so point at it explicitly or shared links would preview without an image.
   const image = { url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630, alt: title };
   return {
     title: { absolute: title },

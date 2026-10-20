@@ -1,3 +1,4 @@
+import DeleteButton from "@/components/admin/DeleteButton";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/admin/PageHeader";
@@ -7,9 +8,7 @@ import { SITE_URL } from "@/lib/seo";
 import { approveTestimonial, deleteTestimonial, moveTestimonial } from "./actions";
 import { AdminForm } from "@/components/admin/AdminFeedback";
 
-// Queried directly with the authenticated client (not getTestimonials() from lib/data.ts,
-// which is public-only and RLS-filtered to status="approved") so pending submissions are
-// visible here for review.
+// Queried directly with the authenticated client (not getTestimonials() from lib/data.ts, which is public-only and RLS-filtered to status="approved") so pending submissions are visible here for review.
 export default async function TestimonialsListPage() {
   const supabase = await createClient();
   const { data } = await supabase.from("testimonials").select("*").order("sort_order");
@@ -74,7 +73,7 @@ export default async function TestimonialsListPage() {
                 <Link href={`/admin/testimonials/${t.id}`} className="admin-btn admin-btn-ghost px-3 py-1.5 text-xs">Edit</Link>
                 <AdminForm action={deleteTestimonial} message="Testimonial deleted">
                   <input type="hidden" name="id" value={t.id} />
-                  <button type="submit" className="admin-btn admin-btn-danger px-3 py-1.5 text-xs">Delete</button>
+                  <DeleteButton what="this testimonial" className="admin-btn admin-btn-danger px-3 py-1.5 text-xs" />
                 </AdminForm>
               </div>
             </li>

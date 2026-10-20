@@ -29,9 +29,7 @@ export default function CommandPaletteDialog({
 }) {
   const close = () => onOpenChange(false);
 
-  // Updates the URL fragment and scrolls there, same net effect as `location.hash = id`
-  // without assigning to `window.location` directly (the site's `scroll-smooth` class
-  // on <html> already makes this animate the same way the native hash-jump would).
+  // Updates the URL fragment and scrolls there, same net effect as `location.hash = id` without assigning to `window.location` directly (the site's `scroll-smooth` class on <html> already makes this animate the same way the native hash-jump would).
   const navigateToHash = (id: string) => {
     window.history.pushState(null, "", `#${id}`);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });

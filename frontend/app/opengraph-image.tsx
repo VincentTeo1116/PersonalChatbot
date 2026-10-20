@@ -5,9 +5,7 @@ export const alt = "Portfolio preview";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// Every element needs an explicit display (satori, which renders this, doesn't support
-// the default "block" layout) -- that's why every style below sets display explicitly,
-// not an oversight.
+// Every element needs an explicit display (satori, which renders this, doesn't support the default "block" layout) -- that's why every style below sets display explicitly, not an oversight.
 export default async function Image() {
   const profile = await getProfile();
 

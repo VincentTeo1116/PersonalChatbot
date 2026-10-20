@@ -34,6 +34,10 @@ def sync_kb(x_sync_secret: str = Header(default="")):
     if not rows:
         raise HTTPException(status_code=502, detail="Supabase returned no content; refusing to wipe the knowledge base")
 
-    stats = sync_rows(rows)
+    try:
+        stats = sync_rows(rows)
+    except Exception as exc:
+        logger.exception("KB sync failed while embedding/upserting")
+        raise HTTPException(status_code=502, detail=f"Sync failed: {type(exc).__name__}: {exc}"[:500]) from exc
     clear_cache()
     return {"status": "ok", **stats}

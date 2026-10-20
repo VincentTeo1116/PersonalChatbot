@@ -349,8 +349,7 @@ body::before {
   font-weight: 600;
 }
 
-/* Hero + nav entrance. Pure CSS on purpose: JS-driven "start hidden" animations keep the hero
-   invisible until the bundle downloads and hydrates, which delayed first and largest paint. */
+/* Hero + nav entrance. Pure CSS on purpose: JS-driven "start hidden" animations keep the hero invisible until the bundle downloads and hydrates, which delayed first and largest paint. */
 @keyframes enter-rise {
   from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: none; }

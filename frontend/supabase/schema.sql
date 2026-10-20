@@ -1,6 +1,3 @@
--- Run this entire file once in the Supabase SQL Editor (Project -> SQL Editor -> New query)
--- after creating the "portfolio-content" storage bucket (Storage -> New bucket -> Public on).
-
 create table public.profile (
   id smallint primary key default 1,
   name text not null,

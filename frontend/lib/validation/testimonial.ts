@@ -1,6 +1,4 @@
-// Shared by the client (inline feedback) and the server action (the real check, since
-// client-side validation can be bypassed). Deliberately lighter than meetingRequest's --
-// no email/phone here, so no disposable-domain checks are relevant.
+// Shared by the client (inline feedback) and the server action (the real check, since client-side validation can be bypassed). Deliberately lighter than meetingRequest's -- no email/phone here, so no disposable-domain checks are relevant.
 
 export type TestimonialInput = {
   authorName: string;

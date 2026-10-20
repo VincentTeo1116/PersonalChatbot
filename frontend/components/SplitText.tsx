@@ -16,8 +16,7 @@ export default function SplitText({
 
   return (
     <span className={className}>
-      {/* aria-label isn't permitted on a bare span, so screen readers get the sentence as real
-          text and the per-word animation spans are hidden from them. */}
+      {/* aria-label isn't permitted on a bare span, so screen readers get the sentence as real text and the per-word animation spans are hidden from them. */}
       <span className="sr-only">{text}</span>
       {words.map((word, i) => (
         <Fragment key={i}>

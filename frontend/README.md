@@ -6,7 +6,7 @@ section, and an embedded AI chat widget backed by
 [`../portfolio-chatbot-backend`](../portfolio-chatbot-backend).
 
 All content (profile, education, work experience, skills, projects, research, hackathon
-photos) lives in the database, not in code — a fresh clone has no content until you seed
+photos, testimonials, final year project) lives in the database, not in code — a fresh clone has no content until you seed
 it, and you edit it afterward through `/admin`, not by editing files.
 
 ## 1. Install dependencies
@@ -40,11 +40,15 @@ fetches its content from it.
    - `supabase/seed.sql` — your real profile/education/projects/research content (edit
      this file first if you want different starting content — it's plain SQL, safe to
      read before running)
-   - `supabase/003_fix_storage_policies.sql` through `009_project_impact.sql` — later
-     additions (chat logs, testimonials, resume upload, meeting requests, the Final Year
-     Project section, and project role/impact/availability fields). Each file says at the
-     top what it adds and is safe to run even if you're not using that feature yet — the
-     admin page for it just shows an empty state until you add content.
+   - `supabase/003_fix_storage_policies.sql` through `011_meeting_request_replies.sql` —
+     later additions (storage policy fix, chat logs, testimonials, resume upload, meeting
+     requests, the Final Year Project section, project role/impact/availability fields,
+     testimonial approval status, and meeting-request replies). Run them in numeric order.
+     Each file says at the top what it adds, and the admin page for each feature just
+     shows an empty state until you add content.
+
+Optional but recommended: also set `NEXT_PUBLIC_SITE_URL` in `.env.local` to your public
+URL. It drives canonical links, `sitemap.xml`, `robots.txt`, Open Graph and JSON-LD.
 
 ## 3. Add images (optional, can do later via `/admin`)
 
@@ -68,9 +72,9 @@ Testimonials, and the Final Year Project section, plus review meeting requests a
 chatbot questions (see **Chatbot** in the sidebar) — changes appear on the public site
 immediately.
 
-### Optional: GitHub stats and meeting-request emails
+### Optional: GitHub stats, meeting-request emails and analytics
 
-Two sections work without any setup, with a graceful fallback if you skip this:
+These work without any setup, with a graceful fallback if you skip them:
 
 - **GitHub stats/exhibition** (`components/GithubStats.tsx`, `GithubExhibition.tsx`):
   repo/star/follower counts and the repo list work with no token via GitHub's public REST
@@ -84,7 +88,14 @@ Two sections work without any setup, with a graceful fallback if you skip this:
   `/admin/profile`'s Contact section); `RESEND_FROM_EMAIL` can stay at its default until
   you verify your own sending domain in Resend.
 
-Both vars are documented inline in `.env.local.example` — copy them in, restart
+- **Google Analytics 4** (`components/GoogleAnalyticsLoader.tsx`): set
+  `NEXT_PUBLIC_GA_ID` (the `G-…` Measurement ID) to enable it. It is skipped when unset
+  and never loads on `/admin`. Vercel Analytics custom events (e.g. the contact nudge)
+  are tracked separately via `@vercel/analytics`.
+- **Google Search Console**: set `NEXT_PUBLIC_GSC_VERIFICATION` to the token from the
+  "HTML tag" method (only the `content="…"` value), then submit `/sitemap.xml`.
+
+Every variable is documented inline in `.env.local.example` — copy them in, restart
 `npm run dev`, done.
 
 ## 5. Connect the chat widget to your backend
@@ -122,13 +133,36 @@ npx vercel
 
 or connect the GitHub repo at vercel.com/new. Set every var from `.env.local` in the
 Vercel project settings too — `.env.local` isn't committed, so nothing works on a deploy
-without them set there: the five required ones (`NEXT_PUBLIC_SUPABASE_URL`,
+without them set there: the required ones (`NEXT_PUBLIC_SUPABASE_URL`,
 `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_CHATBOT_API_URL`, `CHATBOT_SYNC_URL`,
-`CHATBOT_SYNC_SECRET`; pointing the last two at your deployed backend) plus whichever of
-the optional `GITHUB_TOKEN` / `RESEND_API_KEY` / `RESEND_FROM_EMAIL` you're using
-locally — skip a var and its feature just falls back the same way it does locally.
+`CHATBOT_SYNC_SECRET`; pointing the last two at your deployed backend, and
+`NEXT_PUBLIC_SITE_URL` set to your live URL) plus whichever of the optional
+`GITHUB_TOKEN` / `RESEND_API_KEY` / `RESEND_FROM_EMAIL` / `NEXT_PUBLIC_GA_ID` /
+`NEXT_PUBLIC_GSC_VERIFICATION` you're using locally — skip a var and its feature just falls back the same way it does locally.
 
 Netlify works too via its Next.js runtime — same environment variable requirement.
+
+## Testimonials
+
+Visitors can leave a testimonial from the site (`TestimonialSubmitForm`, shared by the
+modal and the standalone `/testimonial` page). Submissions are saved as `pending` and only
+appear publicly after you approve them in `/admin/testimonials`. That admin page also has
+an invite-link card (copy link, WhatsApp, email) pointing to `/testimonial`, which is
+`noindex` and left out of the sitemap.
+
+## SEO
+
+`lib/seo.ts` holds the site URL helpers. The home page emits Person + WebSite JSON-LD,
+each `/projects/[slug]` page emits CreativeWork/SoftwareSourceCode + BreadcrumbList
+JSON-LD, and `sitemap.xml` uses `updated_at` for `lastmod` (revalidated hourly). Open
+Graph images are generated by `app/opengraph-image.tsx` and
+`app/projects/[slug]/opengraph-image.tsx`.
+
+## Admin
+
+Saving, creating, deleting and replying in `/admin` show a confirmation (or error) modal
+via `components/admin/AdminFeedback.tsx`; server actions return `{ ok | error | redirectTo }`
+instead of throwing. `proxy.ts` guards `/admin` routes.
 
 ## Interactive extras
 
@@ -137,6 +171,10 @@ Netlify works too via its Next.js runtime — same environment variable requirem
   (deep-links to `#project-<slug>`, which the card listens for via CSS `:target` to
   highlight itself), opens the chat assistant, opens the terminal, or jumps to
   email/GitHub/LinkedIn.
+- **Contact nudge** (`components/ContactNudge.tsx`) — a small corner card offering a
+  meeting request or LinkedIn, shown after 45 s of visible time and 60% scroll. It stays
+  hidden while another dialog is open or the Contact section is in view, and a dismissal
+  snoozes it for 14 days (localStorage).
 - **Terminal easter egg** (`components/TerminalEasterEgg.tsx`, via `@xterm/xterm`) — the
   `>_` button bottom-left. A tiny fake shell (`help`, `whoami`, `about`, `skills`,
   `education`, `projects`, `hackathons`, `ls`, `cat <file>`, `contact`, `clear`, `exit`,
@@ -154,6 +192,9 @@ Netlify works too via its Next.js runtime — same environment variable requirem
   hover pill, magnetic buttons (`components/MagneticButton.tsx`), and spring-based card
   hovers. Respects `prefers-reduced-motion` via `MotionConfig` in
   `components/MotionProvider.tsx`.
+- Hero and nav entrance animations are CSS (`.enter-*` classes in `globals.css`) so they
+  render without waiting for JavaScript; heavier modals and the command palette are
+  lazy-loaded with `next/dynamic`.
 - `next/image` is configured (`next.config.ts`) to accept Supabase Storage URLs
   (`*.supabase.co`) as a remote image pattern, alongside local files under `public/`.
 

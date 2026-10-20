@@ -3,7 +3,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/admin/PageHeader";
 
-// Missing migrations just read as 0 here rather than crashing the dashboard -- same graceful-degradation posture as the public site's data layer.
 async function countOf(supabase: SupabaseClient, table: string) {
   const { count } = await supabase.from(table).select("*", { count: "exact", head: true });
   return count ?? 0;
