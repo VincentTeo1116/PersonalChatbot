@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/admin/PageHeader";
 import FypForm from "./FypForm";
 import { deleteFypImage, setFypCoverImage, uploadFypImage } from "./actions";
+import { AdminForm } from "@/components/admin/AdminFeedback";
 
 const BUCKET = "portfolio-content";
 
@@ -56,22 +57,22 @@ export default async function FypPage() {
                   )}
                 </div>
                 {!img.is_cover && (
-                  <form action={setFypCoverImage}>
+                  <AdminForm action={setFypCoverImage} message="Cover image updated">
                     <input type="hidden" name="imageId" value={img.id} />
                     <button type="submit" className="admin-btn admin-btn-ghost w-full px-2 py-1 text-xs">Make cover</button>
-                  </form>
+                  </AdminForm>
                 )}
-                <form action={deleteFypImage}>
+                <AdminForm action={deleteFypImage} message="Image removed">
                   <input type="hidden" name="imageId" value={img.id} />
                   <input type="hidden" name="storagePath" value={img.storage_path} />
                   <button type="submit" className="admin-btn admin-btn-danger w-full px-2 py-1 text-xs">Delete</button>
-                </form>
+                </AdminForm>
               </div>
             ))}
           </div>
         )}
 
-        <form action={uploadFypImage} className="flex flex-wrap items-end gap-3">
+        <AdminForm action={uploadFypImage} message="Image uploaded" className="flex flex-wrap items-end gap-3">
           <div>
             <label className="admin-label" htmlFor="file">Image file</label>
             <input id="file" name="file" type="file" accept="image/*" required className="block text-sm" />
@@ -81,7 +82,7 @@ export default async function FypPage() {
             Set as cover
           </label>
           <button type="submit" className="admin-btn admin-btn-primary">Upload</button>
-        </form>
+        </AdminForm>
       </section>
     </div>
   );

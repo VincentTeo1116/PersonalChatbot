@@ -5,6 +5,7 @@ import type { ChangeEvent } from "react";
 import Image from "next/image";
 import type { Profile } from "@/lib/types";
 import { saveProfile, uploadAvatar, uploadResume, type ProfileFormState } from "./actions";
+import { useAdminFeedback } from "@/components/admin/AdminFeedback";
 
 const inputClass = "admin-input";
 const labelClass = "admin-label";
@@ -20,7 +21,15 @@ function parseSkillNames(itemsText: string): string[] {
 }
 
 export default function ProfileForm({ profile }: { profile: Profile }) {
-  const [state, action, pending] = useActionState<ProfileFormState, FormData>(saveProfile, undefined);
+  const { showSuccess } = useAdminFeedback();
+  // Confirmed from inside the action (not an effect on its result) so it still fires if the
+  // page re-renders around this form after the save.
+  const [state, action, pending] = useActionState<ProfileFormState, FormData>(async (prev, formData) => {
+    const result = await saveProfile(prev, formData);
+    if (result?.success) showSuccess({ title: "Profile saved", detail: "Your site has been updated." });
+    return result;
+  }, undefined);
+
   const [skills, setSkills] = useState<SkillRow[]>(
     profile.skills.map((s) => ({
       category: s.category,

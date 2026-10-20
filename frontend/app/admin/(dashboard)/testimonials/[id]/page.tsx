@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/admin/PageHeader";
 import TestimonialForm from "../TestimonialForm";
 import { updateTestimonial, uploadTestimonialAvatar } from "../actions";
+import { AdminForm } from "@/components/admin/AdminFeedback";
 
 const BUCKET = "portfolio-content";
 
@@ -32,6 +33,7 @@ export default async function EditTestimonialPage({ params }: { params: Promise<
           status: testimonial.status ?? "approved",
         }}
         action={updateTestimonial}
+        redirectTo="/admin/testimonials"
         submitLabel="Save changes"
       />
 
@@ -40,11 +42,11 @@ export default async function EditTestimonialPage({ params }: { params: Promise<
         <div className="relative h-20 w-20 overflow-hidden rounded-full border border-border bg-background">
           {avatarUrl && <Image src={avatarUrl} alt={testimonial.author_name} fill className="object-cover" />}
         </div>
-        <form action={uploadTestimonialAvatar} className="flex flex-wrap items-end gap-3">
+        <AdminForm action={uploadTestimonialAvatar} message="Photo updated" className="flex flex-wrap items-end gap-3">
           <input type="hidden" name="id" value={id} />
           <input id="file" name="file" type="file" accept="image/*" required className="block text-sm" />
           <button type="submit" className="admin-btn admin-btn-primary">Upload</button>
-        </form>
+        </AdminForm>
       </section>
     </div>
   );

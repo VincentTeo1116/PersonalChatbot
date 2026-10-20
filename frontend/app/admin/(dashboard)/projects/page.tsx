@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getProjects } from "@/lib/data";
 import PageHeader from "@/components/admin/PageHeader";
 import { deleteProject, moveProject } from "./actions";
+import { AdminForm } from "@/components/admin/AdminFeedback";
 
 export default async function ProjectsListPage() {
   const projects = await getProjects();
@@ -42,10 +43,10 @@ export default async function ProjectsListPage() {
                   <button type="submit" disabled={i === projects.length - 1} className="admin-btn admin-btn-ghost px-2.5 py-1.5 text-xs disabled:opacity-30">↓</button>
                 </form>
                 <Link href={`/admin/projects/${p.id}`} className="admin-btn admin-btn-ghost px-3 py-1.5 text-xs">Edit</Link>
-                <form action={deleteProject}>
+                <AdminForm action={deleteProject} message="Project deleted">
                   <input type="hidden" name="id" value={p.id} />
                   <button type="submit" className="admin-btn admin-btn-danger px-3 py-1.5 text-xs">Delete</button>
-                </form>
+                </AdminForm>
               </div>
             </li>
           ))}

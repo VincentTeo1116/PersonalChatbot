@@ -2,6 +2,7 @@ import { getMeetingRequests } from "@/lib/data";
 import PageHeader from "@/components/admin/PageHeader";
 import { deleteMeetingRequest } from "./actions";
 import ReplyForm from "./ReplyForm";
+import { AdminForm } from "@/components/admin/AdminFeedback";
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleString(undefined, {
@@ -71,10 +72,10 @@ export default async function MeetingRequestsPage() {
                 <ReplyForm request={r} />
               )}
 
-              <form action={deleteMeetingRequest} className="mt-3">
+              <AdminForm action={deleteMeetingRequest} message="Request deleted" className="mt-3">
                 <input type="hidden" name="id" value={r.id} />
                 <button type="submit" className="admin-btn admin-btn-danger px-3 py-1 text-xs">Delete</button>
-              </form>
+              </AdminForm>
             </li>
           ))}
         </ul>

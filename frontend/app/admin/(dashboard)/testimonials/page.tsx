@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/admin/PageHeader";
+import InviteLinkCard from "@/components/admin/InviteLinkCard";
+import { getProfile } from "@/lib/data";
+import { SITE_URL } from "@/lib/seo";
 import { approveTestimonial, deleteTestimonial, moveTestimonial } from "./actions";
+import { AdminForm } from "@/components/admin/AdminFeedback";
 
 // Queried directly with the authenticated client (not getTestimonials() from lib/data.ts,
 // which is public-only and RLS-filtered to status="approved") so pending submissions are
@@ -10,6 +14,7 @@ export default async function TestimonialsListPage() {
   const supabase = await createClient();
   const { data } = await supabase.from("testimonials").select("*").order("sort_order");
   const testimonials = data ?? [];
+  const profile = await getProfile();
 
   return (
     <div>
@@ -22,6 +27,8 @@ export default async function TestimonialsListPage() {
           </Link>
         }
       />
+
+      <InviteLinkCard url={`${SITE_URL}/testimonial`} ownerName={profile.name} />
 
       {testimonials.length === 0 ? (
         <p className="admin-card p-6 text-sm text-text-secondary">No testimonials yet.</p>
@@ -57,18 +64,18 @@ export default async function TestimonialsListPage() {
                   <button type="submit" disabled={i === testimonials.length - 1} className="admin-btn admin-btn-ghost px-2.5 py-1.5 text-xs disabled:opacity-30">↓</button>
                 </form>
                 {t.status === "pending" && (
-                  <form action={approveTestimonial}>
+                  <AdminForm action={approveTestimonial} message="Testimonial approved" detail="It's now live on your site.">
                     <input type="hidden" name="id" value={t.id} />
                     <button type="submit" className="admin-btn border border-emerald-500/40 px-3 py-1.5 text-xs text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400">
                       Approve
                     </button>
-                  </form>
+                  </AdminForm>
                 )}
                 <Link href={`/admin/testimonials/${t.id}`} className="admin-btn admin-btn-ghost px-3 py-1.5 text-xs">Edit</Link>
-                <form action={deleteTestimonial}>
+                <AdminForm action={deleteTestimonial} message="Testimonial deleted">
                   <input type="hidden" name="id" value={t.id} />
                   <button type="submit" className="admin-btn admin-btn-danger px-3 py-1.5 text-xs">Delete</button>
-                </form>
+                </AdminForm>
               </div>
             </li>
           ))}

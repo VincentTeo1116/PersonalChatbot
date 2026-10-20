@@ -3,12 +3,19 @@
 import { useActionState } from "react";
 import type { Fyp } from "@/lib/types";
 import { saveFyp, type FypFormState } from "./actions";
+import { useAdminFeedback } from "@/components/admin/AdminFeedback";
 
 const inputClass = "admin-input";
 const labelClass = "admin-label";
 
 export default function FypForm({ fyp }: { fyp: Fyp }) {
-  const [state, action, pending] = useActionState<FypFormState, FormData>(saveFyp, undefined);
+  const { showSuccess } = useAdminFeedback();
+  const [state, action, pending] = useActionState<FypFormState, FormData>(async (prev, formData) => {
+    const result = await saveFyp(prev, formData);
+    if (result?.success) showSuccess({ title: "FYP saved", detail: "Your site has been updated." });
+    return result;
+  }, undefined);
+
 
   return (
     <form action={action} className="admin-card max-w-2xl space-y-4 p-6">

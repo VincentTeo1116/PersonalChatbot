@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
@@ -15,8 +14,9 @@ export async function approveTestimonial(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase.from("testimonials").update({ status: "approved" }).eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
   refresh();
+  return { ok: true };
 }
 
 export async function createTestimonial(formData: FormData) {
@@ -35,10 +35,10 @@ export async function createTestimonial(formData: FormData) {
     .select("id")
     .single();
 
-  if (error || !data) throw new Error(error?.message ?? "Failed to create testimonial");
+  if (error || !data) return { error: error?.message ?? "Failed to create testimonial" };
 
   refresh();
-  redirect(`/admin/testimonials/${data.id}`);
+  return { ok: true, redirectTo: `/admin/testimonials/${data.id}` };
 }
 
 export async function updateTestimonial(formData: FormData) {
@@ -55,10 +55,11 @@ export async function updateTestimonial(formData: FormData) {
     })
     .eq("id", id);
 
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/testimonials/${id}`);
+  return { ok: true };
 }
 
 export async function deleteTestimonial(formData: FormData) {
@@ -70,8 +71,9 @@ export async function deleteTestimonial(formData: FormData) {
   if (row?.avatar_path) await deleteImage(supabase, row.avatar_path).catch(() => {});
 
   const { error } = await supabase.from("testimonials").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
   refresh();
+  return { ok: true };
 }
 
 export async function moveTestimonial(formData: FormData) {
@@ -99,13 +101,14 @@ export async function moveTestimonial(formData: FormData) {
 export async function uploadTestimonialAvatar(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) throw new Error("No file provided.");
+  if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
 
   const supabase = await createClient();
   const { path } = await uploadNextImage(supabase, `testimonials/${id}`, file);
   const { error } = await supabase.from("testimonials").update({ avatar_path: path }).eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/testimonials/${id}`);
+  return { ok: true };
 }

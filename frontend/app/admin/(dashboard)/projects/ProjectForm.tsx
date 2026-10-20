@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Project } from "@/lib/types";
+import { AdminForm, type ActionResult } from "@/components/admin/AdminFeedback";
 
 const inputClass = "admin-input";
 const labelClass = "admin-label";
@@ -12,10 +13,13 @@ export default function ProjectForm({
   project,
   action,
   submitLabel,
+  redirectTo,
 }: {
   project?: Project;
-  action: (formData: FormData) => void;
+  action: (formData: FormData) => Promise<ActionResult>;
   submitLabel: string;
+  /** Where to go after a successful save (edit forms); create actions return their own redirectTo. */
+  redirectTo?: string;
 }) {
   // "Live site" gets its own field below, auto-saved as the first links entry, so it's not typed twice.
   const [liveSiteUrl, setLiveSiteUrl] = useState(
@@ -29,7 +33,12 @@ export default function ProjectForm({
   ];
 
   return (
-    <form action={action} className="admin-card max-w-2xl space-y-4 p-6">
+    <AdminForm
+      action={action}
+      message={project ? "Changes saved" : "Created"}
+      detail={project ? undefined : "Opening the editor so you can add images…"}
+      redirectTo={redirectTo}
+      className="admin-card max-w-2xl space-y-4 p-6">
       {project && <input type="hidden" name="id" value={project.id} />}
       <input type="hidden" name="links" value={JSON.stringify(allLinks)} />
 
@@ -121,6 +130,6 @@ export default function ProjectForm({
       <button type="submit" className="admin-btn admin-btn-primary">
         {submitLabel}
       </button>
-    </form>
+    </AdminForm>
   );
 }

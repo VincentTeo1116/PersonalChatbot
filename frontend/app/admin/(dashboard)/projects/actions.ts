@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
@@ -43,10 +42,10 @@ export async function createProject(formData: FormData) {
     .select("id")
     .single();
 
-  if (error || !data) throw new Error(error?.message ?? "Failed to create project");
+  if (error || !data) return { error: error?.message ?? "Failed to create project" };
 
   refresh();
-  redirect(`/admin/projects/${data.id}`);
+  return { ok: true, redirectTo: `/admin/projects/${data.id}` };
 }
 
 export async function updateProject(formData: FormData) {
@@ -70,10 +69,11 @@ export async function updateProject(formData: FormData) {
     })
     .eq("id", id);
 
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/projects/${id}`);
+  return { ok: true };
 }
 
 export async function deleteProject(formData: FormData) {
@@ -85,9 +85,10 @@ export async function deleteProject(formData: FormData) {
   await Promise.all((images ?? []).map((img) => deleteImage(supabase, img.storage_path).catch(() => {})));
 
   const { error } = await supabase.from("projects").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
+  return { ok: true };
 }
 
 export async function moveProject(formData: FormData) {
@@ -116,7 +117,7 @@ export async function uploadProjectImage(formData: FormData) {
   const projectId = String(formData.get("projectId") ?? "");
   const makeCover = formData.get("isCover") === "on";
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) throw new Error("No file provided.");
+  if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
 
   const supabase = await createClient();
   const { count } = await supabase
@@ -137,10 +138,11 @@ export async function uploadProjectImage(formData: FormData) {
     sort_order: count ?? 0,
   });
 
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/projects/${projectId}`);
+  return { ok: true };
 }
 
 export async function setCoverImage(formData: FormData) {
@@ -150,10 +152,11 @@ export async function setCoverImage(formData: FormData) {
   const supabase = await createClient();
   await supabase.from("project_images").update({ is_cover: false }).eq("project_id", projectId);
   const { error } = await supabase.from("project_images").update({ is_cover: true }).eq("id", imageId);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/projects/${projectId}`);
+  return { ok: true };
 }
 
 export async function deleteProjectImage(formData: FormData) {
@@ -164,8 +167,9 @@ export async function deleteProjectImage(formData: FormData) {
   const supabase = await createClient();
   await deleteImage(supabase, storagePath).catch(() => {});
   const { error } = await supabase.from("project_images").delete().eq("id", imageId);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/projects/${projectId}`);
+  return { ok: true };
 }

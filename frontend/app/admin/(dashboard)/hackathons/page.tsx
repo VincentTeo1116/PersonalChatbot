@@ -7,6 +7,7 @@ import {
   updateHackathonCaption,
   uploadHackathonPhoto,
 } from "./actions";
+import { AdminForm } from "@/components/admin/AdminFeedback";
 
 const BUCKET = "portfolio-content";
 
@@ -24,7 +25,7 @@ export default async function HackathonsAdminPage() {
     <div>
       <PageHeader eyebrow="Content" title="Hackathons" description="Photos shown in the Hackathons gallery on the public site." />
 
-      <form action={uploadHackathonPhoto} className="admin-card mb-6 flex flex-wrap items-end gap-3 p-6">
+      <AdminForm action={uploadHackathonPhoto} message="Photo uploaded" className="admin-card mb-6 flex flex-wrap items-end gap-3 p-6">
         <div>
           <label className="admin-label" htmlFor="caption">Caption</label>
           <input id="caption" name="caption" placeholder="[Hackathon name] — [Year], [what happened]" className="admin-input sm:w-72" />
@@ -34,7 +35,7 @@ export default async function HackathonsAdminPage() {
           <input id="file" name="file" type="file" accept="image/*" required className="block text-sm" />
         </div>
         <button type="submit" className="admin-btn admin-btn-primary">Upload</button>
-      </form>
+      </AdminForm>
 
       {photos.length === 0 ? (
         <p className="admin-card p-6 text-sm text-text-secondary">No hackathon photos yet -- upload your first one above.</p>
@@ -46,11 +47,11 @@ export default async function HackathonsAdminPage() {
                 <Image src={photo.src} alt={photo.caption} fill className="object-cover" />
               </div>
 
-              <form action={updateHackathonCaption} className="flex gap-2">
+              <AdminForm action={updateHackathonCaption} message="Caption saved" className="flex gap-2">
                 <input type="hidden" name="id" value={photo.id} />
                 <input name="caption" defaultValue={photo.caption} className="admin-input flex-1 px-2 py-1 text-xs" />
                 <button type="submit" className="admin-btn admin-btn-ghost px-2 py-1 text-xs">Save</button>
-              </form>
+              </AdminForm>
 
               <div className="flex items-center gap-2">
                 <form action={moveHackathonPhoto}>
@@ -63,11 +64,11 @@ export default async function HackathonsAdminPage() {
                   <input type="hidden" name="direction" value="down" />
                   <button type="submit" disabled={i === photos.length - 1} className="admin-btn admin-btn-ghost px-2 py-1 text-xs disabled:opacity-30">↓</button>
                 </form>
-                <form action={deleteHackathonPhoto} className="ml-auto">
+                <AdminForm action={deleteHackathonPhoto} message="Photo deleted" className="ml-auto">
                   <input type="hidden" name="id" value={photo.id} />
                   <input type="hidden" name="storagePath" value={photo.storagePath} />
                   <button type="submit" className="admin-btn admin-btn-danger px-2 py-1 text-xs">Delete</button>
-                </form>
+                </AdminForm>
               </div>
             </div>
           ))}

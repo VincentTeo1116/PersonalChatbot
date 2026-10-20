@@ -43,7 +43,7 @@ export async function saveFyp(_prevState: FypFormState, formData: FormData): Pro
 export async function uploadFypImage(formData: FormData) {
   const makeCover = formData.get("isCover") === "on";
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) throw new Error("No file provided.");
+  if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
 
   const supabase = await createClient();
   const { count } = await supabase.from("fyp_images").select("*", { count: "exact", head: true });
@@ -60,9 +60,10 @@ export async function uploadFypImage(formData: FormData) {
     sort_order: count ?? 0,
   });
 
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
+  return { ok: true };
 }
 
 export async function setFypCoverImage(formData: FormData) {
@@ -71,9 +72,10 @@ export async function setFypCoverImage(formData: FormData) {
   const supabase = await createClient();
   await supabase.from("fyp_images").update({ is_cover: false }).eq("is_cover", true);
   const { error } = await supabase.from("fyp_images").update({ is_cover: true }).eq("id", imageId);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
+  return { ok: true };
 }
 
 export async function deleteFypImage(formData: FormData) {
@@ -83,7 +85,8 @@ export async function deleteFypImage(formData: FormData) {
   const supabase = await createClient();
   await deleteImage(supabase, storagePath).catch(() => {});
   const { error } = await supabase.from("fyp_images").delete().eq("id", imageId);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
+  return { ok: true };
 }

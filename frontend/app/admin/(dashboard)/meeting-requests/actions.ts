@@ -9,8 +9,9 @@ export async function deleteMeetingRequest(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase.from("meeting_requests").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
   revalidatePath("/admin/meeting-requests");
+  return { ok: true };
 }
 
 export type ReplyState = { ok: true } | { ok: false; error: string } | undefined;

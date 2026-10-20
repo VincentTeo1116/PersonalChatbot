@@ -9,6 +9,7 @@ import {
   uploadExperienceLogo,
   uploadExperiencePhoto,
 } from "../actions";
+import { AdminForm } from "@/components/admin/AdminFeedback";
 
 const BUCKET = "portfolio-content";
 const MAX_PHOTOS = 2;
@@ -45,6 +46,7 @@ export default async function EditExperiencePage({ params }: { params: Promise<{
           images: [],
         }}
         action={updateExperience}
+        redirectTo="/admin/experience"
         submitLabel="Save changes"
       />
 
@@ -54,11 +56,11 @@ export default async function EditExperiencePage({ params }: { params: Promise<{
           <div className="relative h-16 w-16 overflow-hidden rounded-xl border border-border bg-background">
             {logoUrl && <Image src={logoUrl} alt="Company logo" fill className="object-cover" />}
           </div>
-          <form action={uploadExperienceLogo} className="flex flex-wrap items-end gap-3">
+          <AdminForm action={uploadExperienceLogo} message="Logo updated" className="flex flex-wrap items-end gap-3">
             <input type="hidden" name="id" value={id} />
             <input name="file" type="file" accept="image/*" required className="block text-sm" />
             <button type="submit" className="admin-btn admin-btn-primary">Upload</button>
-          </form>
+          </AdminForm>
         </div>
       </section>
 
@@ -78,19 +80,19 @@ export default async function EditExperiencePage({ params }: { params: Promise<{
                   />
                 </div>
                 <p className="truncate text-xs text-text-subtle" title={img.caption}>{img.caption || "—"}</p>
-                <form action={deleteExperiencePhoto}>
+                <AdminForm action={deleteExperiencePhoto} message="Photo removed">
                   <input type="hidden" name="imageId" value={img.id} />
                   <input type="hidden" name="experienceId" value={id} />
                   <input type="hidden" name="storagePath" value={img.storage_path} />
                   <button type="submit" className="admin-btn admin-btn-danger w-full px-2 py-1 text-xs">Delete</button>
-                </form>
+                </AdminForm>
               </div>
             ))}
           </div>
         )}
 
         {(photos ?? []).length < MAX_PHOTOS ? (
-          <form action={uploadExperiencePhoto} className="flex flex-wrap items-end gap-3">
+          <AdminForm action={uploadExperiencePhoto} message="Photo uploaded" className="flex flex-wrap items-end gap-3">
             <input type="hidden" name="id" value={id} />
             <div>
               <label className="admin-label" htmlFor="caption">Caption</label>
@@ -101,7 +103,7 @@ export default async function EditExperiencePage({ params }: { params: Promise<{
               <input id="file" name="file" type="file" accept="image/*" required className="block text-sm" />
             </div>
             <button type="submit" className="admin-btn admin-btn-primary">Upload</button>
-          </form>
+          </AdminForm>
         ) : (
           <p className="text-xs text-text-subtle">Maximum of {MAX_PHOTOS} photos reached — delete one to add another.</p>
         )}

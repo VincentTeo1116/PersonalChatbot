@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/admin/PageHeader";
 import EducationForm from "../EducationForm";
 import { deleteEducationImage, updateEducation, uploadEducationImage } from "../actions";
+import { AdminForm } from "@/components/admin/AdminFeedback";
 
 const BUCKET = "portfolio-content";
 
@@ -27,6 +28,7 @@ export default async function EditEducationPage({ params }: { params: Promise<{ 
       <EducationForm
         education={{ id: education.id, degree: education.degree, institution: education.institution, period: education.period, detail: education.detail, images: [] }}
         action={updateEducation}
+        redirectTo="/admin/education"
         submitLabel="Save changes"
       />
 
@@ -46,18 +48,18 @@ export default async function EditEducationPage({ params }: { params: Promise<{ 
                   />
                 </div>
                 <p className="truncate text-xs text-text-subtle" title={img.caption}>{img.caption || "—"}</p>
-                <form action={deleteEducationImage}>
+                <AdminForm action={deleteEducationImage} message="Image removed">
                   <input type="hidden" name="imageId" value={img.id} />
                   <input type="hidden" name="educationId" value={id} />
                   <input type="hidden" name="storagePath" value={img.storage_path} />
                   <button type="submit" className="admin-btn admin-btn-danger w-full px-2 py-1 text-xs">Delete</button>
-                </form>
+                </AdminForm>
               </div>
             ))}
           </div>
         )}
 
-        <form action={uploadEducationImage} className="flex flex-wrap items-end gap-3">
+        <AdminForm action={uploadEducationImage} message="Image uploaded" className="flex flex-wrap items-end gap-3">
           <input type="hidden" name="educationId" value={education.id} />
           <div>
             <label className="admin-label" htmlFor="caption">Caption</label>
@@ -68,7 +70,7 @@ export default async function EditEducationPage({ params }: { params: Promise<{ 
             <input id="file" name="file" type="file" accept="image/*" required className="block text-sm" />
           </div>
           <button type="submit" className="admin-btn admin-btn-primary">Upload</button>
-        </form>
+        </AdminForm>
       </section>
     </div>
   );

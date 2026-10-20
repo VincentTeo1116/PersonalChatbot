@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getEducation } from "@/lib/data";
 import PageHeader from "@/components/admin/PageHeader";
 import { deleteEducation, moveEducation } from "./actions";
+import { AdminForm } from "@/components/admin/AdminFeedback";
 
 export default async function EducationListPage() {
   const education = await getEducation();
@@ -42,10 +43,10 @@ export default async function EducationListPage() {
                   <button type="submit" disabled={i === education.length - 1} className="admin-btn admin-btn-ghost px-2.5 py-1.5 text-xs disabled:opacity-30">↓</button>
                 </form>
                 <Link href={`/admin/education/${ed.id}`} className="admin-btn admin-btn-ghost px-3 py-1.5 text-xs">Edit</Link>
-                <form action={deleteEducation}>
+                <AdminForm action={deleteEducation} message="Entry deleted">
                   <input type="hidden" name="id" value={ed.id} />
                   <button type="submit" className="admin-btn admin-btn-danger px-3 py-1.5 text-xs">Delete</button>
-                </form>
+                </AdminForm>
               </div>
             </li>
           ))}

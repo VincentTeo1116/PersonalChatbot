@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/admin/PageHeader";
 import ProjectForm from "../ProjectForm";
 import { deleteProjectImage, setCoverImage, updateProject, uploadProjectImage } from "../actions";
+import { AdminForm } from "@/components/admin/AdminFeedback";
 
 const BUCKET = "portfolio-content";
 
@@ -41,6 +42,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           updatedAt: project.updated_at,
         }}
         action={updateProject}
+        redirectTo="/admin/projects"
         submitLabel="Save changes"
       />
 
@@ -66,24 +68,24 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
                   )}
                 </div>
                 {!img.is_cover && (
-                  <form action={setCoverImage}>
+                  <AdminForm action={setCoverImage} message="Cover image updated">
                     <input type="hidden" name="imageId" value={img.id} />
                     <input type="hidden" name="projectId" value={id} />
                     <button type="submit" className="admin-btn admin-btn-ghost w-full px-2 py-1 text-xs">Make cover</button>
-                  </form>
+                  </AdminForm>
                 )}
-                <form action={deleteProjectImage}>
+                <AdminForm action={deleteProjectImage} message="Image removed">
                   <input type="hidden" name="imageId" value={img.id} />
                   <input type="hidden" name="projectId" value={id} />
                   <input type="hidden" name="storagePath" value={img.storage_path} />
                   <button type="submit" className="admin-btn admin-btn-danger w-full px-2 py-1 text-xs">Delete</button>
-                </form>
+                </AdminForm>
               </div>
             ))}
           </div>
         )}
 
-        <form action={uploadProjectImage} className="flex flex-wrap items-end gap-3">
+        <AdminForm action={uploadProjectImage} message="Image uploaded" className="flex flex-wrap items-end gap-3">
           <input type="hidden" name="projectId" value={id} />
           <div>
             <label className="admin-label" htmlFor="file">Image file</label>
@@ -94,7 +96,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
             Set as cover
           </label>
           <button type="submit" className="admin-btn admin-btn-primary">Upload</button>
-        </form>
+        </AdminForm>
       </section>
     </div>
   );

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/admin/PageHeader";
 import ResearchForm from "../ResearchForm";
 import { updateResearch, uploadResearchImage } from "../actions";
+import { AdminForm } from "@/components/admin/AdminFeedback";
 
 const BUCKET = "portfolio-content";
 
@@ -36,6 +37,7 @@ export default async function EditResearchPage({ params }: { params: Promise<{ i
           image: imageUrl,
         }}
         action={updateResearch}
+        redirectTo="/admin/research"
         submitLabel="Save changes"
       />
 
@@ -44,11 +46,11 @@ export default async function EditResearchPage({ params }: { params: Promise<{ i
         <div className="relative h-32 w-52 overflow-hidden rounded-xl border border-border">
           <Image src={imageUrl} alt={research.title} fill className="object-cover" />
         </div>
-        <form action={uploadResearchImage} className="flex flex-wrap items-end gap-3">
+        <AdminForm action={uploadResearchImage} message="Image uploaded" className="flex flex-wrap items-end gap-3">
           <input type="hidden" name="id" value={id} />
           <input id="file" name="file" type="file" accept="image/*" required className="block text-sm" />
           <button type="submit" className="admin-btn admin-btn-primary">Upload</button>
-        </form>
+        </AdminForm>
       </section>
     </div>
   );

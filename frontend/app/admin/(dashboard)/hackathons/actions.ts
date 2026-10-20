@@ -12,16 +12,17 @@ function refresh() {
 export async function uploadHackathonPhoto(formData: FormData) {
   const caption = String(formData.get("caption") ?? "");
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) throw new Error("No file provided.");
+  if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
 
   const supabase = await createClient();
   const { count } = await supabase.from("hackathon_photos").select("*", { count: "exact", head: true });
 
   const { path } = await uploadNextImage(supabase, "hackathons", file);
   const { error } = await supabase.from("hackathon_photos").insert({ storage_path: path, caption, sort_order: count ?? 0 });
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
+  return { ok: true };
 }
 
 export async function updateHackathonCaption(formData: FormData) {
@@ -29,8 +30,9 @@ export async function updateHackathonCaption(formData: FormData) {
   const caption = String(formData.get("caption") ?? "");
   const supabase = await createClient();
   const { error } = await supabase.from("hackathon_photos").update({ caption }).eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
   refresh();
+  return { ok: true };
 }
 
 export async function deleteHackathonPhoto(formData: FormData) {
@@ -39,8 +41,9 @@ export async function deleteHackathonPhoto(formData: FormData) {
   const supabase = await createClient();
   await deleteImage(supabase, storagePath).catch(() => {});
   const { error } = await supabase.from("hackathon_photos").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
   refresh();
+  return { ok: true };
 }
 
 export async function moveHackathonPhoto(formData: FormData) {

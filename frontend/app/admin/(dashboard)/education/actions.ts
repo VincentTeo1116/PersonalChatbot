@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
@@ -28,10 +27,10 @@ export async function createEducation(formData: FormData) {
     .select("id")
     .single();
 
-  if (error || !data) throw new Error(error?.message ?? "Failed to create education entry");
+  if (error || !data) return { error: error?.message ?? "Failed to create education entry" };
 
   refresh();
-  redirect(`/admin/education/${data.id}`);
+  return { ok: true, redirectTo: `/admin/education/${data.id}` };
 }
 
 export async function updateEducation(formData: FormData) {
@@ -48,10 +47,11 @@ export async function updateEducation(formData: FormData) {
     })
     .eq("id", id);
 
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/education/${id}`);
+  return { ok: true };
 }
 
 export async function deleteEducation(formData: FormData) {
@@ -63,9 +63,10 @@ export async function deleteEducation(formData: FormData) {
   await Promise.all((images ?? []).map((img) => deleteImage(supabase, img.storage_path).catch(() => {})));
 
   const { error } = await supabase.from("education").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
+  return { ok: true };
 }
 
 export async function moveEducation(formData: FormData) {
@@ -94,7 +95,7 @@ export async function uploadEducationImage(formData: FormData) {
   const educationId = String(formData.get("educationId") ?? "");
   const caption = String(formData.get("caption") ?? "");
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) throw new Error("No file provided.");
+  if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
 
   const supabase = await createClient();
   const { count } = await supabase
@@ -107,10 +108,11 @@ export async function uploadEducationImage(formData: FormData) {
     .from("education_images")
     .insert({ education_id: educationId, storage_path: path, caption, sort_order: count ?? 0 });
 
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/education/${educationId}`);
+  return { ok: true };
 }
 
 export async function deleteEducationImage(formData: FormData) {
@@ -121,8 +123,9 @@ export async function deleteEducationImage(formData: FormData) {
   const supabase = await createClient();
   await deleteImage(supabase, storagePath).catch(() => {});
   const { error } = await supabase.from("education_images").delete().eq("id", imageId);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/education/${educationId}`);
+  return { ok: true };
 }

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AdminNav from "@/components/admin/AdminNav";
 import Spotlight from "@/components/admin/Spotlight";
+import { AdminFeedbackProvider } from "@/components/admin/AdminFeedback";
 import { logout } from "./actions";
 
 export default async function AdminDashboardLayout({ children }: { children: ReactNode }) {
@@ -17,6 +18,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   if (!user) redirect("/admin/login");
 
   return (
+    <AdminFeedbackProvider>
     <div className="relative min-h-screen bg-background text-foreground">
       <Spotlight />
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -50,5 +52,6 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
         <main className="min-w-0 flex-1">{children}</main>
       </div>
     </div>
+    </AdminFeedbackProvider>
   );
 }

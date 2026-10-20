@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
@@ -30,10 +29,10 @@ export async function createExperience(formData: FormData) {
     .select("id")
     .single();
 
-  if (error || !data) throw new Error(error?.message ?? "Failed to create work experience entry");
+  if (error || !data) return { error: error?.message ?? "Failed to create work experience entry" };
 
   refresh();
-  redirect(`/admin/experience/${data.id}`);
+  return { ok: true, redirectTo: `/admin/experience/${data.id}` };
 }
 
 export async function updateExperience(formData: FormData) {
@@ -51,10 +50,11 @@ export async function updateExperience(formData: FormData) {
     })
     .eq("id", id);
 
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/experience/${id}`);
+  return { ok: true };
 }
 
 export async function deleteExperience(formData: FormData) {
@@ -72,9 +72,10 @@ export async function deleteExperience(formData: FormData) {
   if (row?.logo_path) await deleteImage(supabase, row.logo_path).catch(() => {});
 
   const { error } = await supabase.from("work_experience").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
+  return { ok: true };
 }
 
 export async function moveExperience(formData: FormData) {
@@ -102,22 +103,23 @@ export async function moveExperience(formData: FormData) {
 export async function uploadExperienceLogo(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) throw new Error("No file provided.");
+  if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
 
   const supabase = await createClient();
   const { path } = await uploadNextImage(supabase, `work-experience/${id}/logo`, file);
   const { error } = await supabase.from("work_experience").update({ logo_path: path }).eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/experience/${id}`);
+  return { ok: true };
 }
 
 export async function uploadExperiencePhoto(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const caption = String(formData.get("caption") ?? "");
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) throw new Error("No file provided.");
+  if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
 
   const supabase = await createClient();
   const { count } = await supabase
@@ -126,7 +128,7 @@ export async function uploadExperiencePhoto(formData: FormData) {
     .eq("work_experience_id", id);
 
   if ((count ?? 0) >= MAX_PHOTOS) {
-    throw new Error(`Maximum of ${MAX_PHOTOS} workplace photos — delete one before adding another.`);
+    return { error: `Maximum of ${MAX_PHOTOS} workplace photos — delete one before adding another.` };
   }
 
   const { path } = await uploadNextImage(supabase, `work-experience/${id}/photos`, file);
@@ -134,10 +136,11 @@ export async function uploadExperiencePhoto(formData: FormData) {
     .from("work_experience_images")
     .insert({ work_experience_id: id, storage_path: path, caption, sort_order: count ?? 0 });
 
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/experience/${id}`);
+  return { ok: true };
 }
 
 export async function deleteExperiencePhoto(formData: FormData) {
@@ -148,8 +151,9 @@ export async function deleteExperiencePhoto(formData: FormData) {
   const supabase = await createClient();
   await deleteImage(supabase, storagePath).catch(() => {});
   const { error } = await supabase.from("work_experience_images").delete().eq("id", imageId);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/experience/${experienceId}`);
+  return { ok: true };
 }

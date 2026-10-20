@@ -1,4 +1,5 @@
 import type { Testimonial } from "@/lib/types";
+import { AdminForm, type ActionResult } from "@/components/admin/AdminFeedback";
 
 const inputClass = "admin-input";
 const labelClass = "admin-label";
@@ -7,13 +8,21 @@ export default function TestimonialForm({
   testimonial,
   action,
   submitLabel,
+  redirectTo,
 }: {
   testimonial?: Testimonial;
-  action: (formData: FormData) => void;
+  action: (formData: FormData) => Promise<ActionResult>;
   submitLabel: string;
+  /** Where to go after a successful save (edit forms); create actions return their own redirectTo. */
+  redirectTo?: string;
 }) {
   return (
-    <form action={action} className="admin-card max-w-2xl space-y-4 p-6">
+    <AdminForm
+      action={action}
+      message={testimonial ? "Changes saved" : "Created"}
+      detail={testimonial ? undefined : "Opening the editor so you can add images…"}
+      redirectTo={redirectTo}
+      className="admin-card max-w-2xl space-y-4 p-6">
       {testimonial && <input type="hidden" name="id" value={testimonial.id} />}
 
       <div>
@@ -32,6 +41,6 @@ export default function TestimonialForm({
       <button type="submit" className="admin-btn admin-btn-primary">
         {submitLabel}
       </button>
-    </form>
+    </AdminForm>
   );
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getResearch } from "@/lib/data";
 import PageHeader from "@/components/admin/PageHeader";
 import { deleteResearch, moveResearch } from "./actions";
+import { AdminForm } from "@/components/admin/AdminFeedback";
 
 export default async function ResearchListPage() {
   const research = await getResearch();
@@ -40,10 +41,10 @@ export default async function ResearchListPage() {
                   <button type="submit" disabled={i === research.length - 1} className="admin-btn admin-btn-ghost px-2.5 py-1.5 text-xs disabled:opacity-30">↓</button>
                 </form>
                 <Link href={`/admin/research/${r.id}`} className="admin-btn admin-btn-ghost px-3 py-1.5 text-xs">Edit</Link>
-                <form action={deleteResearch}>
+                <AdminForm action={deleteResearch} message="Entry deleted">
                   <input type="hidden" name="id" value={r.id} />
                   <button type="submit" className="admin-btn admin-btn-danger px-3 py-1.5 text-xs">Delete</button>
-                </form>
+                </AdminForm>
               </div>
             </li>
           ))}

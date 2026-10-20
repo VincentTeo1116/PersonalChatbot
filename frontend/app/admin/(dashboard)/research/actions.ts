@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { uploadNextImage } from "@/lib/storage";
@@ -32,10 +31,10 @@ export async function createResearch(formData: FormData) {
     .select("id")
     .single();
 
-  if (error || !data) throw new Error(error?.message ?? "Failed to create research entry");
+  if (error || !data) return { error: error?.message ?? "Failed to create research entry" };
 
   refresh();
-  redirect(`/admin/research/${data.id}`);
+  return { ok: true, redirectTo: `/admin/research/${data.id}` };
 }
 
 export async function updateResearch(formData: FormData) {
@@ -57,10 +56,11 @@ export async function updateResearch(formData: FormData) {
     })
     .eq("id", id);
 
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/research/${id}`);
+  return { ok: true };
 }
 
 export async function deleteResearch(formData: FormData) {
@@ -68,8 +68,9 @@ export async function deleteResearch(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase.from("research").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
   refresh();
+  return { ok: true };
 }
 
 export async function moveResearch(formData: FormData) {
@@ -97,13 +98,14 @@ export async function moveResearch(formData: FormData) {
 export async function uploadResearchImage(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) throw new Error("No file provided.");
+  if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
 
   const supabase = await createClient();
   const { path } = await uploadNextImage(supabase, `research/${id}`, file);
   const { error } = await supabase.from("research").update({ image_path: path }).eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   refresh();
   revalidatePath(`/admin/research/${id}`);
+  return { ok: true };
 }
