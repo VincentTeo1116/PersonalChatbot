@@ -97,10 +97,10 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
         {(project.featured || project.award) && (
           <div className="mt-8 flex flex-wrap items-center gap-3">
             {project.featured && (
-              <span className="rounded-full bg-indigo-500/90 px-2.5 py-1 text-xs font-medium text-white">Featured</span>
+              <span className="rounded-full bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white">Featured</span>
             )}
             {project.award && (
-              <span className="rounded-full bg-amber-500/90 px-2.5 py-1 text-xs font-medium text-white">{project.award}</span>
+              <span className="rounded-full bg-amber-400 px-2.5 py-1 text-xs font-medium text-amber-950">{project.award}</span>
             )}
           </div>
         )}

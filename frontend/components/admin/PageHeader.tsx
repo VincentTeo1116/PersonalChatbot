@@ -15,7 +15,7 @@ export default function PageHeader({
   return (
     <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-300">{eyebrow}</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">{eyebrow}</p>
         <h1 className="mt-1 text-2xl font-semibold text-foreground">{title}</h1>
         {description && <p className="mt-1.5 max-w-xl text-sm text-text-secondary">{description}</p>}
       </div>

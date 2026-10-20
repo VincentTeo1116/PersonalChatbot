@@ -34,11 +34,11 @@ export default function WorkExperience({ experience }: { experience: WorkExperie
                 <div className="flex items-start gap-3">
                   {exp.logoUrl && (
                     <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border bg-surface">
-                      <Image src={exp.logoUrl} alt={`${exp.company} logo`} fill className="object-cover" />
+                      <Image src={exp.logoUrl} alt={`${exp.company} logo`} fill sizes="40px" className="object-cover" />
                     </div>
                   )}
                   <div>
-                    <p className="text-xs font-medium text-indigo-500 dark:text-indigo-300">{exp.period}</p>
+                    <p className="text-xs font-medium text-indigo-600 dark:text-indigo-300">{exp.period}</p>
                     <h3 className="mt-1 font-semibold text-foreground transition-colors group-hover:text-indigo-500 dark:group-hover:text-indigo-300">
                       {exp.role}
                     </h3>
@@ -56,7 +56,7 @@ export default function WorkExperience({ experience }: { experience: WorkExperie
                         className="relative h-16 w-16 overflow-hidden rounded-lg border border-border bg-surface transition-transform duration-300 hover:scale-105"
                         title={img.caption}
                       >
-                        <Image src={img.src} alt={img.caption} fill className="object-cover" />
+                        <Image src={img.src} alt={img.caption} fill sizes="64px" className="object-cover" />
                       </div>
                     ))}
                   </div>

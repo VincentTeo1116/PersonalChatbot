@@ -111,7 +111,7 @@ export default function GithubExhibition({
             <div className="border-b border-border bg-surface-hover/50 px-5 py-5 sm:px-8">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-500 dark:text-indigo-300">The project patisserie</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-600 dark:text-indigo-300">The project patisserie</p>
                   <p className="mt-1 text-sm text-text-muted">{repositories.length} public {repositories.length === 1 ? "project" : "projects"} · fresh from GitHub</p>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row">
@@ -134,7 +134,7 @@ export default function GithubExhibition({
               </div>
 
               {repositories.length > 0 && (
-                <div className="mt-5 flex gap-2 overflow-x-auto pb-1" aria-label="Filter projects by language">
+                <div role="group" className="mt-5 flex gap-2 overflow-x-auto pb-1" aria-label="Filter projects by language">
                   {rooms.map((item) => (
                     <button
                       type="button"
@@ -232,7 +232,7 @@ export default function GithubExhibition({
                       <motion.div key={selected.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
                         <div className="flex flex-wrap items-start justify-between gap-4">
                           <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-300">Your selected slice</p>
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-300">Your selected slice</p>
                             <h3 className="mt-2 break-words text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">{selected.name.replaceAll("-", " ")}</h3>
                           </div>
                           <span className="rounded-full border border-border bg-background px-3 py-1.5 text-xs text-text-muted">{selected.archived ? "Archived" : "Fresh build"}</span>
@@ -260,11 +260,11 @@ export default function GithubExhibition({
                           <AnimatePresence mode="wait">
                             <motion.div key={tab} initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.16 }}>
                               {tab === "idea" && <>
-                                <p className="text-xs font-semibold uppercase tracking-wider text-indigo-500 dark:text-indigo-300">The idea</p>
+                                <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-300">The idea</p>
                                 <p className="mt-2 text-sm leading-relaxed text-text-secondary">{selected.description || "No short description yet. Open the repository to see the recipe in full."}</p>
                               </>}
                               {tab === "ingredients" && <>
-                                <p className="text-xs font-semibold uppercase tracking-wider text-indigo-500 dark:text-indigo-300">Ingredients in this layer</p>
+                                <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-300">Ingredients in this layer</p>
                                 <p className="mt-3 text-xs font-medium text-text-muted">Top languages by code size</p>
                                 <div className="mt-2 flex flex-wrap gap-2">
                                   {languageMix[selected.id] === undefined && <span className="text-sm text-text-muted">Checking the recipe…</span>}
@@ -277,7 +277,7 @@ export default function GithubExhibition({
                                 </>}
                               </>}
                               {tab === "bake" && <>
-                                <p className="text-xs font-semibold uppercase tracking-wider text-indigo-500 dark:text-indigo-300">Baking notes</p>
+                                <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-300">Baking notes</p>
                                 <p className="mt-2 text-sm leading-relaxed text-text-secondary">Updated {formatDate(selected.updatedAt)} · {selected.stars} {selected.stars === 1 ? "star" : "stars"} · {selected.forks} {selected.forks === 1 ? "fork" : "forks"}. {selected.archived ? "This repository is archived." : "This repository is active."}</p>
                               </>}
                             </motion.div>

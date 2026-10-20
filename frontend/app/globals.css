@@ -18,8 +18,9 @@
   --surface-hover: #f1f5f9;
   --border-color: #e2e8f0;
   --text-secondary: #334155;
-  --text-muted: #64748b;
-  --text-subtle: #94a3b8;
+  /* Muted/subtle sit at >=4.7:1 on every background they appear on (WCAG AA needs 4.5:1). */
+  --text-muted: #526077;
+  --text-subtle: #5f6e85;
   --overlay: rgba(15, 23, 42, 0.5);
   --blob-opacity: 0.18;
 }
@@ -32,7 +33,7 @@
   --border-color: rgba(255, 255, 255, 0.1);
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
-  --text-subtle: #64748b;
+  --text-subtle: #8b98ae;
   --overlay: rgba(0, 0, 0, 0.7);
   --blob-opacity: 0.3;
 }
@@ -346,4 +347,44 @@ body::before {
   background: linear-gradient(115deg, rgba(99, 102, 241, 0.14), rgba(217, 70, 239, 0.1));
   color: var(--foreground);
   font-weight: 600;
+}
+
+/* Hero + nav entrance. Pure CSS on purpose: JS-driven "start hidden" animations keep the hero
+   invisible until the bundle downloads and hydrates, which delayed first and largest paint. */
+@keyframes enter-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes enter-drop {
+  from { opacity: 0; transform: translateY(-80px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes enter-slide {
+  from { opacity: 0; transform: translateX(56px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes enter-word {
+  from { transform: translateY(115%); }
+  to { transform: none; }
+}
+.enter-rise,
+.enter-drop,
+.enter-slide,
+.enter-word {
+  animation-duration: 0.7s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+  animation-delay: var(--enter-delay, 0s);
+}
+.enter-rise { animation-name: enter-rise; }
+.enter-drop { animation-name: enter-drop; }
+.enter-slide { animation-name: enter-slide; animation-duration: 0.8s; }
+.enter-word { animation-name: enter-word; animation-duration: 0.75s; }
+@media (prefers-reduced-motion: reduce) {
+  .enter-rise,
+  .enter-drop,
+  .enter-slide,
+  .enter-word {
+    animation: none;
+  }
 }

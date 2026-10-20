@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { motion, useScroll, useSpring } from "motion/react";
 import type { Profile } from "@/lib/types";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -42,11 +42,9 @@ export default function Nav({ profile }: { profile: Profile }) {
   }, []);
 
   return (
-    <motion.header
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.7, delay: 0.1 }}
-      className={`fixed top-0 inset-x-0 z-40 transition-colors duration-300 ${
+    <header
+      style={{ "--enter-delay": "0.1s" } as CSSProperties}
+      className={`enter-drop fixed top-0 inset-x-0 z-40 transition-colors duration-300 ${
         scrolled ? "bg-background/80 backdrop-blur border-b border-border" : "bg-transparent"
       }`}
     >
@@ -161,6 +159,6 @@ export default function Nav({ profile }: { profile: Profile }) {
           )}
         </ul>
       </motion.div>
-    </motion.header>
+    </header>
   );
 }

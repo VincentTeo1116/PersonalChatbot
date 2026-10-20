@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { AnimatePresence } from "motion/react";
 import MagneticButton from "@/components/MagneticButton";
 import Reveal from "@/components/Reveal";
-import ResumeModal from "@/components/ResumeModal";
 import SectionHeading from "@/components/SectionHeading";
 import type { Profile } from "@/lib/types";
+
+// Loaded on first open: most visitors never open it, so it shouldn't be in the initial bundle.
+const ResumeModal = dynamic(() => import("@/components/ResumeModal"));
 
 const OUTLINE_BUTTON =
   "inline-block rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-foreground/10 active:scale-95";
@@ -28,7 +31,7 @@ export default function Contact({ profile }: { profile: Profile }) {
             through any of the channels below, or use the chat assistant in the corner.
           </p>
           {profile.availability && (
-            <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-500 dark:text-indigo-300">
+            <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-300">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
               {profile.availability}
             </span>

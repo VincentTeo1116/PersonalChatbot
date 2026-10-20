@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence } from "motion/react";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import TiltCard from "@/components/TiltCard";
-import ProjectModal from "@/components/ProjectModal";
 import type { Project } from "@/lib/types";
+
+// Loaded on first open: most visitors never open it, so it shouldn't be in the initial bundle.
+const ProjectModal = dynamic(() => import("@/components/ProjectModal"));
 
 export default function Projects({ projects }: { projects: Project[] }) {
   const [previewSlug, setPreviewSlug] = useState<string | null>(null);
@@ -36,15 +39,16 @@ export default function Projects({ projects }: { projects: Project[] }) {
                       src={p.image}
                       alt={p.title}
                       fill
+                      sizes="(min-width: 1152px) 536px, (min-width: 640px) calc(50vw - 40px), calc(100vw - 48px)"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     {p.featured && (
-                      <span className="absolute top-3 left-3 rounded-full bg-indigo-500/90 px-2.5 py-1 text-xs font-medium text-white">
+                      <span className="absolute top-3 left-3 rounded-full bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white">
                         Featured
                       </span>
                     )}
                     {p.award && (
-                      <span className="absolute top-3 left-3 rounded-full bg-amber-500/90 px-2.5 py-1 text-xs font-medium text-white">
+                      <span className="absolute top-3 left-3 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-medium text-amber-950">
                         {p.award}
                       </span>
                     )}

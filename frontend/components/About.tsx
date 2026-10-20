@@ -35,7 +35,7 @@ export default function About({ profile, research }: { profile: Profile; researc
             <Timeline className="space-y-8">
               {profile.education.map((ed, i) => (
                 <TimelineItem key={ed.id} index={i}>
-                  <p className="text-xs font-medium text-indigo-500 dark:text-indigo-300">{ed.period}</p>
+                  <p className="text-xs font-medium text-indigo-600 dark:text-indigo-300">{ed.period}</p>
                   <h4 className="mt-1 font-semibold text-foreground transition-colors group-hover:text-indigo-500 dark:group-hover:text-indigo-300">
                     {ed.degree}
                   </h4>
@@ -49,7 +49,7 @@ export default function About({ profile, research }: { profile: Profile; researc
                           className="relative h-16 w-16 overflow-hidden rounded-lg border border-border bg-surface transition-transform duration-300 hover:scale-105"
                           title={img.caption}
                         >
-                          <Image src={img.src} alt={img.caption} fill className="object-cover" />
+                          <Image src={img.src} alt={img.caption} fill sizes="64px" className="object-cover" />
                         </div>
                       ))}
                     </div>

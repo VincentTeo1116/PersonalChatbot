@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence } from "motion/react";
-import MeetingRequestModal from "@/components/MeetingRequestModal";
+import dynamic from "next/dynamic";
 import type { MeetingRequestInput } from "@/lib/validation/meetingRequest";
+
+// Loaded on first open: most visitors never open it, so it shouldn't be in the initial bundle.
+const MeetingRequestModal = dynamic(() => import("@/components/MeetingRequestModal"));
 
 // Mounted once at the page root (like CommandPalette/TerminalEasterEgg) so it can be opened
 // from anywhere -- the Contact section's own button, or the chat widget dispatching

@@ -35,6 +35,7 @@ export default function Research({ research }: { research: Publication[] }) {
                     src={r.image}
                     alt={r.title}
                     fill
+                    sizes="(min-width: 1152px) 536px, (min-width: 640px) calc(50vw - 40px), calc(100vw - 48px)"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>

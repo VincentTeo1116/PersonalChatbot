@@ -29,7 +29,7 @@ export default function Testimonials({ testimonials }: { testimonials: Testimoni
                 <div className="mt-5 flex items-center gap-3">
                   <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-surface-hover">
                     {t.avatarUrl ? (
-                      <Image src={t.avatarUrl} alt={t.authorName} fill className="object-cover" />
+                      <Image src={t.avatarUrl} alt={t.authorName} fill sizes="40px" className="object-cover" />
                     ) : (
                       <span className="flex h-full w-full items-center justify-center text-xs font-semibold text-text-muted">
                         {initials(t.authorName)}

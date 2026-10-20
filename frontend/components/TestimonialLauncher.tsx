@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence } from "motion/react";
-import TestimonialModal from "@/components/TestimonialModal";
+import dynamic from "next/dynamic";
+
+// Loaded on first open: most visitors never open it, so it shouldn't be in the initial bundle.
+const TestimonialModal = dynamic(() => import("@/components/TestimonialModal"));
 
 // Mounted once at the page root (like MeetingRequestLauncher) so it can be opened from
 // anywhere -- currently just the Contact section's "Leave a testimonial" button.

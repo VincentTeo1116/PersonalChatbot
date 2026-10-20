@@ -99,7 +99,7 @@ export default function ProjectMedia({
         ) : slide.kind === "video-file" ? (
           <video key={i} src={slide.src} controls autoPlay muted className="absolute inset-0 h-full w-full object-contain" />
         ) : (
-          <Image key={i} src={slide.src} alt={`${title} screenshot ${i + 1}`} fill className="object-cover" />
+          <Image key={i} src={slide.src} alt={`${title} screenshot ${i + 1}`} fill sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />
         )
       )}
 

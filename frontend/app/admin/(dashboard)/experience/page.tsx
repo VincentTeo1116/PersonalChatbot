@@ -26,7 +26,7 @@ export default async function ExperienceListPage() {
           {experience.map((exp, i) => (
             <li key={exp.id} className="admin-card flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div className="min-w-0">
-                <p className="text-xs font-medium text-indigo-500 dark:text-indigo-300">{exp.period}</p>
+                <p className="text-xs font-medium text-indigo-600 dark:text-indigo-300">{exp.period}</p>
                 <p className="font-semibold text-foreground">{exp.role}</p>
                 <p className="text-sm text-text-muted">{exp.company}</p>
                 <p className="mt-1 text-xs text-text-subtle">

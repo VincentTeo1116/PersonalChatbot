@@ -33,7 +33,7 @@ export default function SectionHeading({
           transition={{ duration: 0.9 }}
           className="h-px w-10 origin-left bg-gradient-to-r from-indigo-400 to-fuchsia-400"
         />
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-indigo-400">{eyebrow}</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">{eyebrow}</h2>
       </div>
 
       {title && (

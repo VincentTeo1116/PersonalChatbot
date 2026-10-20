@@ -1,24 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { motion, useMotionValue, useScroll, useSpring, useTransform } from "motion/react";
-import Reveal from "@/components/Reveal";
 import MagneticButton from "@/components/MagneticButton";
 import SplitText from "@/components/SplitText";
 import type { Profile } from "@/lib/types";
 
-const EASE = [0.16, 1, 0.3, 1] as const;
-
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.12, delayChildren: 0.85 } },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
-};
+// Entrance animations are CSS (.enter-*, see globals.css) so they start at first paint instead of
+// waiting for the JS bundle to hydrate; this just sets each element's start delay.
+const delay = (seconds: number) => ({ "--enter-delay": `${seconds}s` }) as CSSProperties;
 
 // Scroll fade/lift thresholds assume desktop's side-by-side layout, so just skip them on mobile's stacked one.
 function useIsDesktop() {
@@ -72,35 +63,32 @@ export default function Hero({ profile }: { profile: Profile }) {
         className="mx-auto max-w-6xl px-6 grid gap-12 sm:grid-cols-[1.2fr_0.8fr] items-center"
       >
         <div>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05, duration: 0.6, ease: EASE }}
-            className="inline-flex items-center rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-500 dark:text-indigo-300 mb-6"
+          <p
+            style={delay(0.05)}
+            className="enter-rise inline-flex items-center rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-300 mb-6"
           >
             {profile.location}
-          </motion.p>
+          </p>
 
           <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
             <SplitText text={`Hi, I'm ${profile.name}.`} delay={0.15} />
             <span className="block overflow-hidden pb-[0.15em] -mb-[0.15em]">
-              <motion.span
-                className="block animate-gradient-x bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent"
-                initial={{ y: "110%" }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.85, ease: EASE, delay: 0.6 }}
-              >
-                {profile.tagline}
-              </motion.span>
+              {/* Two layers on purpose: the outer one plays the one-off slide-in, the inner one keeps the
+                  looping gradient shimmer. Both set `animation`, so sharing an element made the slide repeat. */}
+              <span style={delay(0.4)} className="enter-word block">
+                <span className="block animate-gradient-x bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+                  {profile.tagline}
+                </span>
+              </span>
             </span>
           </h1>
 
-          <motion.div variants={container} initial="hidden" animate="show">
-            <motion.p variants={item} className="mt-6 max-w-xl text-lg text-text-secondary leading-relaxed">
+          <div>
+            <p style={delay(0.45)} className="enter-rise mt-6 max-w-xl text-lg text-text-secondary leading-relaxed">
               {profile.heroSummary}
-            </motion.p>
+            </p>
 
-            <motion.div variants={item} className="mt-10 flex flex-wrap gap-4">
+            <div style={delay(0.55)} className="enter-rise mt-10 flex flex-wrap gap-4">
               <MagneticButton>
                 <a
                   href="#projects"
@@ -133,17 +121,17 @@ export default function Hero({ profile }: { profile: Profile }) {
                   </a>
                 </MagneticButton>
               )}
-            </motion.div>
+            </div>
 
-            <motion.p variants={item} className="mt-6 text-xs text-text-subtle">
+            <p style={delay(0.65)} className="enter-rise mt-6 text-xs text-text-subtle">
               Press{" "}
               <kbd className="rounded border border-border bg-surface px-1.5 py-0.5 text-text-secondary">{"⌘K"}</kbd>{" "}
               to search, or open the terminal in the corner {"↙"}
-            </motion.p>
-          </motion.div>
+            </p>
+          </div>
         </div>
 
-        <Reveal delay={200} direction="right">
+        <div style={delay(0.2)} className="enter-slide">
           <div
             className="relative mx-auto w-56 sm:w-72"
             onMouseMove={handleMouseMove}
@@ -161,11 +149,12 @@ export default function Hero({ profile }: { profile: Profile }) {
                 width={400}
                 height={400}
                 className="relative rounded-3xl border border-border shadow-2xl"
+                sizes="(min-width: 640px) 288px, 224px"
                 priority
               />
             </motion.div>
           </div>
-        </Reveal>
+        </div>
       </motion.div>
 
       {/* Scroll cue */}
