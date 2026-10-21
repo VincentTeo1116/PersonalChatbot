@@ -50,7 +50,7 @@ export default function Hero({ profile }: { profile: Profile }) {
   };
 
   return (
-    <section id="top" className="relative overflow-hidden pt-32 pb-28 sm:pt-40 sm:pb-36">
+    <section id="top" className="relative overflow-hidden pt-24 pb-14 sm:pt-40 sm:pb-36">
       {/* Background glow */}
       <motion.div style={{ y: glowY }} className="pointer-events-none absolute inset-0 -z-10">
         <div className="animate-float absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-indigo-600 opacity-[var(--blob-opacity)] blur-[120px]" />
@@ -59,17 +59,17 @@ export default function Hero({ profile }: { profile: Profile }) {
 
       <motion.div
         style={{ y: isDesktop ? contentY : 0, opacity: isDesktop ? contentOpacity : 1 }}
-        className="mx-auto max-w-6xl px-6 grid gap-12 sm:grid-cols-[1.2fr_0.8fr] items-center"
+        className="mx-auto max-w-6xl px-6 grid gap-8 sm:gap-12 sm:grid-cols-[1.2fr_0.8fr] items-center"
       >
         <div>
           <p
             style={delay(0.05)}
-            className="enter-rise inline-flex items-center rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-300 mb-6"
+            className="enter-rise inline-flex items-center rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-300 mb-4 sm:mb-6"
           >
             {profile.location}
           </p>
 
-          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
+          <h1 className="text-3xl sm:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
             <SplitText text={`Hi, I'm ${profile.name}.`} delay={0.15} />
             <span className="block overflow-hidden pb-[0.15em] -mb-[0.15em]">
               {/* Two layers on purpose: the outer one plays the one-off slide-in, the inner one keeps the looping gradient shimmer. Both set `animation`, so sharing an element made the slide repeat. */}
@@ -82,11 +82,11 @@ export default function Hero({ profile }: { profile: Profile }) {
           </h1>
 
           <div>
-            <p style={delay(0.45)} className="enter-rise mt-6 max-w-xl text-lg text-text-secondary leading-relaxed">
+            <p style={delay(0.45)} className="enter-rise mt-4 max-w-xl text-base text-text-secondary leading-relaxed sm:mt-6 sm:text-lg">
               {profile.heroSummary}
             </p>
 
-            <div style={delay(0.55)} className="enter-rise mt-10 flex flex-wrap gap-4">
+            <div style={delay(0.55)} className="enter-rise mt-6 flex flex-wrap gap-3 sm:mt-10 sm:gap-4">
               <MagneticButton>
                 <a
                   href="#projects"
@@ -108,6 +108,7 @@ export default function Hero({ profile }: { profile: Profile }) {
                 </button>
               </MagneticButton>
               {profile.contact.linkedin && (
+                <div className="hidden sm:block">
                 <MagneticButton>
                   <a
                     href={profile.contact.linkedin}
@@ -118,10 +119,11 @@ export default function Hero({ profile }: { profile: Profile }) {
                     Connect on LinkedIn
                   </a>
                 </MagneticButton>
+                </div>
               )}
             </div>
 
-            <p style={delay(0.65)} className="enter-rise mt-6 text-xs text-text-subtle">
+            <p style={delay(0.65)} className="enter-rise mt-6 hidden text-xs text-text-subtle sm:block">
               Press{" "}
               <kbd className="rounded border border-border bg-surface px-1.5 py-0.5 text-text-secondary">{"⌘K"}</kbd>{" "}
               to search, or open the terminal in the corner {"↙"}
@@ -131,7 +133,7 @@ export default function Hero({ profile }: { profile: Profile }) {
 
         <div style={delay(0.2)} className="enter-slide">
           <div
-            className="relative mx-auto w-56 sm:w-72"
+            className="relative mx-auto w-32 sm:w-72"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
           >
@@ -147,7 +149,7 @@ export default function Hero({ profile }: { profile: Profile }) {
                 width={400}
                 height={400}
                 className="relative rounded-3xl border border-border shadow-2xl"
-                sizes="(min-width: 640px) 288px, 224px"
+                sizes="(min-width: 640px) 288px, 128px"
                 priority
               />
             </motion.div>

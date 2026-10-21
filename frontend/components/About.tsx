@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
 import ExpandableText from "@/components/ExpandableText";
-import MobileCollapse from "@/components/MobileCollapse";
 import SectionHeading from "@/components/SectionHeading";
 import SkillGroup from "@/components/SkillGroup";
 import StatCounter from "@/components/StatCounter";
@@ -31,8 +30,7 @@ export default function About({ profile, research }: { profile: Profile; researc
         <div className="mt-16 grid gap-16 lg:grid-cols-2">
           {/* Education timeline */}
           <Reveal delay={100} direction="left">
-            <h3 className="text-lg font-semibold text-foreground mb-6 hidden lg:block">Education</h3>
-            <MobileCollapse label="education">
+            <h3 className="text-lg font-semibold text-foreground mb-6">Education</h3>
             <Timeline className="space-y-8">
               {profile.education.map((ed, i) => (
                 <TimelineItem key={ed.id} index={i}>
@@ -58,7 +56,6 @@ export default function About({ profile, research }: { profile: Profile; researc
                 </TimelineItem>
               ))}
             </Timeline>
-            </MobileCollapse>
           </Reveal>
 
           {/* Skills */}

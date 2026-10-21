@@ -33,6 +33,8 @@ export default function GithubExhibition({
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(repositories[0]?.id ?? null);
   const [tab, setTab] = useState<DetailTab>("idea");
+  // On phones the details panel starts folded so the section is one cake tall; large screens always show it.
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [languageMix, setLanguageMix] = useState<Record<number, LanguageShare[]>>({});
 
   const rooms = useMemo(
@@ -179,7 +181,7 @@ export default function GithubExhibition({
                               layout
                               key={repo.id}
                               type="button"
-                              onClick={() => { setSelectedId(repo.id); setTab("idea"); }}
+                              onClick={() => { setSelectedId(repo.id); setTab("idea"); setDetailsOpen(true); }}
                               aria-pressed={active}
                               aria-label={`Explore ${repo.name.replaceAll("-", " ")}, cake layer ${index + 1}`}
                               className={`group relative h-[3.65rem] ${width} overflow-hidden rounded-[1rem_1rem_1.2rem_1.2rem] border border-white/40 bg-gradient-to-r ${flavor} text-left shadow-[0_8px_14px_-9px_rgba(15,23,42,.8)] transition duration-300 hover:-translate-y-1 hover:brightness-105 ${active ? "z-10 -translate-y-1 scale-[1.025] ring-2 ring-white/80 ring-offset-2 ring-offset-indigo-950/10" : "saturate-[.82]"}`}
@@ -214,9 +216,20 @@ export default function GithubExhibition({
                       <button type="button" onClick={() => movePage(currentPage + 1)} disabled={currentPage >= pageCount - 1} aria-label="Next cake layers" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-surface text-foreground transition hover:border-indigo-400/50 disabled:cursor-not-allowed disabled:opacity-35">→</button>
                     </div>
                   )}
+
+                  {selected && !detailsOpen && (
+                    <div className="relative mt-4 flex justify-center lg:hidden">
+                      <button type="button" onClick={() => setDetailsOpen(true)} className="rounded-full bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400 active:scale-95">
+                        View {selected.name.replaceAll("-", " ")} details
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                <div className="min-h-[30rem] p-5 sm:p-8">
+                <div className={`min-h-[30rem] p-5 sm:p-8 lg:block ${detailsOpen ? "" : "hidden"}`}>
+                  <button type="button" onClick={() => setDetailsOpen(false)} className="mb-4 rounded-full border border-border px-4 py-1.5 text-xs font-semibold text-text-secondary transition hover:text-foreground lg:hidden">
+                    Hide details
+                  </button>
                   <AnimatePresence mode="wait">
                     {selected ? (
                       <motion.div key={selected.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>

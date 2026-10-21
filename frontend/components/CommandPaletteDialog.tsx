@@ -65,13 +65,13 @@ export default function CommandPaletteDialog({
     >
       <div className="animate-fade-in-scale w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
         <div className="flex items-center gap-3 border-b border-border px-4">
-          <span className="text-text-subtle">{"⌘K"}</span>
+          <span className="hidden text-text-subtle sm:inline">{"⌘K"}</span>
           <Command.Input
             autoFocus
             placeholder="Jump to a section, project, or action…"
             className="h-14 flex-1 bg-transparent text-sm text-foreground placeholder:text-text-subtle outline-none"
           />
-          <kbd className="rounded border border-border px-1.5 py-0.5 text-[10px] text-text-subtle">esc</kbd>
+          <kbd className="hidden rounded border border-border px-1.5 py-0.5 text-[10px] text-text-subtle sm:inline">esc</kbd>
         </div>
 
         <Command.List className="max-h-[60vh] overflow-y-auto p-2">
