@@ -94,7 +94,7 @@ export default function GithubExhibition({
   return (
     <section id="github-exhibition" className="relative isolate overflow-hidden py-24 sm:py-32">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-1/2 top-44 h-96 w-[min(90vw,60rem)] -translate-x-1/2 rounded-full bg-fuchsia-500/[0.08] blur-[100px]" />
+        <div className="absolute left-1/2 top-44 h-96 w-[min(90vw,60rem)] -translate-x-1/2 glow glow-fuchsia opacity-[0.08]" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/40 to-transparent" />
       </div>
 

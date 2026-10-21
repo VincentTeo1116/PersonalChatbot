@@ -27,8 +27,8 @@ export default function Contact({ profile }: { profile: Profile }) {
   return (
     <section id="contact" className="relative overflow-hidden py-24 sm:py-32">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="animate-float-slow absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500 opacity-[var(--blob-opacity)] blur-[120px]" />
-        <div className="animate-float absolute left-1/4 top-1/3 h-[240px] w-[240px] rounded-full bg-fuchsia-500 opacity-[var(--blob-opacity)] blur-[100px]" />
+        <div className="animate-float-slow absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 glow glow-indigo opacity-[var(--blob-opacity)]" />
+        <div className="animate-float absolute left-1/4 top-1/3 h-[240px] w-[240px] glow glow-fuchsia opacity-[var(--blob-opacity)]" />
       </div>
 
       <div className="mx-auto max-w-3xl px-6 text-center">

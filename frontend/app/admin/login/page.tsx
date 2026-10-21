@@ -9,8 +9,8 @@ export default function LoginPage() {
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="animate-float-slow absolute left-1/2 top-1/3 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-indigo-500 opacity-[var(--blob-opacity)] blur-[120px]" />
-        <div className="animate-float absolute bottom-0 right-1/4 h-[260px] w-[260px] rounded-full bg-fuchsia-500 opacity-[var(--blob-opacity)] blur-[100px]" />
+        <div className="animate-float-slow absolute left-1/2 top-1/3 h-[420px] w-[420px] -translate-x-1/2 glow glow-indigo opacity-[var(--blob-opacity)]" />
+        <div className="animate-float absolute bottom-0 right-1/4 h-[260px] w-[260px] glow glow-fuchsia opacity-[var(--blob-opacity)]" />
       </div>
 
       <form action={action} className="admin-card w-full max-w-sm space-y-4 p-8">

@@ -53,8 +53,8 @@ export default function Hero({ profile }: { profile: Profile }) {
     <section id="top" className="relative overflow-hidden pt-24 pb-14 sm:pt-40 sm:pb-36">
       {/* Background glow */}
       <motion.div style={{ y: glowY }} className="pointer-events-none absolute inset-0 -z-10">
-        <div className="animate-float absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-indigo-600 opacity-[var(--blob-opacity)] blur-[120px]" />
-        <div className="animate-float-slow absolute top-20 right-0 h-[380px] w-[380px] rounded-full bg-fuchsia-500 opacity-[var(--blob-opacity)] blur-[100px]" />
+        <div className="animate-float absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 glow glow-indigo opacity-[var(--blob-opacity)]" />
+        <div className="animate-float-slow absolute top-20 right-0 h-[380px] w-[380px] glow glow-fuchsia opacity-[var(--blob-opacity)]" />
       </motion.div>
 
       <motion.div
@@ -137,7 +137,7 @@ export default function Hero({ profile }: { profile: Profile }) {
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
           >
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 blur-2xl opacity-40" />
+            <div className="absolute -inset-8 rounded-full bg-[radial-gradient(closest-side,rgba(99,102,241,0.5),rgba(217,70,239,0.22)_65%,transparent)]" />
             <motion.div
               style={{ rotateX: springRotateX, rotateY: springRotateY, transformPerspective: 800 }}
               whileHover={{ scale: 1.03 }}

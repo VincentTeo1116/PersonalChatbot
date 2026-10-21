@@ -49,7 +49,7 @@ export default function MobileActionBar({ profile }: { profile: Profile }) {
     <nav
       aria-label="Quick actions"
       inert={!visible}
-      className={`fixed inset-x-0 bottom-0 z-[9990] flex border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.35)] backdrop-blur transition-transform duration-300 sm:hidden ${
+      className={`fixed inset-x-0 bottom-0 z-[9990] flex border-t border-border bg-background/80 pb-[env(safe-area-inset-bottom)] backdrop-blur transition-transform duration-300 sm:hidden ${
         visible ? "translate-y-0" : "translate-y-full"
       }`}
     >

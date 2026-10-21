@@ -394,3 +394,22 @@ body::before {
     display: none !important;
   }
 }
+
+/* Set by ThemeToggle for a moment while the theme flips so colour transitions don't all run at once. */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
+/* Soft background glows drawn as radial gradients. They replace blurred discs: a 100-120px blur filter is re-rasterised on every theme change and animation frame, which stalled the page for seconds on modest laptops. */
+.glow {
+  border-radius: 9999px;
+}
+.glow-indigo {
+  background: radial-gradient(closest-side, #6366f1, transparent);
+}
+.glow-fuchsia {
+  background: radial-gradient(closest-side, #d946ef, transparent);
+}

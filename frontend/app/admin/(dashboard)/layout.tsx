@@ -21,8 +21,8 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     <div className="relative min-h-screen bg-background text-foreground">
       <Spotlight />
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="animate-float-slow absolute -top-32 left-1/4 h-[420px] w-[420px] rounded-full bg-indigo-500 opacity-[var(--blob-opacity)] blur-[120px]" />
-        <div className="animate-float absolute bottom-0 right-0 h-[320px] w-[320px] rounded-full bg-fuchsia-500 opacity-[var(--blob-opacity)] blur-[100px]" />
+        <div className="animate-float-slow absolute -top-32 left-1/4 h-[420px] w-[420px] glow glow-indigo opacity-[var(--blob-opacity)]" />
+        <div className="animate-float absolute bottom-0 right-0 h-[320px] w-[320px] glow glow-fuchsia opacity-[var(--blob-opacity)]" />
       </div>
 
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:flex-row sm:gap-8 sm:px-6 sm:py-10">

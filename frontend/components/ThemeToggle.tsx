@@ -13,8 +13,13 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
   }, []);
 
   const toggle = () => {
-    const next = !document.documentElement.classList.contains("dark");
-    document.documentElement.classList.toggle("dark", next);
+    const root = document.documentElement;
+    const next = !root.classList.contains("dark");
+    // Hundreds of elements have colour transitions; letting them all animate at once makes the switch stall and paint in pieces, so freeze transitions for the switch itself.
+    root.classList.add("theme-switching");
+    root.classList.toggle("dark", next);
+    void root.offsetHeight;
+    window.setTimeout(() => root.classList.remove("theme-switching"), 120);
     try {
       localStorage.setItem("theme", next ? "dark" : "light");
     } catch {}
