@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
+import ExpandableText from "@/components/ExpandableText";
+import MobileCollapse from "@/components/MobileCollapse";
 import SectionHeading from "@/components/SectionHeading";
 import SkillGroup from "@/components/SkillGroup";
 import StatCounter from "@/components/StatCounter";
@@ -11,9 +13,7 @@ export default function About({ profile, research }: { profile: Profile; researc
     <section id="about" className="py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <SectionHeading eyebrow="About">
-          <p className="mt-3 max-w-2xl text-base sm:text-lg text-text-secondary leading-relaxed">
-            {profile.about}
-          </p>
+          <ExpandableText text={profile.about} className="mt-3 max-w-2xl text-base sm:text-lg text-text-secondary leading-relaxed" />
         </SectionHeading>
 
         <Reveal delay={80}>
@@ -31,7 +31,8 @@ export default function About({ profile, research }: { profile: Profile; researc
         <div className="mt-16 grid gap-16 lg:grid-cols-2">
           {/* Education timeline */}
           <Reveal delay={100} direction="left">
-            <h3 className="text-lg font-semibold text-foreground mb-6">Education</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-6 hidden lg:block">Education</h3>
+            <MobileCollapse label="education">
             <Timeline className="space-y-8">
               {profile.education.map((ed, i) => (
                 <TimelineItem key={ed.id} index={i}>
@@ -57,6 +58,7 @@ export default function About({ profile, research }: { profile: Profile; researc
                 </TimelineItem>
               ))}
             </Timeline>
+            </MobileCollapse>
           </Reveal>
 
           {/* Skills */}

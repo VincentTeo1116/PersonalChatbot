@@ -32,7 +32,10 @@ export default function CommandPaletteDialog({
   // Updates the URL fragment and scrolls there, same net effect as `location.hash = id` without assigning to `window.location` directly (the site's `scroll-smooth` class on <html> already makes this animate the same way the native hash-jump would).
   const navigateToHash = (id: string) => {
     window.history.pushState(null, "", `#${id}`);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // A project card hidden by "Show all projects" has to be revealed before it can be scrolled to.
+    const collapsed = document.getElementById(id)?.offsetParent === null;
+    if (collapsed) window.dispatchEvent(new CustomEvent("portfolio:reveal-project", { detail: id }));
+    window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), collapsed ? 150 : 0);
   };
 
   const goTo = (hash: string) => {

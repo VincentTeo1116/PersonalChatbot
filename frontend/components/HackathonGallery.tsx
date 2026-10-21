@@ -18,9 +18,9 @@ export default function HackathonGallery({ hackathonPhotos }: { hackathonPhotos:
           </p>
         </SectionHeading>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="-mx-6 mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
           {hackathonPhotos.map((photo, i) => (
-            <Reveal key={photo.id} delay={i * 80}>
+            <Reveal key={photo.id} delay={i * 80} className="w-[68%] shrink-0 snap-start sm:w-auto">
               <motion.figure
                 whileHover={{ y: -4 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -30,7 +30,7 @@ export default function HackathonGallery({ hackathonPhotos }: { hackathonPhotos:
                   src={photo.src}
                   alt={photo.caption}
                   fill
-                  sizes="(min-width: 1152px) 264px, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  sizes="(min-width: 1152px) 264px, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 68vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <figcaption className="absolute inset-x-0 bottom-0 translate-y-1 bg-gradient-to-t from-black/80 to-transparent p-3 text-xs text-white opacity-90 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">

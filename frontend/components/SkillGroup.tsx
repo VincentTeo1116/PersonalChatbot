@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "motion/react";
 import type { SkillItem } from "@/lib/types";
 
@@ -10,6 +11,8 @@ const pill = {
 };
 
 const MAX_LEVEL = 5;
+// Collapsed groups keep their strongest skills (original order preserved) and fold the rest behind a "+N more" pill.
+const COLLAPSED_COUNT = 6;
 
 /** Five small dots showing proficiency (filled up to `level`, out of 5). */
 function ProficiencyDots({ level }: { level: number }) {
@@ -28,6 +31,12 @@ function ProficiencyDots({ level }: { level: number }) {
 
 /** One skill category: its pills pop in one by one, then bounce on hover. Each pill carries a small proficiency-dot rating next to the skill name. */
 export default function SkillGroup({ category, items }: { category: string; items: SkillItem[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const foldable = items.length > COLLAPSED_COUNT;
+  const kept = new Set(
+    [...items].sort((a, b) => b.level - a.level).slice(0, COLLAPSED_COUNT).map((item) => item.name)
+  );
+
   return (
     <div>
       <p className="text-xs font-medium uppercase tracking-wide text-text-muted mb-2">{category}</p>
@@ -44,12 +53,24 @@ export default function SkillGroup({ category, items }: { category: string; item
             variants={pill}
             whileHover={{ y: -4, scale: 1.08 }}
             title={`${item.name} — ${item.level}/${MAX_LEVEL}`}
-            className="inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-sm text-text-secondary transition-colors duration-200 hover:border-indigo-400/50 hover:bg-indigo-500/10 hover:text-foreground"
+            className={`items-center rounded-full border border-border bg-surface px-3 py-1 text-sm text-text-secondary transition-colors duration-200 hover:border-indigo-400/50 hover:bg-indigo-500/10 hover:text-foreground ${
+              foldable && !expanded && !kept.has(item.name) ? "hidden" : "inline-flex"
+            }`}
           >
             {item.name}
             <ProficiencyDots level={item.level} />
           </motion.span>
         ))}
+        {foldable && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            className="inline-flex items-center rounded-full border border-dashed border-indigo-400/60 px-3 py-1 text-sm font-medium text-indigo-600 transition-colors hover:bg-indigo-500/10 dark:text-indigo-300"
+          >
+            {expanded ? "Show less" : `+${items.length - COLLAPSED_COUNT} more`}
+          </button>
+        )}
       </motion.div>
     </div>
   );
