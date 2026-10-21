@@ -134,6 +134,23 @@
     return node;
   }
 
+  // Renders the answer's **bold** markers as <strong> using DOM nodes only (never innerHTML), so answer text can't inject markup.
+  function renderRich(node, text) {
+    node.textContent = "";
+    String(text).split(/(\*\*[^*\n]+?\*\*)/).forEach(function (part) {
+      if (/^\*\*[^*\n]+\*\*$/.test(part)) {
+        node.appendChild(el("strong", "", { text: part.slice(2, -2) }));
+      } else if (part) {
+        node.appendChild(document.createTextNode(part));
+      }
+    });
+  }
+
+  // Only same-site paths ("/projects/x", "/#about") are linked; anything else a source might carry is shown as plain text.
+  function isSitePath(url) {
+    return typeof url === "string" && /^\/(?!\/)/.test(url);
+  }
+
   function ChatbotWidget(config) {
     this.config = config;
     this.isOpen = false;
@@ -237,7 +254,9 @@
   };
 
   ChatbotWidget.prototype._addMessage = function (role, text) {
-    var bubble = el("div", "pcw-msg pcw-msg-" + role, { text: text });
+    var bubble = el("div", "pcw-msg pcw-msg-" + role);
+    if (role === "bot") renderRich(bubble, text);
+    else bubble.textContent = text;
     this.messagesEl.appendChild(bubble);
     this._scrollToBottom();
     return bubble;
@@ -271,10 +290,48 @@
 
   ChatbotWidget.prototype._addSources = function (sources) {
     if (!sources || !sources.length) return;
+    var self = this;
     var wrap = el("div", "pcw-sources");
+    var pills = el("div", "pcw-source-pills");
+    var evidence = el("ul", "pcw-evidence");
+    evidence.hidden = true;
+
     sources.forEach(function (s) {
-      wrap.appendChild(el("span", "pcw-source-pill", { text: s.category || "Source" }));
+      var label = s.label || s.category || "Source";
+      if (isSitePath(s.url)) {
+        var link = el("a", "pcw-source-pill pcw-source-link", { href: s.url, text: label });
+        if (s.url.indexOf("/#") !== 0) {
+          link.target = "_blank";
+          link.rel = "noopener";
+        } else {
+          // Section links jump within the page, so tuck the chat away to reveal where they land.
+          link.addEventListener("click", function () { self.close(); });
+        }
+        pills.appendChild(link);
+      } else {
+        pills.appendChild(el("span", "pcw-source-pill", { text: label }));
+      }
+      if (s.snippet) {
+        var item = el("li", "pcw-evidence-item");
+        item.appendChild(el("strong", "", { text: label }));
+        item.appendChild(el("span", "", { text: s.snippet }));
+        evidence.appendChild(item);
+      }
     });
+
+    wrap.appendChild(pills);
+    if (evidence.childNodes.length) {
+      var toggle = el("button", "pcw-evidence-toggle", { type: "button", text: "What supports this?", "aria-expanded": "false" });
+      toggle.addEventListener("click", function () {
+        var open = evidence.hidden;
+        evidence.hidden = !open;
+        toggle.setAttribute("aria-expanded", String(open));
+        toggle.textContent = open ? "Hide sources" : "What supports this?";
+        self._scrollToBottom();
+      });
+      wrap.appendChild(toggle);
+      wrap.appendChild(evidence);
+    }
     this.messagesEl.appendChild(wrap);
     this._scrollToBottom();
   };
@@ -441,7 +498,7 @@
           }
           // Snap to the server's canonical, fully markdown-cleaned answer, even if the
           // raw streamed chunks briefly differed from it.
-          bubble.textContent = msg.answer || text || "Sorry, I couldn't find an answer to that.";
+          renderRich(bubble, msg.answer || text || "Sorry, I couldn't find an answer to that.");
           self._addSources(msg.sources);
           self._handleMeetingPrefill(msg.meeting_prefill);
         } else if (msg.type === "error") {

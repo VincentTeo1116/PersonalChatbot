@@ -1,5 +1,6 @@
 :root {
   --pcw-primary: #4f46e5;
+  --pcw-link: #4f46e5;
   --pcw-gradient: linear-gradient(135deg, #6366f1, #a855f7 60%, #d946ef);
   --pcw-primary-fg: #ffffff;
   --pcw-bg: #ffffff;
@@ -13,6 +14,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    --pcw-link: #a5b4fc;
     --pcw-bg: #1a1e2b;
     --pcw-fg: #f3f4f6;
     --pcw-muted: #9ca3af;
@@ -210,12 +212,68 @@
   transform: translateY(-1px);
 }
 
+.pcw-msg strong {
+  font-weight: 700;
+}
+
 .pcw-sources {
   align-self: flex-start;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 6px;
   max-width: 85%;
+}
+.pcw-source-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pcw-source-link {
+  color: var(--pcw-link);
+  border-color: var(--pcw-link);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.pcw-source-link:hover,
+.pcw-source-link:focus-visible {
+  background: var(--pcw-gradient);
+  border-color: transparent;
+  color: var(--pcw-primary-fg);
+}
+.pcw-evidence-toggle {
+  font: inherit;
+  font-size: 11px;
+  color: var(--pcw-muted);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.pcw-evidence {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pcw-evidence[hidden] {
+  display: none;
+}
+.pcw-evidence-item {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--pcw-muted);
+  border-left: 2px solid var(--pcw-border);
+  padding-left: 8px;
+}
+.pcw-evidence-item strong {
+  display: block;
+  color: var(--pcw-fg);
+  font-weight: 600;
 }
 .pcw-source-pill {
   font-size: 10.5px;

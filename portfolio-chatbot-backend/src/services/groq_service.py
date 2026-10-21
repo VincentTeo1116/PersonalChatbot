@@ -2,9 +2,11 @@
 Gemini's for a portfolio site. Embeddings still go through Gemini since Groq has no such endpoint."""
 import json
 import logging
+import re
+import time
 from typing import Any, Iterator
 
-from groq import Groq
+from groq import Groq, RateLimitError
 
 from src.config import Config
 from src.services.prompting import build_prompt
@@ -13,6 +15,33 @@ from src.services.text_utils import strip_markdown
 logger = logging.getLogger(__name__)
 
 _client = Groq(api_key=Config.GROQ_API_KEY)
+
+INTENT_MAX_TOKENS = 200
+RETRY_DELAY_RANGE = (1.0, 6.0)  # seconds to wait before the one retry on a 429
+
+
+class BusyError(RuntimeError):
+    """Groq's rate limit is still hit after a retry -- the routes turn this into a friendly "try again" message."""
+
+
+def _retry_delay(exc: RateLimitError) -> float:
+    try:
+        wait = float(exc.response.headers.get("retry-after", ""))
+    except (AttributeError, TypeError, ValueError):
+        wait = 2.0
+    return min(max(wait, RETRY_DELAY_RANGE[0]), RETRY_DELAY_RANGE[1])
+
+
+def _create_with_retry(**kwargs):
+    """One retry after the wait Groq asks for; a second 429 raises BusyError."""
+    for attempt in range(2):
+        try:
+            return _client.chat.completions.create(**kwargs)
+        except RateLimitError as exc:
+            if attempt == 1:
+                raise BusyError("Groq rate limit hit") from exc
+            logger.warning("Groq rate limit hit, retrying once: %s", exc)
+            time.sleep(_retry_delay(exc))
 
 MEETING_REQUEST_TOOL = {
     "type": "function",
@@ -55,11 +84,21 @@ _MEETING_INTENT_SYSTEM_PROMPT = (
 )
 
 
+# Cheap pre-check: most questions are plain "tell me about X", and skipping the model call for them saves a request per message and avoids false positives.
+_MAYBE_MEETING = re.compile(
+    r"meet|schedul|connect|contact|reach|touch|e-?mail|call|phone|hire|hiring|recruit|collaborat|work with|talk|chat|message|interview|opportunit|appointment|available",
+    re.IGNORECASE,
+)
+
+
 def detect_meeting_intent(question: str) -> dict[str, Any] | None:
     """Separate, focused tool-calling pass that checks for meeting/contact intent and drafts
     whatever contact fields the visitor already gave. Returns None if no such intent is found."""
+    if not _MAYBE_MEETING.search(question):
+        return None
     response = _client.chat.completions.create(
         model=Config.GROQ_CHAT_MODEL,
+        max_tokens=INTENT_MAX_TOKENS,
         messages=[
             {"role": "system", "content": _MEETING_INTENT_SYSTEM_PROMPT},
             {"role": "user", "content": question},
@@ -80,9 +119,10 @@ def detect_meeting_intent(question: str) -> dict[str, Any] | None:
 def generate_answer(question: str, context: str, owner_name: str = "Vincent") -> str:
     """Generate a grounded answer from retrieved context (non-streaming)."""
     prompt = build_prompt(question, context, owner_name)
-    response = _client.chat.completions.create(
+    response = _create_with_retry(
         model=Config.GROQ_CHAT_MODEL,
         messages=[{"role": "user", "content": prompt}],
+        max_tokens=Config.GROQ_MAX_ANSWER_TOKENS,
     )
     text = response.choices[0].message.content or ""
     return strip_markdown(text.strip())
@@ -92,9 +132,10 @@ def generate_answer_stream(question: str, context: str, owner_name: str = "Vince
     """Yields raw text chunks as Groq produces them -- not markdown-stripped individually, since a
     marker like "**" could land split across chunks. Caller should strip_markdown() the final text."""
     prompt = build_prompt(question, context, owner_name)
-    stream = _client.chat.completions.create(
+    stream = _create_with_retry(
         model=Config.GROQ_CHAT_MODEL,
         messages=[{"role": "user", "content": prompt}],
+        max_tokens=Config.GROQ_MAX_ANSWER_TOKENS,
         stream=True,
     )
     for chunk in stream:

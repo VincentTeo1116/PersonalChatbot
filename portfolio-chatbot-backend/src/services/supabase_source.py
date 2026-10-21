@@ -142,6 +142,8 @@ def _project_rows(projects: list[dict[str, Any]]) -> list[dict[str, str]]:
         rows.append(
             {
                 "category": "Projects",
+                "url": f"/projects/{p['slug']}" if p.get("slug") else "/#projects",
+                "label": p["title"],
                 "question": f"Tell me about the {p['title']} project",
                 "answer": _join(
                     p["description"],

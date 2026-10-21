@@ -11,6 +11,23 @@ logger = logging.getLogger(__name__)
 
 REQUIRED_FIELDS = ("category", "question", "answer")
 
+# Where each kind of entry lives on the portfolio site, so answers can link back to their source.
+CATEGORY_URLS = {
+    "About": "/#about",
+    "Contact": "/#contact",
+    "Education": "/#about",
+    "Skills": "/#about",
+    "Hackathons": "/#hackathons",
+    "Work Experience": "/#experience",
+    "Projects": "/#projects",
+    "Research": "/#research",
+    "Final Year Project": "/#fyp",
+}
+
+
+def source_url(category: str, url: str = "") -> str:
+    return url or CATEGORY_URLS.get(category, "")
+
 
 def _row_id(row: dict[str, Any]) -> str:
     """Stable id derived from category+question so edits update in place."""
@@ -53,6 +70,8 @@ def sync_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
                     "question": row.get("question", ""),
                     "answer": row.get("answer", ""),
                     "tags": row.get("tags", ""),
+                    "url": source_url(row.get("category", ""), row.get("url", "")),
+                    "label": row.get("label", "") or row.get("category", ""),
                     "source": "portfolio-kb-sheet",
                 },
             }

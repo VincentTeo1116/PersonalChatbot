@@ -4,7 +4,7 @@ import time
 from typing import Annotated, Iterator
 
 from cachetools import TTLCache
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, StringConstraints
 
@@ -12,8 +12,9 @@ from src.config import Config
 from src.services import pinecone_service
 from src.services.chat_logging import log_chat
 from src.services.gemini_service import embed_text
-from src.services.groq_service import detect_meeting_intent, generate_answer, generate_answer_stream
-from src.services.text_utils import strip_markdown
+from src.services.groq_service import BusyError, detect_meeting_intent, generate_answer, generate_answer_stream
+from src.services.kb_sync import source_url
+from src.services.text_utils import highlight, strip_markdown
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/chat", tags=["chat"])
@@ -35,6 +36,9 @@ class Source(BaseModel):
     category: str
     question: str
     score: float
+    url: str = ""
+    label: str = ""
+    snippet: str = ""
 
 
 class MeetingPrefill(BaseModel):
@@ -68,20 +72,60 @@ def _retrieve(question: str) -> list[dict]:
     return [m for m in pinecone_service.query(query_vector) if m["score"] >= Config.MIN_SCORE]
 
 
+def _snippet(text: str, limit: int = 240) -> str:
+    text = " ".join((text or "").split())
+    if len(text) <= limit:
+        return text
+    return text[:limit].rsplit(" ", 1)[0].rstrip(",;:") + "…"
+
+
+# Only entries about as relevant as the best one are shown as sources, so a weak 0.55 match doesn't pose as support.
+SOURCE_SCORE_WINDOW = 0.08
+MAX_SOURCES = 3
+
+
 def _sources_from_matches(matches: list[dict]) -> list[dict]:
-    return [
-        {
-            "category": m["metadata"].get("category", ""),
-            "question": m["metadata"].get("question", ""),
-            "score": round(m["score"], 3),
-        }
-        for m in matches
-    ]
+    sources, seen = [], set()
+    best = max((m["score"] for m in matches), default=0)
+    for m in matches:
+        if m["score"] < best - SOURCE_SCORE_WINDOW or len(sources) >= MAX_SOURCES:
+            continue
+        meta = m["metadata"]
+        category = meta.get("category", "")
+        url = source_url(category, meta.get("url", ""))
+        label = meta.get("label") or category
+        if (url, label) in seen:
+            continue
+        seen.add((url, label))
+        sources.append(
+            {
+                "category": category,
+                "question": meta.get("question", ""),
+                "score": round(m["score"], 3),
+                "url": url,
+                "label": label,
+                "snippet": _snippet(meta.get("answer", "")),
+            }
+        )
+    return sources
+
+
+def _highlight_terms(matches: list[dict]) -> list[str]:
+    """Names worth bolding in the answer: the matched entries' titles and tags (project names, tools)."""
+    terms: list[str] = []
+    for m in matches:
+        meta = m["metadata"]
+        if meta.get("label") and meta.get("label") != meta.get("category"):
+            terms.append(meta["label"])
+        terms += [t for t in (meta.get("tags") or "").split(",")]
+    return terms
 
 
 def _top_score(sources: list[dict]) -> float | None:
     return max((s["score"] for s in sources), default=None)
 
+
+BUSY_MESSAGE = "I'm getting a lot of questions right now -- please try again in a few seconds."
 
 MEETING_CONFIRMATION_MESSAGE = (
     "Got it! I've opened the meeting request form for you with what you've shared -- "
@@ -122,18 +166,22 @@ async def chat(payload: ChatRequest, background_tasks: BackgroundTasks) -> ChatR
         cached = _cache[cache_key]
         latency_ms = int((time.monotonic() - start) * 1000)
         background_tasks.add_task(
-            log_chat, clean_question, cached["answer"], bool(cached["sources"]), _top_score(cached["sources"]), True, latency_ms
+            log_chat, clean_question, cached["plain"], bool(cached["sources"]), _top_score(cached["sources"]), True, latency_ms
         )
         return ChatResponse(answer=cached["answer"], sources=cached["sources"], cache_hit=True, latency_ms=latency_ms)
 
     matches = _retrieve(clean_question)
     context = _build_context(matches)
-    answer = generate_answer(clean_question, context)
+    try:
+        plain = generate_answer(clean_question, context)
+    except BusyError:
+        raise HTTPException(status_code=503, detail=BUSY_MESSAGE)
+    answer = highlight(plain, _highlight_terms(matches))
     sources = _sources_from_matches(matches)
 
-    _cache[cache_key] = {"answer": answer, "sources": sources}
+    _cache[cache_key] = {"answer": answer, "plain": plain, "sources": sources}
     latency_ms = int((time.monotonic() - start) * 1000)
-    background_tasks.add_task(log_chat, clean_question, answer, bool(sources), _top_score(sources), False, latency_ms)
+    background_tasks.add_task(log_chat, clean_question, plain, bool(sources), _top_score(sources), False, latency_ms)
 
     return ChatResponse(answer=answer, sources=sources, cache_hit=False, latency_ms=latency_ms)
 
@@ -160,12 +208,12 @@ def _stream_chat(question: str) -> Iterator[str]:
     if cache_key in _cache:
         cached = _cache[cache_key]
         answer, sources = cached["answer"], cached["sources"]
-        yield json.dumps({"type": "chunk", "text": answer}) + "\n"
+        yield json.dumps({"type": "chunk", "text": cached["plain"]}) + "\n"
         latency_ms = int((time.monotonic() - start) * 1000)
         yield json.dumps(
             {"type": "done", "answer": answer, "sources": sources, "cache_hit": True, "latency_ms": latency_ms}
         ) + "\n"
-        log_chat(question, answer, bool(sources), _top_score(sources), True, latency_ms)
+        log_chat(question, cached["plain"], bool(sources), _top_score(sources), True, latency_ms)
         return
 
     try:
@@ -178,13 +226,16 @@ def _stream_chat(question: str) -> Iterator[str]:
             pieces.append(piece)
             yield json.dumps({"type": "chunk", "text": piece}) + "\n"
 
-        answer = strip_markdown("".join(pieces).strip())
-        _cache[cache_key] = {"answer": answer, "sources": sources}
+        plain = strip_markdown("".join(pieces).strip())
+        answer = highlight(plain, _highlight_terms(matches))
+        _cache[cache_key] = {"answer": answer, "plain": plain, "sources": sources}
         latency_ms = int((time.monotonic() - start) * 1000)
         yield json.dumps(
             {"type": "done", "answer": answer, "sources": sources, "cache_hit": False, "latency_ms": latency_ms}
         ) + "\n"
-        log_chat(question, answer, bool(sources), _top_score(sources), False, latency_ms)
+        log_chat(question, plain, bool(sources), _top_score(sources), False, latency_ms)
+    except BusyError:
+        yield json.dumps({"type": "error", "message": BUSY_MESSAGE}) + "\n"
     except Exception:
         logger.exception("Streaming chat failed")
         yield json.dumps({"type": "error", "message": "Something went wrong generating a response."}) + "\n"
