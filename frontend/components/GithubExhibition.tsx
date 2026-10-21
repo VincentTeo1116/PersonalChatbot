@@ -99,8 +99,8 @@ export default function GithubExhibition({
       </div>
 
       <div className="mx-auto max-w-6xl px-6">
-        <SectionHeading eyebrow="GitHub exhibition" title="A portfolio, baked in layers" align="center" large>
-          <p className="mx-auto mt-4 max-w-2xl text-text-secondary">
+        <SectionHeading eyebrow="GitHub exhibition" title="A portfolio, baked in layers">
+          <p className="mt-4 max-w-2xl text-text-secondary">
             Pick a slice from the project cake. Each layer opens a different build; explore its ingredients, story, and GitHub activity.
           </p>
         </SectionHeading>
@@ -241,7 +241,7 @@ export default function GithubExhibition({
                           <span className="rounded-full border border-border bg-background px-3 py-1.5 text-xs text-text-muted">{selected.archived ? "Archived" : "Fresh build"}</span>
                         </div>
 
-                        <div className="mt-6 border-y border-border py-4 text-center">
+                        <div className="mt-6 border-y border-border py-4">
                           <p className="truncate text-sm font-semibold text-foreground">{formatDate(selected.updatedAt)}</p><p className="mt-1 text-[10px] uppercase tracking-wider text-text-muted">Last baked</p>
                         </div>
 

@@ -31,9 +31,9 @@ export default function Contact({ profile }: { profile: Profile }) {
         <div className="animate-float absolute left-1/4 top-1/3 h-[240px] w-[240px] glow glow-fuchsia opacity-[var(--blob-opacity)]" />
       </div>
 
-      <div className="mx-auto max-w-3xl px-6 text-center">
-        <SectionHeading eyebrow="Contact" title="Let's work together" align="center" large>
-          <p className="mt-4 text-text-secondary">
+      <div className="mx-auto max-w-6xl px-6">
+        <SectionHeading eyebrow="Contact" title="Let's work together">
+          <p className="mt-4 max-w-2xl text-text-secondary">
             Open to opportunities, collaborations, or just a chat about AI engineering. Reach out
             through any of the channels below, or use the chat assistant in the corner.
           </p>
@@ -45,7 +45,7 @@ export default function Contact({ profile }: { profile: Profile }) {
           )}
         </SectionHeading>
 
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
+        <div className="mt-10 flex flex-wrap gap-4">
           <Reveal delay={0} direction="up">
             <MagneticButton>
               <a

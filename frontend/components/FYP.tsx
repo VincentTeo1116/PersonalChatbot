@@ -15,7 +15,7 @@ export default function FYP({ fyp }: { fyp: Fyp | null }) {
 
         {!hasContent || !fyp ? (
           <Reveal delay={80}>
-            <div className="mt-12 flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-surface/50 py-20 text-center">
+            <div className="mt-12 flex flex-col items-start justify-center gap-2 rounded-2xl border border-dashed border-border bg-surface/50 px-8 py-16">
               <p className="text-lg font-medium text-foreground">Coming soon</p>
               <p className="max-w-md text-sm text-text-subtle">
                 The Final Year Project writeup is still in progress -- check back later for the title, approach, and demo.

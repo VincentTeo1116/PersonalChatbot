@@ -42,11 +42,11 @@ export default async function GithubStats({ githubUrl }: { githubUrl: string | u
 
   return (
     <section className="py-16 sm:py-20">
-      <div className="mx-auto max-w-4xl px-6 text-center">
-        <SectionHeading eyebrow="GitHub" title="Open-source activity" align="center" />
+      <div className="mx-auto max-w-6xl px-6">
+        <SectionHeading eyebrow="GitHub" title="Open-source activity" />
 
         <Reveal delay={100}>
-          <div className="mt-10 flex flex-wrap justify-center gap-x-14 gap-y-6">
+          <div className="mt-10 flex flex-wrap gap-x-14 gap-y-6">
             <StatCounter value={stats.publicRepos} label="Public repos" />
             {/* A zero reads as "nobody cares" rather than "just starting", so only show these once they're non-zero. */}
             {stats.totalStars > 0 && <StatCounter value={stats.totalStars} label="Stars earned" />}
@@ -65,7 +65,7 @@ export default async function GithubStats({ githubUrl }: { githubUrl: string | u
 
         {stats.topLanguages.length > 0 && (
           <Reveal delay={200}>
-            <div className="mt-8 flex flex-wrap justify-center gap-2">
+            <div className="mt-8 flex flex-wrap gap-2">
               {stats.topLanguages.map((lang) => (
                 <span
                   key={lang}

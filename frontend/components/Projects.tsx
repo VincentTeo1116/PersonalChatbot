@@ -142,7 +142,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
         </div>
 
         {hiddenCount > 0 && (
-          <div className="mt-10 text-center">
+          <div className="mt-10">
             <button
               type="button"
               onClick={toggle}
