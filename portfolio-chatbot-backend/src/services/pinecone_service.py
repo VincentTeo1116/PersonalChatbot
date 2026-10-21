@@ -37,12 +37,20 @@ def upsert_rows(vectors: list[dict[str, Any]]) -> int:
     return len(vectors)
 
 
+def _ids_in(batch: Any) -> set[str]:
+    """index.list() yields plain id strings in older SDKs and ListItem objects (with .id) in newer ones."""
+    items = getattr(batch, "vectors", batch)
+    if isinstance(items, (str, dict)) or not hasattr(items, "__iter__"):
+        items = [items]
+    return {i if isinstance(i, str) else i["id"] if isinstance(i, dict) else i.id for i in items}
+
+
 def delete_missing_ids(keep_ids: set[str]) -> int:
     """Removes vectors whose id is no longer in keep_ids, so Pinecone stays in sync with deleted rows."""
     index = get_index()
     existing_ids: set[str] = set()
     for batch in index.list(namespace=Config.PINECONE_NAMESPACE):
-        existing_ids.update(batch)
+        existing_ids.update(_ids_in(batch))
     stale = existing_ids - keep_ids
     if stale:
         index.delete(ids=list(stale), namespace=Config.PINECONE_NAMESPACE)
