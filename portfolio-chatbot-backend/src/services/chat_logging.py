@@ -42,3 +42,24 @@ def log_chat(
     except Exception:
         # Likely the migration hasn't run yet, or a network hiccup -- the visitor already has their answer.
         logger.warning("chat_logs insert failed (non-fatal)", exc_info=True)
+
+
+def log_feedback(question: str, answer: str, rating: str, matched: bool) -> None:
+    """Stores a visitor's thumbs up/down on an answer (see supabase/012_chat_feedback.sql). Telemetry only, so it never raises."""
+    if not Config.SUPABASE_URL or not Config.SUPABASE_ANON_KEY:
+        return
+
+    try:
+        httpx.post(
+            f"{Config.SUPABASE_URL}/rest/v1/chat_feedback",
+            headers={
+                "apikey": Config.SUPABASE_ANON_KEY,
+                "Authorization": f"Bearer {Config.SUPABASE_ANON_KEY}",
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal",
+            },
+            json={"question": question[:500], "answer": answer[:2000], "rating": rating, "matched": matched},
+            timeout=5,
+        ).raise_for_status()
+    except Exception:
+        logger.warning("chat_feedback insert failed (non-fatal)", exc_info=True)

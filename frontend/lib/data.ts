@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/public";
 // chat_logs and meeting_requests deliberately have NO public-read RLS policy (they hold visitor questions and contact details) -- only an authenticated admin session can read them back, so their getters below use this client instead of the public one above.
 import { createClient as createAdminClient } from "@/lib/supabase/server";
 import type {
+  ChatFeedback,
   ChatLog,
   EducationEntry,
   Fyp,
@@ -275,4 +276,33 @@ export const getChatLogStats = cache(async (): Promise<{ total: number; unmatche
     supabase.from("chat_logs").select("*", { count: "exact", head: true }).eq("matched", false),
   ]);
   return { total: total ?? 0, unmatched: unmatched ?? 0 };
+});
+
+export const getChatFeedback = cache(async (limit = 30): Promise<ChatFeedback[]> => {
+  const supabase = await createAdminClient();
+  const { data, error } = await supabase
+    .from("chat_feedback")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    question: row.question,
+    answer: row.answer,
+    rating: row.rating,
+    matched: row.matched,
+    createdAt: row.created_at,
+  }));
+});
+
+export const getChatFeedbackCounts = cache(async (): Promise<{ up: number; down: number }> => {
+  const supabase = await createAdminClient();
+  const [{ count: up }, { count: down }] = await Promise.all([
+    supabase.from("chat_feedback").select("*", { count: "exact", head: true }).eq("rating", "up"),
+    supabase.from("chat_feedback").select("*", { count: "exact", head: true }).eq("rating", "down"),
+  ]);
+  return { up: up ?? 0, down: down ?? 0 };
 });

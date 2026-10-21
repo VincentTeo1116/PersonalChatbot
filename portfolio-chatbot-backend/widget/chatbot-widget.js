@@ -151,6 +151,20 @@
     return typeof url === "string" && /^\/(?!\/)/.test(url);
   }
 
+  // Replies that admit they have no answer -- worth offering a way to reach the owner directly.
+  var UNKNOWN_RE = /(don't|do not|doesn't|does not|didn't|did not) (have|know|see|find)|no (such )?(information|info|details)|not (sure|certain)|couldn't find|can't find|cannot find|unable to (find|answer)|reach out/i;
+
+  // ".../api/chat" -> ".../api/chat/feedback"; null if the URL can't be parsed.
+  function buildFeedbackUrl(apiUrl) {
+    try {
+      var u = new URL(apiUrl, window.location.href);
+      u.pathname = u.pathname.replace(/\/+$/, "") + "/feedback";
+      return u.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
   function ChatbotWidget(config) {
     this.config = config;
     this.isOpen = false;
@@ -336,6 +350,74 @@
     this._scrollToBottom();
   };
 
+  // Under each answer: thumbs up/down (logged for the owner to review) and, when the bot had no real answer or got a thumbs-down,
+  // a prompt to contact the owner directly so the visitor is never left at a dead end.
+  ChatbotWidget.prototype._addFollowUps = function (question, data) {
+    if (data.meeting_prefill) return;
+    var self = this;
+    var answer = String(data.answer || "").replace(/\*\*/g, "");
+    var hasSources = !!(data.sources && data.sources.length);
+    var wrap = el("div", "pcw-followups");
+    var ctaShown = false;
+
+    function showCta() {
+      if (ctaShown) return;
+      ctaShown = true;
+      var owner = self.config.ownerName || "the owner";
+      var cta = el("div", "pcw-contact-cta");
+      cta.appendChild(el("p", "", { text: "Want a direct answer? Get in touch with " + owner + "." }));
+      var row = el("div", "pcw-contact-cta-row");
+      var meet = el("button", "pcw-cta-btn pcw-cta-primary", { type: "button", text: "Request a meeting" });
+      meet.addEventListener("click", function () {
+        self.close();
+        window.dispatchEvent(new CustomEvent("portfolio:open-meeting-request"));
+      });
+      var more = el("button", "pcw-cta-btn", { type: "button", text: "Contact options" });
+      more.addEventListener("click", function () {
+        self.close();
+        window.location.hash = "#contact";
+      });
+      row.appendChild(meet);
+      row.appendChild(more);
+      cta.appendChild(row);
+      wrap.appendChild(cta);
+      self._scrollToBottom();
+    }
+
+    var feedbackUrl = buildFeedbackUrl(this.config.apiUrl);
+    if (feedbackUrl) {
+      var bar = el("div", "pcw-feedback");
+      var label = el("span", "pcw-feedback-label", { text: "Was this helpful?" });
+      var up = el("button", "pcw-feedback-btn", { type: "button", "aria-label": "This answer was helpful", text: "\uD83D\uDC4D" });
+      var down = el("button", "pcw-feedback-btn", { type: "button", "aria-label": "This answer was not helpful", text: "\uD83D\uDC4E" });
+      var send = function (rating) {
+        up.disabled = true;
+        down.disabled = true;
+        label.textContent = "Thanks for the feedback!";
+        try {
+          fetch(feedbackUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: question, answer: answer, rating: rating, matched: hasSources }),
+          }).catch(function () {});
+        } catch (e) {}
+        if (rating === "down") showCta();
+      };
+      up.addEventListener("click", function () { send("up"); });
+      down.addEventListener("click", function () { send("down"); });
+      bar.appendChild(label);
+      bar.appendChild(up);
+      bar.appendChild(down);
+      wrap.appendChild(bar);
+    }
+
+    if (!hasSources || UNKNOWN_RE.test(answer)) showCta();
+    if (wrap.childNodes.length) {
+      this.messagesEl.appendChild(wrap);
+      this._scrollToBottom();
+    }
+  };
+
   // Fires when the backend's tool-calling pass detects the visitor wants to connect -- opens
   // the site's own "Request a meeting" modal pre-filled with whatever it drafted, same
   // custom-event pattern the nav uses for the command palette/terminal. The visitor still
@@ -500,6 +582,7 @@
           // raw streamed chunks briefly differed from it.
           renderRich(bubble, msg.answer || text || "Sorry, I couldn't find an answer to that.");
           self._addSources(msg.sources);
+          self._addFollowUps(question, msg);
           self._handleMeetingPrefill(msg.meeting_prefill);
         } else if (msg.type === "error") {
           gotDone = true;
@@ -564,6 +647,7 @@
         self._hideTyping();
         self._addMessage("bot", data.answer || "Sorry, I couldn't find an answer to that.");
         self._addSources(data.sources);
+        self._addFollowUps(question, data);
         self._handleMeetingPrefill(data.meeting_prefill);
       });
   };

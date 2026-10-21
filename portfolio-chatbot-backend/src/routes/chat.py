@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-from typing import Annotated, Iterator
+from typing import Annotated, Iterator, Literal
 
 from cachetools import TTLCache
 from fastapi import APIRouter, BackgroundTasks, HTTPException
@@ -10,7 +10,7 @@ from pydantic import BaseModel, StringConstraints
 
 from src.config import Config
 from src.services import retrieval
-from src.services.chat_logging import log_chat
+from src.services.chat_logging import log_chat, log_feedback
 from src.services.groq_service import BusyError, detect_meeting_intent, generate_answer, generate_answer_stream
 from src.services.kb_sync import source_url
 from src.services.text_utils import highlight, strip_markdown
@@ -29,6 +29,13 @@ def clear_cache() -> None:
 class ChatRequest(BaseModel):
     # min_length=1 so a short "Hi" isn't rejected like it used to be; strip_whitespace still catches blank input.
     question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
+
+
+class FeedbackRequest(BaseModel):
+    question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
+    answer: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)]
+    rating: Literal["up", "down"]
+    matched: bool = False
 
 
 class Source(BaseModel):
@@ -243,3 +250,10 @@ def _stream_chat(question: str) -> Iterator[str]:
 def chat_stream(payload: ChatRequest) -> StreamingResponse:
     clean_question = payload.question.strip()
     return StreamingResponse(_stream_chat(clean_question), media_type="application/x-ndjson")
+
+
+@router.post("/feedback")
+def chat_feedback(payload: FeedbackRequest, background_tasks: BackgroundTasks) -> dict[str, str]:
+    """Thumbs up/down from the widget; stored for the admin to review in /admin/chatbot."""
+    background_tasks.add_task(log_feedback, payload.question, payload.answer, payload.rating, payload.matched)
+    return {"status": "ok"}

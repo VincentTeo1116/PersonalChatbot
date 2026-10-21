@@ -229,7 +229,7 @@ export default function TerminalEasterEgg({
         type="button"
         aria-label="Open terminal"
         onClick={() => setIsOpen((v) => !v)}
-        className="fixed left-5 bottom-5 z-[9999] flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-indigo-300 shadow-2xl hover:bg-slate-700 transition-colors"
+        className="fixed left-5 bottom-20 sm:bottom-5 z-[9999] flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-indigo-300 shadow-2xl hover:bg-slate-700 transition-colors"
       >
         <span className="font-mono text-lg">{">_"}</span>
       </button>
@@ -240,7 +240,7 @@ export default function TerminalEasterEgg({
         onTransitionEnd={() => {
           if (isOpen) fitRef.current?.fit();
         }}
-        className={`fixed left-5 bottom-24 z-[9999] flex h-[min(70vh,420px)] w-[min(90vw,480px)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl origin-bottom-left transition-all duration-300 ease-out ${
+        className={`fixed left-5 bottom-36 sm:bottom-24 z-[9999] flex h-[min(70vh,420px)] w-[min(90vw,480px)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl origin-bottom-left transition-all duration-300 ease-out ${
           isOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
         }`}
       >

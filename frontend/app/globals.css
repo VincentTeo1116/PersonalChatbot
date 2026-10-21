@@ -387,3 +387,10 @@ body::before {
     animation: none;
   }
 }
+
+/* On phones the bottom action bar has a Chat button, so the floating launcher would only sit on top of it. */
+@media (max-width: 639px) {
+  .pcw-launcher {
+    display: none !important;
+  }
+}

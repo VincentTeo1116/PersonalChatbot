@@ -283,6 +283,74 @@
   padding: 2px 8px;
 }
 
+.pcw-followups {
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 85%;
+}
+.pcw-feedback {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--pcw-muted);
+}
+.pcw-feedback-btn {
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  background: none;
+  border: 1px solid var(--pcw-border);
+  border-radius: 999px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.pcw-feedback-btn:hover:not(:disabled),
+.pcw-feedback-btn:focus-visible {
+  background: var(--pcw-bot-bubble);
+  transform: translateY(-1px);
+}
+.pcw-feedback-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.pcw-contact-cta {
+  border: 1px solid var(--pcw-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--pcw-fg);
+  background: var(--pcw-bg);
+}
+.pcw-contact-cta p {
+  margin: 0 0 8px;
+}
+.pcw-contact-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pcw-cta-btn {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pcw-link);
+  background: none;
+  border: 1px solid var(--pcw-link);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.pcw-cta-primary {
+  background: var(--pcw-gradient);
+  border-color: transparent;
+  color: var(--pcw-primary-fg);
+}
+
 .pcw-typing {
   align-self: flex-start;
   display: flex;
@@ -362,6 +430,36 @@
   .pcw-launcher {
     right: 14px;
     bottom: 14px;
+  }
+}
+
+/* Phones: the chat takes the whole screen instead of a small corner card. */
+@media (max-width: 639px) {
+  .pcw-panel {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: auto;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+  }
+  .pcw-header {
+    padding-top: max(16px, env(safe-area-inset-top));
+  }
+  .pcw-input-row {
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .pcw-msg,
+  .pcw-sources,
+  .pcw-followups {
+    max-width: 92%;
+  }
+  .pcw-input {
+    font-size: 16px; /* anything smaller makes iOS zoom in when the field is focused */
   }
 }
 

@@ -149,6 +149,16 @@ export type Fyp = {
   images: FypImage[];
 };
 
+// A visitor's thumbs up/down on a chatbot answer, shown in /admin/chatbot.
+export type ChatFeedback = {
+  id: string;
+  question: string;
+  answer: string;
+  rating: "up" | "down";
+  matched: boolean;
+  createdAt: string;
+};
+
 // A chatbot question logged for review in /admin/chatbot.
 export type ChatLog = {
   id: string;

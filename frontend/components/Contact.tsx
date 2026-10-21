@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence } from "motion/react";
 import MagneticButton from "@/components/MagneticButton";
@@ -16,6 +16,13 @@ const OUTLINE_BUTTON =
 
 export default function Contact({ profile }: { profile: Profile }) {
   const [resumeOpen, setResumeOpen] = useState(false);
+
+  // The phone action bar opens the resume through this event, so there is one modal for every trigger.
+  useEffect(() => {
+    const open = () => setResumeOpen(true);
+    window.addEventListener("portfolio:open-resume", open);
+    return () => window.removeEventListener("portfolio:open-resume", open);
+  }, []);
 
   return (
     <section id="contact" className="relative overflow-hidden py-24 sm:py-32">

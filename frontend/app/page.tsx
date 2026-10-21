@@ -5,6 +5,7 @@ import TechMarquee from "@/components/TechMarquee";
 import GithubStats from "@/components/GithubStats";
 import GithubExhibition from "@/components/GithubExhibition";
 import WorkExperience from "@/components/WorkExperience";
+import MobileActionBar from "@/components/MobileActionBar";
 import Projects from "@/components/Projects";
 import Research from "@/components/Research";
 import FYP from "@/components/FYP";
@@ -57,7 +58,9 @@ export default async function Home() {
         <HackathonGallery hackathonPhotos={hackathonPhotos} />
         <Testimonials testimonials={testimonials} />
         <Contact profile={profile} />
+        <div aria-hidden className="h-16 sm:hidden" />
       </main>
+      <MobileActionBar profile={profile} />
       <ChatWidgetLoader profile={profile} />
       <CommandPalette profile={profile} projects={projects} research={research} />
       <TerminalEasterEgg profile={profile} projects={projects} hackathonPhotos={hackathonPhotos} />

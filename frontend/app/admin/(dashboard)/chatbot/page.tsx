@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getChatLogs, getChatLogStats } from "@/lib/data";
+import { getChatFeedback, getChatFeedbackCounts, getChatLogs, getChatLogStats } from "@/lib/data";
 import PageHeader from "@/components/admin/PageHeader";
 import SyncForm from "./SyncForm";
 
@@ -20,9 +20,11 @@ export default async function ChatbotAdminPage({
   const { filter } = await searchParams;
   const onlyUnmatched = filter === "unmatched";
 
-  const [logs, stats] = await Promise.all([
+  const [logs, stats, feedback, feedbackCounts] = await Promise.all([
     getChatLogs(50, onlyUnmatched ? "unmatched" : undefined),
     getChatLogStats(),
+    getChatFeedback(),
+    getChatFeedbackCounts(),
   ]);
 
   return (
@@ -38,6 +40,38 @@ export default async function ChatbotAdminPage({
           </p>
           <SyncForm />
         </div>
+      </div>
+
+      <div className="space-y-3">
+        <h2 className="text-lg font-semibold text-foreground">Answer feedback</h2>
+        <p className="text-sm text-text-secondary">
+          Thumbs up/down from visitors, newest first. A 👎 usually means a content gap or a poorly
+          matched entry — check the question and add or reword the relevant section.{" "}
+          <span className="font-medium text-foreground">
+            👍 {feedbackCounts.up} · 👎 {feedbackCounts.down}
+          </span>
+        </p>
+        {feedback.length === 0 ? (
+          <p className="admin-card p-4 text-sm text-text-subtle">No feedback yet.</p>
+        ) : (
+          <ul className="space-y-2">
+            {feedback.map((f) => (
+              <li
+                key={f.id}
+                className={`admin-card p-4 ${f.rating === "down" ? "border-l-4 border-l-red-500" : "border-l-4 border-l-emerald-500"}`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <p className="font-medium text-foreground">
+                    {f.rating === "down" ? "👎" : "👍"} {f.question}
+                  </p>
+                  <span className="shrink-0 text-xs text-text-subtle">{formatTime(f.createdAt)}</span>
+                </div>
+                <p className="mt-1 line-clamp-3 text-sm text-text-muted">{f.answer}</p>
+                {!f.matched && <p className="mt-2 text-xs text-text-subtle">No knowledge-base match</p>}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="space-y-3">
