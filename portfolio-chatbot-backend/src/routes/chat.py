@@ -9,9 +9,8 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, StringConstraints
 
 from src.config import Config
-from src.services import pinecone_service
+from src.services import retrieval
 from src.services.chat_logging import log_chat
-from src.services.gemini_service import embed_text
 from src.services.groq_service import BusyError, detect_meeting_intent, generate_answer, generate_answer_stream
 from src.services.kb_sync import source_url
 from src.services.text_utils import highlight, strip_markdown
@@ -68,8 +67,7 @@ def _build_context(matches: list[dict]) -> str:
 
 def _retrieve(question: str) -> list[dict]:
     """Embed the question and return the Pinecone matches that clear MIN_SCORE."""
-    query_vector = embed_text(question, task_type="retrieval_query")
-    return [m for m in pinecone_service.query(query_vector) if m["score"] >= Config.MIN_SCORE]
+    return [m for m in retrieval.search(question) if m["score"] >= Config.MIN_SCORE]
 
 
 def _snippet(text: str, limit: int = 240) -> str:

@@ -1,6 +1,8 @@
 """Provider-agnostic text post-processing shared by whichever chat backend is active."""
 import re
 
+from src.config import Config
+
 
 def strip_markdown(text: str) -> str:
     """Strips markdown the widget would otherwise show literally -- a backstop for whenever the model slips some in."""
@@ -12,7 +14,7 @@ def strip_markdown(text: str) -> str:
     return text
 
 
-_PLACING = r"\b(?:1st|2nd|3rd|\d+th)\s+place\b"
+_PLACING = r"\b(?:placed\s+(?:1st|2nd|3rd|\d+th)|(?:1st|2nd|3rd|\d+th)\s+place)\b"
 _URL = re.compile(r"(https?://\S+)")
 MAX_HIGHLIGHTS = 10
 
@@ -33,3 +35,15 @@ def highlight(text: str, terms: list[str]) -> str:
         return f"**{m.group(0)}**"
 
     return "".join(part if i % 2 else pattern.sub(bold, part) for i, part in enumerate(_URL.split(text)))
+
+
+def clean_for_embedding(text: str) -> str:
+    """Drops the owner's name ("Vincent Teo", "Vincent", "Vincent's") before embedding. Nearly every entry and question
+    contains it, so it adds shared noise that pulls unrelated entries together."""
+    full = Config.OWNER_NAME.strip()
+    names = [full] + ([full.split()[0]] if " " in full else [])
+    cleaned = text
+    for name in names:
+        cleaned = re.sub(r"(?<!\w)" + re.escape(name) + r"(?:['’]s)?(?!\w)", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned if len(cleaned.split()) >= 2 else text

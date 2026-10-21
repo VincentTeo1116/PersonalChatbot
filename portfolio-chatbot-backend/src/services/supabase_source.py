@@ -134,6 +134,17 @@ def _experience_rows(entries: list[dict[str, Any]], name: str) -> list[dict[str,
     ]
 
 
+def _project_keywords(p: dict[str, Any]) -> str:
+    """Extra search words for a project, so "which project won a prize?" finds the one that did."""
+    text = f"{p.get('description', '')} {p.get('award') or ''}".lower()
+    words = []
+    if p.get("award") or any(w in text for w in ("placed", "won ", "winner", "prize")):
+        words.append("award, won, winner, prize, achievement, placed, ranking")
+    if "hackathon" in text:
+        words.append("hackathon, competition, built in 24-48 hours")
+    return ", ".join(words)
+
+
 def _project_rows(projects: list[dict[str, Any]]) -> list[dict[str, str]]:
     rows = []
     for p in projects:
@@ -144,6 +155,7 @@ def _project_rows(projects: list[dict[str, Any]]) -> list[dict[str, str]]:
                 "category": "Projects",
                 "url": f"/projects/{p['slug']}" if p.get("slug") else "/#projects",
                 "label": p["title"],
+                "keywords": _project_keywords(p),
                 "question": f"Tell me about the {p['title']} project",
                 "answer": _join(
                     p["description"],

@@ -27,9 +27,12 @@ class Config:
     # Groq reserves the requested output budget against the per-minute token limit, so an uncapped request can be rejected on its own.
     GROQ_MAX_ANSWER_TOKENS: int = int(os.getenv("GROQ_MAX_ANSWER_TOKENS", "500"))
 
+    # --- Owner (their name is stripped from text before embedding, since every entry mentions it and it blurs the matches) ---
+    OWNER_NAME: str = os.getenv("OWNER_NAME", "Vincent Teo")
+
     # --- Retrieval ---
     TOP_K: int = int(os.getenv("TOP_K", "4"))
-    MIN_SCORE: float = float(os.getenv("MIN_SCORE", "0.55"))
+    MIN_SCORE: float = float(os.getenv("MIN_SCORE", "0.58"))
 
     # --- Supabase (the knowledge base source: the same tables the portfolio site renders) ---
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "").rstrip("/")
