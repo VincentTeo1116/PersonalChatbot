@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import TestimonialSubmitForm from "@/components/TestimonialSubmitForm";
 import ThemeToggle from "@/components/ThemeToggle";
+import AnimatedArrow from "@/components/AnimatedArrow";
 import { getProfile } from "@/lib/data";
 import { SITE_URL } from "@/lib/seo";
 
@@ -29,7 +30,7 @@ export default async function TestimonialInvitePage() {
     <main className="flex-1">
       <header className="mx-auto flex max-w-xl items-center justify-between px-6 pt-8">
         <Link href="/" className="text-sm font-medium text-text-secondary transition-colors hover:text-foreground">
-          &larr; {profile.name}&apos;s portfolio
+          <AnimatedArrow direction="left" /> {profile.name}&apos;s portfolio
         </Link>
         <ThemeToggle />
       </header>

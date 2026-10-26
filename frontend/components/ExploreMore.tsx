@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SectionHeading from "@/components/SectionHeading";
+import AnimatedArrow from "@/components/AnimatedArrow";
 
 export default function ExploreMore() {
   return (
@@ -13,7 +14,7 @@ export default function ExploreMore() {
             { href: "/services", title: "Web development", text: "Explore the applications I build and discuss a website or AI integration." },
           ].map(({ href, title, text }) => (
             <Link key={href} href={href} className="rounded-2xl border border-border bg-background p-6 transition-colors hover:border-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-500">
-              <h3 className="text-lg font-semibold text-foreground">{title} &rarr;</h3>
+              <h3 className="text-lg font-semibold text-foreground">{title} <AnimatedArrow /></h3>
               <p className="mt-3 text-sm leading-relaxed text-text-secondary">{text}</p>
             </Link>
           ))}

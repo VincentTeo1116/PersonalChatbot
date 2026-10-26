@@ -4,6 +4,7 @@ import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import ProjectMedia from "@/components/ProjectMedia";
 import type { Fyp } from "@/lib/types";
+import AnimatedArrow from "@/components/AnimatedArrow";
 
 export default function FYP({ fyp }: { fyp: Fyp | null }) {
   const hasContent = Boolean(fyp?.title);
@@ -71,7 +72,7 @@ export default function FYP({ fyp }: { fyp: Fyp | null }) {
                       className="group/link inline-flex items-center gap-1 text-sm font-medium text-indigo-600 dark:text-indigo-300 transition-colors hover:text-indigo-500 dark:hover:text-indigo-200"
                     >
                       View repository on GitHub
-                      <span className="transition-transform duration-200 group-hover/link:translate-x-0.5">&rarr;</span>
+                      <AnimatedArrow direction="up-right" />
                     </a>
                   </div>
                 )}

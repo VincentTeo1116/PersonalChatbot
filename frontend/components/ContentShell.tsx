@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
+import AnimatedArrow from "@/components/AnimatedArrow";
 
 export default function ContentShell({ eyebrow, title, intro, children }: { eyebrow: string; title: string; intro?: string; children: ReactNode }) {
   return (
     <main className="flex-1">
       <header className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-5 px-6 pt-8">
-        <Link href="/" className="text-sm font-medium text-text-secondary hover:text-foreground">&larr; Portfolio</Link>
+        <Link href="/" className="text-sm font-medium text-text-secondary hover:text-foreground"><AnimatedArrow direction="left" /> Portfolio</Link>
         <nav aria-label="Explore the portfolio" className="flex flex-wrap items-center gap-4 text-sm text-text-secondary">
           <Link href="/research" className="hover:text-foreground">Research</Link>
           <Link href="/writing" className="hover:text-foreground">Writing</Link>

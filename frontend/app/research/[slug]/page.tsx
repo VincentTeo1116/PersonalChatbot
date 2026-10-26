@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ContentShell from "@/components/ContentShell";
+import AnimatedArrow from "@/components/AnimatedArrow";
 import CaseStudySections from "@/components/CaseStudySections";
 import { getProfile, getResearch } from "@/lib/data";
 import { absoluteUrl, contentMetadata, jsonLdString, SITE_URL } from "@/lib/seo";
@@ -51,11 +52,11 @@ export default async function ResearchPage({ params }: { params: Promise<{ slug:
         <p className="mt-2">Venue: {paper.venue}</p>
         {paper.supervisor && <p className="mt-2">Supervisor: {paper.supervisor}</p>}
         {paper.doi && <p className="mt-2 break-words">DOI: {paper.doi}</p>}
-        {paper.doiUrl && <a href={paper.doiUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex min-h-11 items-center font-medium text-indigo-600 dark:text-indigo-300">Read the original publication &rarr;</a>}
+        {paper.doiUrl && <a href={paper.doiUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex min-h-11 items-center font-medium text-indigo-600 dark:text-indigo-300">Read the original publication <AnimatedArrow direction="up-right" /></a>}
       </section>
       <CaseStudySections value={paper.caseStudy} />
       <div className="mt-12 flex flex-wrap gap-6 text-sm font-medium text-indigo-600 dark:text-indigo-300">
-        <Link href="/research">&larr; All research</Link><Link href="/writing">Read my engineering notes &rarr;</Link><Link href="/#contact">Discuss the research &rarr;</Link>
+        <Link href="/research"><AnimatedArrow direction="left" /> All research</Link><Link href="/writing">Read my engineering notes <AnimatedArrow /></Link><Link href="/#contact">Discuss the research <AnimatedArrow /></Link>
       </div>
     </ContentShell>
   );

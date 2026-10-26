@@ -2,6 +2,7 @@ import Link from "next/link";
 import ContentShell from "@/components/ContentShell";
 import { getProfile, getResearch } from "@/lib/data";
 import { contentMetadata } from "@/lib/seo";
+import AnimatedArrow from "@/components/AnimatedArrow";
 
 export const revalidate = 3600;
 
@@ -20,7 +21,7 @@ export default async function ResearchIndex() {
             <p className="text-sm text-indigo-600 dark:text-indigo-300">{paper.venue}</p>
             <h2 className="mt-2 text-xl font-semibold leading-snug text-foreground"><Link href={`/research/${paper.slug}`} className="hover:text-indigo-500">{paper.seoTitle || paper.title}</Link></h2>
             <p className="mt-4 text-base leading-relaxed text-text-secondary">{paper.description}</p>
-            <Link href={`/research/${paper.slug}`} className="mt-4 inline-flex min-h-11 items-center font-medium text-indigo-600 dark:text-indigo-300">Explore the research &rarr;</Link>
+            <Link href={`/research/${paper.slug}`} className="mt-4 inline-flex min-h-11 items-center font-medium text-indigo-600 dark:text-indigo-300">Explore the research <AnimatedArrow /></Link>
           </section>
         ))}
       </div>

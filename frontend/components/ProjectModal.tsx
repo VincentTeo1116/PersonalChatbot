@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import ProjectMedia from "@/components/ProjectMedia";
+import AnimatedArrow from "@/components/AnimatedArrow";
 
 export type PreviewItem = {
   title: string;
@@ -100,7 +101,7 @@ export default function ProjectModal({
                 rel="noreferrer"
                 className="rounded-full bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-indigo-400 hover:scale-105 active:scale-95"
               >
-                {primaryLink.label} &rarr;
+                {primaryLink.label} <AnimatedArrow direction="up-right" />
               </a>
             )}
             {project.links.slice(1).map((l) => (
@@ -119,7 +120,7 @@ export default function ProjectModal({
                 href={project.caseStudyHref}
                 className="inline-flex items-center gap-1 rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-foreground transition-all hover:bg-foreground/10 hover:scale-105 active:scale-95"
               >
-                Full case study &rarr;
+                Full case study <AnimatedArrow />
               </Link>
             )}
           </div>

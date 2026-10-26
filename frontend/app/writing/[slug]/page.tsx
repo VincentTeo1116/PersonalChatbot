@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ContentShell from "@/components/ContentShell";
+import AnimatedArrow from "@/components/AnimatedArrow";
 import { articles, getArticle } from "@/lib/writing";
 import { absoluteUrl, contentMetadata, jsonLdString, SITE_URL } from "@/lib/seo";
 import { getProfile } from "@/lib/data";
@@ -52,9 +53,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       <aside className="mt-12 rounded-2xl border border-border bg-surface p-6">
         <h2 className="text-xl font-semibold text-foreground">Explore the implementation</h2>
         <div className="mt-4 flex flex-wrap gap-5 text-sm font-medium text-indigo-600 dark:text-indigo-300">
-          <Link href="/projects/portfolio-chatbot">RAG portfolio case study &rarr;</Link>
-          {profile.contact.github && <a href={profile.contact.github} target="_blank" rel="noreferrer">Explore my GitHub &rarr;</a>}
-          <Link href="/#contact">Discuss an AI project &rarr;</Link>
+          <Link href="/projects/portfolio-chatbot">RAG portfolio case study <AnimatedArrow /></Link>
+          {profile.contact.github && <a href={profile.contact.github} target="_blank" rel="noreferrer">Explore my GitHub <AnimatedArrow direction="up-right" /></a>}
+          <Link href="/#contact">Discuss an AI project <AnimatedArrow /></Link>
         </div>
         {articles.filter((other) => other.slug !== article.slug).map((other) => <Link key={other.slug} href={`/writing/${other.slug}`} className="mt-5 block text-sm text-text-secondary underline underline-offset-4">Related: {other.title}</Link>)}
       </aside>

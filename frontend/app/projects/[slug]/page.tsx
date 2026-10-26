@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProjectMedia from "@/components/ProjectMedia";
 import ThemeToggle from "@/components/ThemeToggle";
+import AnimatedArrow from "@/components/AnimatedArrow";
 import { getProfile, getProjects } from "@/lib/data";
 import { SITE_URL, absoluteUrl, jsonLdString, metaDescription } from "@/lib/seo";
 import { CASE_STUDY_SECTIONS } from "@/lib/project-case-study";
@@ -78,7 +79,7 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }} />
       <header className="mx-auto flex max-w-3xl items-center justify-between px-6 pt-8">
         <Link href="/#projects" className="text-sm font-medium text-text-secondary transition-colors hover:text-foreground">
-          &larr; Back to {profile.name}&apos;s portfolio
+          <AnimatedArrow direction="left" /> Back to {profile.name}&apos;s portfolio
         </Link>
         <ThemeToggle />
       </header>
@@ -133,7 +134,7 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
               rel="noreferrer"
               className="rounded-full bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-indigo-400 hover:scale-105 active:scale-95"
             >
-              {primaryLink.label} &rarr;
+              {primaryLink.label} <AnimatedArrow direction="up-right" />
             </a>
           )}
           {project.links.slice(1).map((l) => (
@@ -178,7 +179,7 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
         <aside className="mt-14 rounded-2xl border border-indigo-400/30 bg-indigo-500/5 p-6">
           <h2 className="text-lg font-semibold text-foreground">Discuss this project</h2>
           <p className="mt-2 text-sm leading-relaxed text-text-secondary">Interested in the implementation, an opportunity, or building something together?</p>
-          <Link href="/#contact" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-indigo-600 px-5 text-sm font-semibold text-white transition hover:bg-indigo-500">Get in touch &rarr;</Link>
+          <Link href="/#contact" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-indigo-600 px-5 text-sm font-semibold text-white transition hover:bg-indigo-500">Get in touch <AnimatedArrow /></Link>
         </aside>
       </article>
     </main>

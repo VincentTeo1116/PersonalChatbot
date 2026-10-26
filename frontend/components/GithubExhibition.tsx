@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
+import AnimatedArrow from "@/components/AnimatedArrow";
 import type { GithubRepository } from "@/lib/github";
 
 type DetailTab = "idea" | "ingredients" | "bake";
@@ -147,7 +148,7 @@ export default function GithubExhibition({
                 <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-fuchsia-400/20 bg-fuchsia-500/10 text-2xl" aria-hidden>✿</div>
                 <h3 className="mt-5 text-xl font-semibold text-foreground">The cake is still in the oven</h3>
                 <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-text-muted">GitHub’s public project list isn’t available right now. You can still browse the whole collection on GitHub.</p>
-                <a href={`https://github.com/${username}`} target="_blank" rel="noreferrer" className="mt-6 inline-flex rounded-full bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400">Visit GitHub ↗</a>
+                <a href={`https://github.com/${username}`} target="_blank" rel="noreferrer" className="mt-6 inline-flex rounded-full bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400">Visit GitHub <AnimatedArrow direction="up-right" /></a>
               </div>
             ) : (
               <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
@@ -211,9 +212,9 @@ export default function GithubExhibition({
 
                   {filtered.length > LAYER_WIDTHS.length && (
                     <div className="relative mt-2 flex items-center justify-center gap-4">
-                      <button type="button" onClick={() => movePage(currentPage - 1)} disabled={currentPage === 0} aria-label="Previous cake layers" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-surface text-foreground transition hover:border-indigo-400/50 disabled:cursor-not-allowed disabled:opacity-35">←</button>
+                      <button type="button" onClick={() => movePage(currentPage - 1)} disabled={currentPage === 0} aria-label="Previous cake layers" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-surface text-foreground transition hover:border-indigo-400/50 disabled:cursor-not-allowed disabled:opacity-35"><AnimatedArrow direction="left" /></button>
                       <span className="text-xs tabular-nums text-text-muted">Cake {currentPage + 1} of {pageCount}</span>
-                      <button type="button" onClick={() => movePage(currentPage + 1)} disabled={currentPage >= pageCount - 1} aria-label="Next cake layers" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-surface text-foreground transition hover:border-indigo-400/50 disabled:cursor-not-allowed disabled:opacity-35">→</button>
+                      <button type="button" onClick={() => movePage(currentPage + 1)} disabled={currentPage >= pageCount - 1} aria-label="Next cake layers" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-surface text-foreground transition hover:border-indigo-400/50 disabled:cursor-not-allowed disabled:opacity-35"><AnimatedArrow /></button>
                     </div>
                   )}
 
@@ -286,8 +287,8 @@ export default function GithubExhibition({
                         </div>
 
                         <div className="mt-5 flex flex-wrap gap-3">
-                          <a href={selected.htmlUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-indigo-500 px-5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-indigo-400">Open recipe on GitHub <span aria-hidden>↗</span></a>
-                          {selected.homepage && <a href={selected.homepage} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm font-medium text-foreground transition hover:border-indigo-400/50 hover:bg-surface-hover">Taste the live demo ↗</a>}
+                          <a href={selected.htmlUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-indigo-500 px-5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-indigo-400">Open recipe on GitHub <AnimatedArrow direction="up-right" /></a>
+                          {selected.homepage && <a href={selected.homepage} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm font-medium text-foreground transition hover:border-indigo-400/50 hover:bg-surface-hover">Taste the live demo <AnimatedArrow direction="up-right" /></a>}
                         </div>
                       </motion.div>
                     ) : (
@@ -302,7 +303,7 @@ export default function GithubExhibition({
 
             <div className="flex flex-col gap-2 border-t border-border bg-surface-hover/40 px-5 py-4 text-xs text-text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
               <span>Project details refresh from GitHub every six hours.</span>
-              <a href={`https://github.com/${username}?tab=repositories`} target="_blank" rel="noreferrer" className="font-medium text-indigo-600 hover:underline dark:text-indigo-300">Browse every recipe ↗</a>
+              <a href={`https://github.com/${username}?tab=repositories`} target="_blank" rel="noreferrer" className="font-medium text-indigo-600 hover:underline dark:text-indigo-300">Browse every recipe <AnimatedArrow direction="up-right" /></a>
             </div>
           </div>
         </Reveal>

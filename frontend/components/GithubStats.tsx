@@ -1,4 +1,5 @@
 import Reveal from "@/components/Reveal";
+import AnimatedArrow from "@/components/AnimatedArrow";
 import SectionHeading from "@/components/SectionHeading";
 import StatCounter from "@/components/StatCounter";
 import { getGithubStats, type ContributionCalendar } from "@/lib/github";
@@ -85,7 +86,7 @@ export default async function GithubStats({ githubUrl }: { githubUrl: string | u
             rel="noreferrer"
             className="mt-8 inline-block text-sm font-medium text-indigo-600 dark:text-indigo-300 hover:underline"
           >
-            View full GitHub profile →
+            View full GitHub profile <AnimatedArrow direction="up-right" />
           </a>
         </Reveal>
       </div>

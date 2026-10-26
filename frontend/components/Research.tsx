@@ -8,6 +8,7 @@ import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import TiltCard from "@/components/TiltCard";
 import ProjectModal from "@/components/ProjectModal";
+import AnimatedArrow from "@/components/AnimatedArrow";
 import type { Publication } from "@/lib/types";
 
 export default function Research({ research }: { research: Publication[] }) {
@@ -56,7 +57,7 @@ export default function Research({ research }: { research: Publication[] }) {
                     {r.venue} · DOI: {r.doi}
                   </p>
                   <div className="mt-5 flex flex-wrap gap-4">
-                    <Link href={`/research/${r.slug}`} className="inline-flex min-h-11 items-center text-sm font-medium text-indigo-600 dark:text-indigo-300">Research explanation &rarr;</Link>
+                    <Link href={`/research/${r.slug}`} className="inline-flex min-h-11 items-center text-sm font-medium text-indigo-600 dark:text-indigo-300">Research explanation <AnimatedArrow /></Link>
                     <a
                       href={r.doiUrl}
                       target="_blank"
@@ -64,9 +65,7 @@ export default function Research({ research }: { research: Publication[] }) {
                       className="group/link inline-flex items-center gap-1 text-sm font-medium text-indigo-600 dark:text-indigo-300 transition-colors hover:text-indigo-500 dark:hover:text-indigo-200"
                     >
                       Read on IEEE Xplore
-                      <span className="transition-transform duration-200 group-hover/link:translate-x-0.5">
-                        &rarr;
-                      </span>
+                      <AnimatedArrow direction="up-right" />
                     </a>
                   </div>
                 </div>

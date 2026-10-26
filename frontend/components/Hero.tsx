@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, useMotionValue, useScroll, useSpring, useTransform } from "motion/react";
 import MagneticButton from "@/components/MagneticButton";
 import SplitText from "@/components/SplitText";
+import AnimatedArrow, { FlowArrow } from "@/components/AnimatedArrow";
 import type { Profile } from "@/lib/types";
 
 // Entrance animations are CSS (.enter-*, see globals.css) so they start at first paint instead of waiting for the JS bundle to hydrate; this just sets each element's start delay.
@@ -104,7 +105,7 @@ export default function Hero({ profile }: { profile: Profile }) {
                   }
                   className="rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-foreground/5 active:scale-95 inline-block"
                 >
-                  Chat with my AI assistant {"↓"}
+                  Chat with my AI assistant <AnimatedArrow direction="down" />
                 </button>
               </MagneticButton>
               {profile.contact.github && (
@@ -124,9 +125,9 @@ export default function Hero({ profile }: { profile: Profile }) {
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-text-secondary">
-              <a href="#contact" className="font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-300">Contact me &rarr;</a>
-              {profile.contact.github && <a href={profile.contact.github} target="_blank" rel="noreferrer" className="font-medium text-indigo-600 underline-offset-4 hover:underline sm:hidden dark:text-indigo-300">GitHub &rarr;</a>}
-              <span className="font-mono text-xs tracking-wide">Data &rarr; Models &rarr; Software</span>
+              <a href="#contact" className="font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-300">Contact me <AnimatedArrow /></a>
+              {profile.contact.github && <a href={profile.contact.github} target="_blank" rel="noreferrer" className="font-medium text-indigo-600 underline-offset-4 hover:underline sm:hidden dark:text-indigo-300">GitHub <AnimatedArrow direction="up-right" /></a>}
+              <span className="inline-flex items-center font-mono text-xs tracking-wide">Data <FlowArrow /> Models <FlowArrow /> Software</span>
             </div>
 
             <p style={delay(0.65)} className="enter-rise mt-6 hidden text-xs text-text-subtle sm:block">

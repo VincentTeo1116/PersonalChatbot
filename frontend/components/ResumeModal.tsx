@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { motion } from "motion/react";
+import AnimatedArrow from "@/components/AnimatedArrow";
 
 export default function ResumeModal({ resumeUrl, onClose }: { resumeUrl: string; onClose: () => void }) {
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function ResumeModal({ resumeUrl, onClose }: { resumeUrl: string;
               rel="noreferrer"
               className="text-xs font-medium text-indigo-600 dark:text-indigo-300 hover:underline"
             >
-              Open in new tab ↗
+              Open in new tab <AnimatedArrow direction="up-right" />
             </a>
             <button
               onClick={onClose}
