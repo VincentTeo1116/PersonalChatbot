@@ -42,10 +42,13 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           role: project.role ?? undefined,
           impact: project.impact ?? undefined,
           caseStudy: normalizeCaseStudy(project.case_study),
+          seoTitle: project.seo_title || undefined,
+          seoDescription: project.seo_description || undefined,
           updatedAt: project.updated_at,
         }}
         action={updateProject}
         caseStudyEnabled={"case_study" in project}
+        seoEnabled={"seo_title" in project}
         redirectTo="/admin/projects"
         submitLabel="Save changes"
       />

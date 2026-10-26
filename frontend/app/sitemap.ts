@@ -1,21 +1,25 @@
 import type { MetadataRoute } from "next";
-import { getProfile, getProjects } from "@/lib/data";
+import { getProjects, getResearch } from "@/lib/data";
 import { SITE_URL } from "@/lib/seo";
+import { articles } from "@/lib/writing";
 
 // Same cadence as the homepage: newly added projects show up without waiting for a redeploy.
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [profile, projects] = await Promise.all([getProfile(), getProjects()]);
-
-  // The homepage shows every section, so it changed whenever the profile or any project did.
-  const latest = [profile.updatedAt, ...projects.map((p) => p.updatedAt)].sort().at(-1);
+  const [projects, papers] = await Promise.all([getProjects(), getResearch()]);
 
   return [
-    { url: SITE_URL, lastModified: latest },
+    // Omit lastModified for aggregate pages: multiple independent sections can change.
+    { url: SITE_URL },
+    { url: `${SITE_URL}/research` },
+    { url: `${SITE_URL}/writing` },
+    { url: `${SITE_URL}/services` },
     ...projects.map((p) => ({
       url: `${SITE_URL}/projects/${p.slug}`,
       lastModified: p.updatedAt,
     })),
+    ...papers.map((paper) => ({ url: `${SITE_URL}/research/${paper.slug}`, lastModified: paper.updatedAt })),
+    ...articles.map((article) => ({ url: `${SITE_URL}/writing/${article.slug}`, lastModified: article.updated })),
   ];
 }

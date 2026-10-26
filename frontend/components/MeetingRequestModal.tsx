@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useEffect, useState, type ChangeEvent } from "react";
+import { useActionState, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { motion } from "motion/react";
 import { submitMeetingRequest, type MeetingRequestState } from "@/lib/actions/meetingRequest";
 import { validateMeetingRequest, type MeetingRequestInput } from "@/lib/validation/meetingRequest";
+import { trackPortfolioEvent } from "@/lib/analytics";
 
 const inputClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-indigo-400";
@@ -53,6 +54,13 @@ export default function MeetingRequestModal({
   }
 
   const success = state?.ok === true;
+  const leadRecorded = useRef(false);
+  useEffect(() => {
+    if (state?.ok && state.recorded && !leadRecorded.current) {
+      leadRecorded.current = true;
+      trackPortfolioEvent("generate_lead");
+    }
+  }, [state]);
 
   return (
     <motion.div

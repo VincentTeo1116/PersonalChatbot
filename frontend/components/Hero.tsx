@@ -50,11 +50,11 @@ export default function Hero({ profile }: { profile: Profile }) {
   };
 
   return (
-    <section id="top" className="relative overflow-hidden pt-24 pb-14 sm:pt-40 sm:pb-36">
+    <section id="top" className="relative isolate overflow-hidden pt-24 pb-14 sm:pt-40 sm:pb-28">
+      <div aria-hidden="true" className="engineering-grid pointer-events-none absolute inset-0 -z-10" />
       {/* Background glow */}
-      <motion.div style={{ y: glowY }} className="pointer-events-none absolute inset-0 -z-10">
-        <div className="animate-float absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 glow glow-indigo opacity-[var(--blob-opacity)]" />
-        <div className="animate-float-slow absolute top-20 right-0 h-[380px] w-[380px] glow glow-fuchsia opacity-[var(--blob-opacity)]" />
+      <motion.div aria-hidden="true" style={{ y: glowY }} className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 glow glow-indigo opacity-[var(--blob-opacity)]" />
       </motion.div>
 
       <motion.div
@@ -71,10 +71,10 @@ export default function Hero({ profile }: { profile: Profile }) {
 
           <h1 className="text-3xl sm:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
             <SplitText text={`Hi, I'm ${profile.name}.`} delay={0.15} />
-            <span className="block overflow-hidden pb-[0.15em] -mb-[0.15em]">
+            <span className="mt-2 block overflow-hidden pb-[0.15em] -mb-[0.15em] text-2xl leading-tight sm:text-4xl">
               {/* Two layers on purpose: the outer one plays the one-off slide-in, the inner one keeps the looping gradient shimmer. Both set `animation`, so sharing an element made the slide repeat. */}
               <span style={delay(0.4)} className="enter-word block">
-                <span className="block animate-gradient-x bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+                <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 bg-clip-text text-transparent dark:from-indigo-300 dark:via-violet-300 dark:to-fuchsia-300">
                   {profile.tagline}
                 </span>
               </span>
@@ -92,7 +92,7 @@ export default function Hero({ profile }: { profile: Profile }) {
                   href="#projects"
                   className="rounded-full bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-indigo-400 hover:shadow-lg hover:shadow-indigo-500/30 active:scale-95 inline-block"
                 >
-                  View my work
+                  Explore my projects
                 </a>
               </MagneticButton>
               <MagneticButton>
@@ -107,20 +107,26 @@ export default function Hero({ profile }: { profile: Profile }) {
                   Chat with my AI assistant {"↓"}
                 </button>
               </MagneticButton>
-              {profile.contact.linkedin && (
+              {profile.contact.github && (
                 <div className="hidden sm:block">
                 <MagneticButton>
                   <a
-                    href={profile.contact.linkedin}
+                    href={profile.contact.github}
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-foreground/5 active:scale-95 inline-block"
                   >
-                    Connect on LinkedIn
+                    View GitHub
                   </a>
                 </MagneticButton>
                 </div>
               )}
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-text-secondary">
+              <a href="#contact" className="font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-300">Contact me &rarr;</a>
+              {profile.contact.github && <a href={profile.contact.github} target="_blank" rel="noreferrer" className="font-medium text-indigo-600 underline-offset-4 hover:underline sm:hidden dark:text-indigo-300">GitHub &rarr;</a>}
+              <span className="font-mono text-xs tracking-wide">Data &rarr; Models &rarr; Software</span>
             </div>
 
             <p style={delay(0.65)} className="enter-rise mt-6 hidden text-xs text-text-subtle sm:block">

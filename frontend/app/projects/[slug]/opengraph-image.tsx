@@ -10,8 +10,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const projects = await getProjects();
   const project = projects.find((p) => p.slug === slug);
 
-  const title = project?.title ?? "Project";
-  const description = project?.description ?? "";
+  const title = project?.seoTitle || project?.title || "Project";
+  const description = project?.seoDescription || project?.description || "";
   const snippet = description.length > 150 ? `${description.slice(0, 150)}…` : description;
   const tags = project?.tags.slice(0, 4) ?? [];
 
@@ -30,7 +30,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         }}
       >
         <div style={{ display: "flex", fontSize: 26, color: "#a5b4fc", letterSpacing: 2 }}>CASE STUDY</div>
-        <div style={{ display: "flex", fontSize: 64, fontWeight: 700, color: "white", marginTop: 18, lineHeight: 1.15 }}>
+        <div style={{ display: "flex", fontSize: title.length > 64 ? 46 : 64, fontWeight: 700, color: "white", marginTop: 18, lineHeight: 1.15 }}>
           {title}
         </div>
         {snippet && (

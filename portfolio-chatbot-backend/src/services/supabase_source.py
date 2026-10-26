@@ -201,6 +201,8 @@ def _research_rows(papers: list[dict[str, Any]]) -> list[dict[str, str]]:
         rows.append(
             {
                 "category": "Research",
+                "url": f"/research/{r['slug']}" if r.get("slug") else "/#research",
+                "label": r["title"],
                 "question": f"Tell me about the paper '{r['title']}'",
                 "answer": _join(
                     f"'{r['title']}', published at {r['venue']}." if r.get("venue") else f"'{r['title']}'.",
@@ -211,6 +213,22 @@ def _research_rows(papers: list[dict[str, Any]]) -> list[dict[str, str]]:
                 ),
             }
         )
+        details = r.get("case_study")
+        if isinstance(details, dict):
+            for key, title in (
+                ("problem", "The problem"), ("contribution", "My contribution"),
+                ("approach", "How it works"), ("decisions", "Engineering decisions"),
+                ("validation", "Evidence and evaluation"), ("limitations", "Limitations and next steps"),
+            ):
+                text = details.get(key)
+                if isinstance(text, str) and text.strip():
+                    rows.append({
+                        "category": "Research",
+                        "url": f"/research/{r['slug']}#{key}" if r.get("slug") else "/#research",
+                        "label": f"{r['title']}: {title}",
+                        "question": f"{title} for the paper '{r['title']}'",
+                        "answer": f"{r['title']} - {title}: {text.strip()}",
+                    })
     return rows
 
 

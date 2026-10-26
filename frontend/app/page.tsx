@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import TechMarquee from "@/components/TechMarquee";
 import GithubStats from "@/components/GithubStats";
-import GithubExhibition from "@/components/GithubExhibition";
+import GithubExhibitionSection from "@/components/GithubExhibitionSection";
+import ExploreMore from "@/components/ExploreMore";
 import WorkExperience from "@/components/WorkExperience";
 import MobileActionBar from "@/components/MobileActionBar";
 import Projects from "@/components/Projects";
@@ -19,14 +21,13 @@ import MeetingRequestLauncher from "@/components/MeetingRequestLauncher";
 import TestimonialLauncher from "@/components/TestimonialLauncher";
 import ContactNudge from "@/components/ContactNudge";
 import { getProfile, getProjects, getResearch, getFyp, getHackathonPhotos, getWorkExperience, getTestimonials } from "@/lib/data";
-import { getGithubRepositories } from "@/lib/github";
 
 // Prerendered + cached; admin saves bust this instantly via revalidatePath("/"), this is just a safety-net refresh in case one of those is ever missed.
 export const revalidate = 3600;
 
 export default async function Home() {
   const profilePromise = getProfile();
-  const [profile, projects, research, fyp, hackathonPhotos, workExperience, testimonials, githubExhibition] = await Promise.all([
+  const [profile, projects, research, fyp, hackathonPhotos, workExperience, testimonials] = await Promise.all([
     profilePromise,
     getProjects(),
     getResearch(),
@@ -34,27 +35,28 @@ export default async function Home() {
     getHackathonPhotos(),
     getWorkExperience(),
     getTestimonials(),
-    profilePromise.then((value) => getGithubRepositories(value.contact.github)),
   ]);
 
   return (
     <>
       <Nav profile={profile} />
-      <main className="flex-1">
+      <main className="flex-1 overflow-x-clip">
         <Hero profile={profile} />
-        <TechMarquee items={profile.skills.flatMap((s) => s.items.map((i) => i.name))} />
-        <About profile={profile} research={research} />
-        <GithubStats githubUrl={profile.contact.github} />
-        <WorkExperience experience={workExperience} />
         <Projects projects={projects} />
-        {githubExhibition && (
-          <GithubExhibition
-            username={githubExhibition.username}
-            repositories={githubExhibition.repositories}
-          />
-        )}
+        <WorkExperience experience={workExperience} />
         <Research research={research} />
+        <About profile={profile} research={research} />
+        <TechMarquee items={profile.skills.flatMap((s) => s.items.map((i) => i.name))} />
         <FYP fyp={fyp} />
+        <ExploreMore />
+        <Suspense fallback={<div aria-hidden className="min-h-80" />}>
+          <GithubStats githubUrl={profile.contact.github} />
+        </Suspense>
+        {profile.contact.github && (
+          <Suspense fallback={<section aria-label="GitHub gallery loading" className="min-h-[44rem] py-24"><p className="mx-auto max-w-6xl px-6 text-text-secondary">Loading public repositories…</p></section>}>
+            <GithubExhibitionSection githubUrl={profile.contact.github} />
+          </Suspense>
+        )}
         <HackathonGallery hackathonPhotos={hackathonPhotos} />
         <Testimonials testimonials={testimonials} />
         <Contact profile={profile} />

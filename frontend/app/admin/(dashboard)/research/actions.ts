@@ -4,14 +4,32 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { uploadNextImage } from "@/lib/storage";
+import { editorialSeoFields } from "@/lib/editorial-seo";
+import { CASE_STUDY_MAX_LENGTH, CASE_STUDY_SECTIONS, normalizeCaseStudy } from "@/lib/project-case-study";
 
 function refresh() {
   revalidatePath("/");
   revalidatePath("/admin/research");
+  revalidatePath("/research");
+  revalidatePath("/research/[slug]", "page");
+  revalidatePath("/sitemap.xml");
+}
+
+function researchDetails(formData: FormData) {
+  return formData.get("researchDetailsEnabled") === "true" ? {
+    case_study: normalizeCaseStudy(Object.fromEntries(CASE_STUDY_SECTIONS.map(({ key }) => [key, String(formData.get(`research-${key}`) ?? "")]))),
+  } : {};
+}
+
+function detailsError(formData: FormData) {
+  if (formData.get("researchDetailsEnabled") !== "true") return undefined;
+  const tooLong = CASE_STUDY_SECTIONS.find(({ key }) => String(formData.get(`research-${key}`) ?? "").length > CASE_STUDY_MAX_LENGTH);
+  return tooLong ? `${tooLong.title} must be ${CASE_STUDY_MAX_LENGTH} characters or fewer.` : undefined;
 }
 
 export async function createResearch(formData: FormData) {
-  queueChatbotSync();
+  const validationError = detailsError(formData);
+  if (validationError) return { error: validationError };
   const supabase = await createClient();
   const { count } = await supabase.from("research").select("*", { count: "exact", head: true });
 
@@ -27,18 +45,22 @@ export async function createResearch(formData: FormData) {
       doi_url: String(formData.get("doiUrl") ?? ""),
       description: String(formData.get("description") ?? ""),
       sort_order: count ?? 0,
+      ...researchDetails(formData),
+      ...editorialSeoFields(formData),
     })
     .select("id")
     .single();
 
   if (error || !data) return { error: error?.message ?? "Failed to create research entry" };
 
+  queueChatbotSync();
   refresh();
   return { ok: true, redirectTo: `/admin/research/${data.id}` };
 }
 
 export async function updateResearch(formData: FormData) {
-  queueChatbotSync();
+  const validationError = detailsError(formData);
+  if (validationError) return { error: validationError };
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase
@@ -53,22 +75,25 @@ export async function updateResearch(formData: FormData) {
       doi_url: String(formData.get("doiUrl") ?? ""),
       description: String(formData.get("description") ?? ""),
       updated_at: new Date().toISOString(),
+      ...researchDetails(formData),
+      ...editorialSeoFields(formData),
     })
     .eq("id", id);
 
   if (error) return { error: error.message };
 
+  queueChatbotSync();
   refresh();
   revalidatePath(`/admin/research/${id}`);
   return { ok: true };
 }
 
 export async function deleteResearch(formData: FormData) {
-  queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase.from("research").delete().eq("id", id);
   if (error) return { error: error.message };
+  queueChatbotSync();
   refresh();
   return { ok: true };
 }

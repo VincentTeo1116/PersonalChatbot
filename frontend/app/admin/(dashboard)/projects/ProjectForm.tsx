@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Project } from "@/lib/types";
 import { AdminForm, type ActionResult } from "@/components/admin/AdminFeedback";
 import { CASE_STUDY_MAX_LENGTH, CASE_STUDY_SECTIONS } from "@/lib/project-case-study";
+import SeoFields from "@/components/admin/SeoFields";
 
 const inputClass = "admin-input";
 const labelClass = "admin-label";
@@ -16,6 +17,7 @@ export default function ProjectForm({
   submitLabel,
   redirectTo,
   caseStudyEnabled = false,
+  seoEnabled = false,
 }: {
   project?: Project;
   action: (formData: FormData) => Promise<ActionResult>;
@@ -23,6 +25,7 @@ export default function ProjectForm({
   /** Where to go after a successful save (edit forms); create actions return their own redirectTo. */
   redirectTo?: string;
   caseStudyEnabled?: boolean;
+  seoEnabled?: boolean;
 }) {
   // "Live site" gets its own field below, auto-saved as the first links entry, so it's not typed twice.
   const [liveSiteUrl, setLiveSiteUrl] = useState(
@@ -154,6 +157,8 @@ export default function ProjectForm({
           + Add link
         </button>
       </div>
+
+      {seoEnabled && <SeoFields title={project?.seoTitle} description={project?.seoDescription} />}
 
       <button type="submit" className="admin-btn admin-btn-primary">
         {submitLabel}

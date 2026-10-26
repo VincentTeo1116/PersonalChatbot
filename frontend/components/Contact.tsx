@@ -97,7 +97,7 @@ export default function Contact({ profile }: { profile: Profile }) {
           {profile.contact.resumeUrl && (
             <Reveal delay={300} direction="up">
               <MagneticButton>
-                <button type="button" onClick={() => setResumeOpen(true)} className={OUTLINE_BUTTON}>
+                <button type="button" data-analytics-event="resume_open" onClick={() => setResumeOpen(true)} className={OUTLINE_BUTTON}>
                   Resume
                 </button>
               </MagneticButton>

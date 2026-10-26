@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { AnimatePresence } from "motion/react";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
@@ -40,7 +41,7 @@ export default function Research({ research }: { research: Publication[] }) {
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="font-semibold text-foreground text-lg leading-snug">{r.title}</h3>
+                  <h3 className="font-semibold text-foreground text-lg leading-snug"><Link href={`/research/${r.slug}`} className="hover:text-indigo-500">{r.title}</Link></h3>
                   <p className="mt-3 text-sm text-text-secondary">
                     {r.authors.map((a, idx) => (
                       <span key={a}>
@@ -54,7 +55,8 @@ export default function Research({ research }: { research: Publication[] }) {
                   <p className="mt-4 text-xs text-text-subtle">
                     {r.venue} · DOI: {r.doi}
                   </p>
-                  <div className="mt-5">
+                  <div className="mt-5 flex flex-wrap gap-4">
+                    <Link href={`/research/${r.slug}`} className="inline-flex min-h-11 items-center text-sm font-medium text-indigo-600 dark:text-indigo-300">Research explanation &rarr;</Link>
                     <a
                       href={r.doiUrl}
                       target="_blank"
@@ -81,6 +83,7 @@ export default function Research({ research }: { research: Publication[] }) {
               title: previewPaper.title,
               description: previewPaper.description,
               image: previewPaper.image,
+              caseStudyHref: `/research/${previewPaper.slug}`,
               links: [{ label: "Read on IEEE Xplore", url: previewPaper.doiUrl }],
             }}
             onClose={() => setPreviewSlug(null)}

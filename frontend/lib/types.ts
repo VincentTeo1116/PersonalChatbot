@@ -87,6 +87,8 @@ export type Project = {
   /** A concrete outcome, e.g. "Cut manual grading time by ~60%, used by 50+ students". */
   impact?: string;
   caseStudy?: ProjectCaseStudy;
+  seoTitle?: string;
+  seoDescription?: string;
   updatedAt: string;
 };
 
@@ -101,6 +103,10 @@ export type Publication = {
   doiUrl: string;
   description: string;
   image: string;
+  updatedAt?: string;
+  caseStudy?: ProjectCaseStudy;
+  seoTitle?: string;
+  seoDescription?: string;
 };
 
 export type HackathonPhoto = {

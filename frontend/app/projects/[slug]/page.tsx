@@ -4,19 +4,17 @@ import { notFound } from "next/navigation";
 import ProjectMedia from "@/components/ProjectMedia";
 import ThemeToggle from "@/components/ThemeToggle";
 import { getProfile, getProjects } from "@/lib/data";
-import { SITE_URL, absoluteUrl, jsonLdString } from "@/lib/seo";
+import { SITE_URL, absoluteUrl, jsonLdString, metaDescription } from "@/lib/seo";
 import { CASE_STUDY_SECTIONS } from "@/lib/project-case-study";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const [profile, projects] = await Promise.all([getProfile(), getProjects()]);
   const project = projects.find((p) => p.slug === slug);
-  if (!project) return { title: "Project not found" };
+  if (!project) notFound();
 
-  const title = `${project.title} | ${profile.name}'s AI & Web Development Portfolio`;
-  const description = project.description.length > 150
-    ? `${project.description.slice(0, 147).replace(/\s+\S*$/, "").trimEnd()}…`
-    : project.description;
+  const title = `${project.seoTitle || project.title} | ${profile.name}`;
+  const description = metaDescription(project.seoDescription || project.description);
 
   return {
     title: { absolute: title },
@@ -108,7 +106,7 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
         )}
 
         <p className="mt-8 text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">Engineering case study</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{project.title}</h1>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{project.seoTitle || project.title}</h1>
         {project.role && <p className="mt-1 text-sm text-text-subtle">{project.role}</p>}
 
         <div className="mt-4 flex flex-wrap gap-2">

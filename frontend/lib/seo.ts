@@ -9,3 +9,20 @@ export function absoluteUrl(pathOrUrl: string) {
 export function jsonLdString(data: unknown) {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
+
+/** A compact readable summary, without cutting a word in half. */
+export function metaDescription(text: string, limit = 160) {
+  const clean = text.replace(/\s+/g, " ").trim();
+  return clean.length <= limit ? clean : `${clean.slice(0, limit - 1).replace(/\s+\S*$/, "")}…`;
+}
+
+export function contentMetadata(title: string, description: string, path: string) {
+  const url = absoluteUrl(path);
+  return {
+    title: { absolute: title },
+    description: metaDescription(description),
+    alternates: { canonical: url },
+    openGraph: { type: "website" as const, url, title, description: metaDescription(description), images: [absoluteUrl("/opengraph-image")] },
+    twitter: { card: "summary_large_image" as const, title, description: metaDescription(description), images: [absoluteUrl("/opengraph-image")] },
+  };
+}

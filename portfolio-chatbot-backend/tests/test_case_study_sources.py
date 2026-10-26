@@ -1,6 +1,6 @@
 import unittest
 
-from src.services.supabase_source import _project_rows
+from src.services.supabase_source import _project_rows, _research_rows
 
 
 class CaseStudySourceTests(unittest.TestCase):
@@ -47,6 +47,16 @@ class CaseStudySourceTests(unittest.TestCase):
         for value in (None, [], "draft", 42):
             with self.subTest(value=value):
                 self.assertEqual(len(_project_rows([self.project(case_study=value)])), 1)
+
+    def test_research_sources_link_to_the_paper_and_specific_section(self):
+        rows = _research_rows([{
+            "slug": "forecasting", "title": "Forecasting research", "description": "Research summary.",
+            "case_study": {"approach": "XGBoost with SHAP.", "private_notes": "Ignore this."},
+        }])
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["url"], "/research/forecasting")
+        self.assertEqual(rows[1]["url"], "/research/forecasting#approach")
+        self.assertNotIn("Ignore this.", str(rows))
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ import "./globals.css";
 import { getProfile } from "@/lib/data";
 import MotionProvider from "@/components/MotionProvider";
 import GoogleAnalyticsLoader from "@/components/GoogleAnalyticsLoader";
+import InteractionAnalytics from "@/components/InteractionAnalytics";
 import { SITE_URL, absoluteUrl, jsonLdString } from "@/lib/seo";
 
 const geistSans = Geist({
@@ -104,6 +105,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <MotionProvider>{children}</MotionProvider>
         <Analytics />
         <GoogleAnalyticsLoader />
+        <InteractionAnalytics />
       </body>
     </html>
   );

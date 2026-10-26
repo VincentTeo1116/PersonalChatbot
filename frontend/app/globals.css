@@ -413,3 +413,11 @@ body::before {
 .glow-fuchsia {
   background: radial-gradient(closest-side, #d946ef, transparent);
 }
+
+/* A static engineering grid gives the hero structure without an animated canvas. */
+.engineering-grid {
+  background-image: linear-gradient(to right, var(--border-color) 1px, transparent 1px), linear-gradient(to bottom, var(--border-color) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.38;
+  mask-image: linear-gradient(to bottom, transparent, black 25%, black 60%, transparent);
+}

@@ -44,7 +44,7 @@ export async function getGithubRepositories(
   try {
     const response = await fetch(
       `https://api.github.com/users/${username}/repos?per_page=100&sort=updated&type=owner`,
-      { headers: { Accept: "application/vnd.github+json" }, next: { revalidate: 21600 } },
+      { headers: { Accept: "application/vnd.github+json" }, next: { revalidate: 21600 }, signal: AbortSignal.timeout(5000) },
     );
     if (!response.ok) return null;
     const repos = (await response.json()) as Array<{
@@ -91,7 +91,7 @@ export type RepoLanguage = { name: string; percent: number | null };
 async function fetchLanguages(url: string, token?: string): Promise<Response> {
   const headers: Record<string, string> = { Accept: "application/vnd.github+json" };
   if (token) headers.Authorization = `Bearer ${token}`;
-  return fetch(url, { headers, next: { revalidate: 21600 } });
+  return fetch(url, { headers, next: { revalidate: 21600 }, signal: AbortSignal.timeout(5000) });
 }
 
 // Top languages by code size for one repo. Cached 6h server-side (shared across every visitor, not just within one person's session). Uses GITHUB_TOKEN if set for the higher authenticated rate limit, but falls back to an unauthenticated request if that token is missing or has gone bad (expired/revoked) -- never worse than the old client-side fetch, which never had a token at all.
@@ -136,6 +136,7 @@ async function getGithubContributions(username: string): Promise<ContributionCal
 
   try {
     const res = await fetch("https://api.github.com/graphql", {
+      signal: AbortSignal.timeout(5000),
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -188,8 +189,9 @@ export async function getGithubStats(githubUrl: string | undefined | null): Prom
   try {
     const headers = { Accept: "application/vnd.github+json" };
     const [userRes, reposRes, contributions] = await Promise.all([
-      fetch(`https://api.github.com/users/${username}`, { headers, next: { revalidate: 21600 } }),
+      fetch(`https://api.github.com/users/${username}`, { headers, next: { revalidate: 21600 }, signal: AbortSignal.timeout(5000) }),
       fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, {
+        signal: AbortSignal.timeout(5000),
         headers,
         next: { revalidate: 21600 },
       }),

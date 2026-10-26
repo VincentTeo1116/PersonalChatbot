@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { validateMeetingRequest, hasErrors, type MeetingRequestErrors } from "@/lib/validation/meetingRequest";
 
 export type MeetingRequestState =
-  | { ok: true }
+  | { ok: true; recorded?: true }
   | { ok: false; errors?: MeetingRequestErrors; error?: string }
   | undefined;
 
@@ -55,5 +55,5 @@ export async function submitMeetingRequest(
     }
   });
 
-  return { ok: true };
+  return { ok: true, recorded: true };
 }

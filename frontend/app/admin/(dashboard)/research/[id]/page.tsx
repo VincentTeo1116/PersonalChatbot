@@ -5,6 +5,7 @@ import PageHeader from "@/components/admin/PageHeader";
 import ResearchForm from "../ResearchForm";
 import { updateResearch, uploadResearchImage } from "../actions";
 import { AdminForm } from "@/components/admin/AdminFeedback";
+import { normalizeCaseStudy } from "@/lib/project-case-study";
 
 const BUCKET = "portfolio-content";
 
@@ -35,8 +36,13 @@ export default async function EditResearchPage({ params }: { params: Promise<{ i
           doiUrl: research.doi_url,
           description: research.description,
           image: imageUrl,
+          updatedAt: research.updated_at,
+          caseStudy: normalizeCaseStudy(research.case_study),
+          seoTitle: research.seo_title || undefined,
+          seoDescription: research.seo_description || undefined,
         }}
         action={updateResearch}
+        editorialEnabled={"case_study" in research && "seo_title" in research}
         redirectTo="/admin/research"
         submitLabel="Save changes"
       />

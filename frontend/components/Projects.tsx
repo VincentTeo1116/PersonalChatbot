@@ -53,7 +53,9 @@ export default function Projects({ projects }: { projects: Project[] }) {
   return (
     <section id="projects" className="py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6">
-        <SectionHeading eyebrow="Projects" title="Things I've built" />
+        <SectionHeading eyebrow="Selected work" title="AI systems & software I've built">
+          <p className="mt-4 max-w-2xl leading-relaxed text-text-secondary">Explore the problem, implementation, engineering decisions, and evidence behind each project.</p>
+        </SectionHeading>
 
         <div className="mt-12 grid gap-8 sm:grid-cols-2">
           {projects.map((p, i) => {

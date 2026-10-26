@@ -156,6 +156,75 @@ an invite-link card (copy link, WhatsApp, email) pointing to `/testimonial`, whi
 
 ## SEO
 
+Public content now also has `/research`, `/research/[slug]`, `/writing`,
+`/writing/[slug]`, and `/services` routes, linked from the homepage. Research uses the
+existing Supabase records. The two technical articles in `lib/writing.ts` explain this
+repository's implementation and evaluation limitations; update their content/dates when
+the implementation changes. They contain no invented benchmark results.
+
+Run `supabase/014_editorial_seo.sql` after migration 013 to enable editable search titles,
+descriptions, and research sections. It fills blank search text for the three flagship
+projects and adds a research summary from existing portfolio facts. Review the research
+contribution and findings against the original work before adding them. Deploy frontend
+and backend, then run **Admin > Chatbot > Sync chatbot now** to index research sections.
+The new routes work with existing descriptions before the migration; older admin forms
+continue to save without referencing columns that are not yet present.
+
+**Admin > SEO & measurement** shows configuration status. A present verification tag
+does not mean Google ownership verification has completed; a GA ID does not establish
+that analytics events are arriving. Confirm both in their respective Google accounts.
+Keep the existing production values for `NEXT_PUBLIC_GA_ID`,
+`NEXT_PUBLIC_GSC_VERIFICATION`, and `NEXT_PUBLIC_SITE_URL` in Vercel when deploying.
+
+### Conversions and field performance
+
+Public production pages track `github_click`, `email_click`, `linkedin_click`,
+`contact_click`, `resume_open`, and `meeting_request_open`. A `generate_lead` event is
+sent once only after a successful database-backed meeting request; validation errors
+and honeypot fake-success responses do not count. Mark `generate_lead` as a GA4 key
+event. Click events indicate interest, not completed enquiries. Event payloads contain
+the page path, never form values, email addresses, or destination query strings.
+
+GA4 also receives `web_vital` events for LCP, INP, CLS, and TTFB when its script is
+available. Register `metric_name` and `metric_rating` as event-scoped dimensions and
+`metric_value` as a numeric custom metric to analyse them. Values use the native units
+(CLS is unitless; timing metrics are milliseconds). Use `metric_id` to identify updates
+to the same measurement. Analytics blockers and scripts that have not loaded can prevent
+collection. These events do not substitute for Search Console's aggregated field data.
+
+### Deployment and first-week checks
+
+1. Apply the migrations, review the editorial copy, and deploy both applications.
+2. Verify the exact URL-prefix property in Search Console, submit `/sitemap.xml`, and
+   inspect the homepage plus priority project, research, and writing URLs.
+3. Use GA4 Realtime to confirm a GitHub click and one genuine contact submission.
+4. Record a baseline of impressions, clicks, indexed URLs, GitHub clicks, and completed
+   enquiries. Compare the same measures at the end of the week; indexing and ranking
+   changes can take longer and small samples are not evidence of sustained growth.
+5. Share a useful case study or technical article on LinkedIn with a tagged link such as
+   `?utm_source=linkedin&utm_medium=social&utm_campaign=portfolio_research` to distinguish
+   that traffic. Publishing or sending those posts is a separate action.
+
+Run `node scripts/audit-seo.mjs https://vincent16.vercel.app` for a read-only audit of
+status codes, canonical URLs, titles, descriptions, H1s, JSON-LD, and tag presence.
+It checks up to 16 sitemap URLs and saves `.generated/seo-audit.json`. A local production
+server can be checked with
+`node scripts/audit-seo.mjs http://127.0.0.1:3100 https://vincent16.vercel.app`.
+The optional third argument is the expected canonical origin. The report is a technical
+check, not a ranking, Search Console verification, analytics-delivery, or Lighthouse test.
+
+For a visual check of a running production server, run
+`node scripts/preview-seo.mjs http://127.0.0.1:3100`. It uses an isolated headless Chrome
+profile, checks 1440px desktop and 390px mobile layouts, verifies the hero image, and
+saves previews in `.generated/`. Set `CHROME_PATH` if Chrome is installed elsewhere.
+The homepage now puts projects, experience, and research before biography and GitHub
+extras. GitHub sections use Suspense and bounded external fetches; a static hero grid
+adds visual structure without a canvas or an extra animation dependency.
+
+Google's guidance: [SEO starter guide](https://developers.google.com/search/docs/fundamentals/seo-starter-guide),
+[Search Console verification](https://support.google.com/webmasters/answer/9008080), and
+[helpful content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content).
+
 Project case studies support six optional sections: the problem, personal contribution,
 architecture, engineering decisions, evidence/evaluation, and limitations. Edit them in
 **Admin > Projects** after migration 013. Blank sections are hidden. Existing project

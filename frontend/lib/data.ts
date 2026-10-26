@@ -165,6 +165,8 @@ export const getProjects = cache(async (): Promise<Project[]> => {
       role: row.role ?? undefined,
       impact: row.impact ?? undefined,
       caseStudy: normalizeCaseStudy(row.case_study),
+      seoTitle: row.seo_title || undefined,
+      seoDescription: row.seo_description || undefined,
       updatedAt: row.updated_at,
     };
   });
@@ -185,6 +187,10 @@ export const getResearch = cache(async (): Promise<Publication[]> => {
     doiUrl: row.doi_url,
     description: row.description,
     image: publicUrl(supabase, row.image_path, "/projects/placeholder.svg"),
+    updatedAt: row.updated_at,
+    caseStudy: normalizeCaseStudy(row.case_study),
+    seoTitle: row.seo_title || undefined,
+    seoDescription: row.seo_description || undefined,
   }));
 });
 

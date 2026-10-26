@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
 import { CASE_STUDY_MAX_LENGTH, CASE_STUDY_SECTIONS, normalizeCaseStudy } from "@/lib/project-case-study";
+import { editorialSeoFields } from "@/lib/editorial-seo";
 
 function refresh() {
   revalidatePath("/");
@@ -58,6 +59,7 @@ export async function createProject(formData: FormData) {
       impact: String(formData.get("impact") ?? "") || null,
       sort_order: count ?? 0,
       ...caseStudyFields(formData),
+      ...editorialSeoFields(formData),
     })
     .select("id")
     .single();
@@ -89,6 +91,7 @@ export async function updateProject(formData: FormData) {
       impact: String(formData.get("impact") ?? "") || null,
       updated_at: new Date().toISOString(),
       ...caseStudyFields(formData),
+      ...editorialSeoFields(formData),
     })
     .eq("id", id);
 

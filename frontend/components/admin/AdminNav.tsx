@@ -30,6 +30,7 @@ const NAV = [
   { href: "/admin/hackathons", label: "Hackathons", icon: "hackathons" },
   { href: "/admin/meeting-requests", label: "Meeting requests", icon: "meetings" },
   { href: "/admin/chatbot", label: "Chatbot", icon: "chatbot" },
+  { href: "/admin/seo", label: "SEO & measurement", icon: "research" },
 ];
 
 export default function AdminNav() {

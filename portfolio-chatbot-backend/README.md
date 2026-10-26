@@ -106,6 +106,7 @@ Supabase's REST API with `httpx`, then each row is turned into a FAQ-style entry
 | `projects` | one per project: description, role, impact, award, tech tags, links |
 | `projects.case_study` | one additional entry per nonempty case study section, linked to its heading; optional until frontend migration 013 is applied |
 | `research` | one per paper: venue, authors, supervisor, DOI, description |
+| `research.case_study` | additional entries for authored research sections, with links to `/research/[slug]` headings; optional until frontend migration 014 is applied |
 | `fyp` | one entry, title/description/dataset/supervisor/feedback/GitHub — only emitted once the admin fills it in (skipped while it's still the blank "Coming Soon" state) |
 
 Hackathon photos, testimonials, and chat logs are not included — captions/quotes/logs aren't

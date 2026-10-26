@@ -7,13 +7,11 @@ import ThemeToggle from "@/components/ThemeToggle";
 import MagneticButton from "@/components/MagneticButton";
 
 const LINKS = [
-  { href: "#about", label: "About" },
-  { href: "#experience", label: "Experience" },
   { href: "#projects", label: "Projects" },
-  { href: "#github-exhibition", label: "GitHub Gallery" },
+  { href: "#experience", label: "Experience" },
   { href: "#research", label: "Research" },
-  { href: "#fyp", label: "FYP" },
-  { href: "#hackathons", label: "Hackathons" },
+  { href: "#about", label: "About" },
+  { href: "#explore", label: "Explore" },
   { href: "#contact", label: "Contact" },
 ];
 

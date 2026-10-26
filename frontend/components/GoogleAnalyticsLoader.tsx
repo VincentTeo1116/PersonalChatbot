@@ -7,6 +7,6 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 export default function GoogleAnalyticsLoader() {
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
   const pathname = usePathname();
-  if (!gaId || pathname.startsWith("/admin")) return null;
-  return <GoogleAnalytics gaId={gaId} />;
+  if (!/^G-[A-Z0-9]+$/.test(gaId || "") || pathname.startsWith("/admin") || process.env.NODE_ENV !== "production") return null;
+  return <GoogleAnalytics gaId={gaId!} />;
 }
