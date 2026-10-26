@@ -7,5 +7,5 @@ export function absoluteUrl(pathOrUrl: string) {
 
 /** Serialises JSON-LD for a <script> tag, escaping "<" so admin-entered text can't close the tag early. */
 export function jsonLdString(data: unknown) {
-  return JSON.stringify(data).replace(/</g, "\u003c");
+  return JSON.stringify(data).replace(/</g, "\\u003c");
 }

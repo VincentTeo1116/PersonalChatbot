@@ -1,3 +1,5 @@
+import type { ProjectCaseStudy } from "@/lib/project-case-study";
+
 export type EducationImage = {
   src: string;
   caption: string;
@@ -84,6 +86,7 @@ export type Project = {
   role?: string;
   /** A concrete outcome, e.g. "Cut manual grading time by ~60%, used by 50+ students". */
   impact?: string;
+  caseStudy?: ProjectCaseStudy;
   updatedAt: string;
 };
 

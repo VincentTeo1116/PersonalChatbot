@@ -6,6 +6,7 @@ import PageHeader from "@/components/admin/PageHeader";
 import ProjectForm from "../ProjectForm";
 import { deleteProjectImage, setCoverImage, updateProject, uploadProjectImage } from "../actions";
 import { AdminForm } from "@/components/admin/AdminFeedback";
+import { normalizeCaseStudy } from "@/lib/project-case-study";
 
 const BUCKET = "portfolio-content";
 
@@ -40,9 +41,11 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           award: project.award ?? undefined,
           role: project.role ?? undefined,
           impact: project.impact ?? undefined,
+          caseStudy: normalizeCaseStudy(project.case_study),
           updatedAt: project.updated_at,
         }}
         action={updateProject}
+        caseStudyEnabled={"case_study" in project}
         redirectTo="/admin/projects"
         submitLabel="Save changes"
       />

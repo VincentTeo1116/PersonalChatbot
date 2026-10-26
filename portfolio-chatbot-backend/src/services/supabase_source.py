@@ -168,6 +168,30 @@ def _project_rows(projects: list[dict[str, Any]]) -> list[dict[str, str]]:
                 "tags": ", ".join(tags),
             }
         )
+        # Keep sections separate: a long case study must not become one oversized embedding.
+        case_study = p.get("case_study")
+        if not isinstance(case_study, dict):
+            continue
+        section_titles = {
+            "problem": "The problem",
+            "contribution": "My contribution",
+            "approach": "How it works",
+            "decisions": "Engineering decisions",
+            "validation": "Evidence and evaluation",
+            "limitations": "Limitations and next steps",
+        }
+        for key, title in section_titles.items():
+            text = case_study.get(key)
+            if not isinstance(text, str) or not text.strip():
+                continue
+            rows.append({
+                "category": "Projects",
+                "url": f"/projects/{p['slug']}#{key}" if p.get("slug") else "/#projects",
+                "label": f"{p['title']}: {title}",
+                "question": f"{title} for the {p['title']} project",
+                "answer": f"{p['title']} - {title}: {text.strip()}",
+                "tags": ", ".join(tags),
+            })
     return rows
 
 

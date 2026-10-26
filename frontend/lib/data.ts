@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { normalizeCaseStudy } from "@/lib/project-case-study";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/public";
 // chat_logs and meeting_requests deliberately have NO public-read RLS policy (they hold visitor questions and contact details) -- only an authenticated admin session can read them back, so their getters below use this client instead of the public one above.
@@ -163,6 +164,7 @@ export const getProjects = cache(async (): Promise<Project[]> => {
       award: row.award ?? undefined,
       role: row.role ?? undefined,
       impact: row.impact ?? undefined,
+      caseStudy: normalizeCaseStudy(row.case_study),
       updatedAt: row.updated_at,
     };
   });

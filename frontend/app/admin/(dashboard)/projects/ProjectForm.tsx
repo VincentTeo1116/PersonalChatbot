@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Project } from "@/lib/types";
 import { AdminForm, type ActionResult } from "@/components/admin/AdminFeedback";
+import { CASE_STUDY_MAX_LENGTH, CASE_STUDY_SECTIONS } from "@/lib/project-case-study";
 
 const inputClass = "admin-input";
 const labelClass = "admin-label";
@@ -14,12 +15,14 @@ export default function ProjectForm({
   action,
   submitLabel,
   redirectTo,
+  caseStudyEnabled = false,
 }: {
   project?: Project;
   action: (formData: FormData) => Promise<ActionResult>;
   submitLabel: string;
   /** Where to go after a successful save (edit forms); create actions return their own redirectTo. */
   redirectTo?: string;
+  caseStudyEnabled?: boolean;
 }) {
   // "Live site" gets its own field below, auto-saved as the first links entry, so it's not typed twice.
   const [liveSiteUrl, setLiveSiteUrl] = useState(
@@ -92,6 +95,31 @@ export default function ProjectForm({
         <input type="checkbox" name="featured" defaultChecked={project?.featured} />
         Featured
       </label>
+
+      {caseStudyEnabled ? (
+        <fieldset className="space-y-4 border-t border-border pt-5">
+          <legend className="px-1 text-base font-semibold text-foreground">Engineering case study</legend>
+          <input type="hidden" name="caseStudyEnabled" value="true" />
+          <p className="text-sm text-text-secondary">These sections appear on the full project page and become sources for the chatbot. Empty sections stay hidden.</p>
+          {CASE_STUDY_SECTIONS.map(({ key, title, prompt }) => (
+            <div key={key}>
+              <label className={labelClass} htmlFor={`caseStudy-${key}`}>{title}</label>
+              <p id={`caseStudy-${key}-help`} className="mb-2 text-xs text-text-secondary">{prompt}</p>
+              <textarea
+                id={`caseStudy-${key}`}
+                name={`caseStudy-${key}`}
+                defaultValue={project?.caseStudy?.[key] ?? ""}
+                aria-describedby={`caseStudy-${key}-help`}
+                maxLength={CASE_STUDY_MAX_LENGTH}
+                rows={5}
+                className={inputClass}
+              />
+            </div>
+          ))}
+        </fieldset>
+      ) : (
+        <p className="rounded-xl border border-border p-3 text-sm text-text-secondary">To enable engineering case studies, run supabase/013_project_case_studies.sql in your Supabase SQL Editor. Existing project fields can still be saved.</p>
+      )}
 
       <div className="space-y-2">
         <p className={labelClass}>Other links (GitHub, write-up, etc.)</p>

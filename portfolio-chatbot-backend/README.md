@@ -104,6 +104,7 @@ Supabase's REST API with `httpx`, then each row is turned into a FAQ-style entry
 | `education` | one per degree: "Tell me about <degree> at <institution>" |
 | `work_experience` | one per job: "What did … do as <role> at <company>?" (bullet lines flattened to sentences) |
 | `projects` | one per project: description, role, impact, award, tech tags, links |
+| `projects.case_study` | one additional entry per nonempty case study section, linked to its heading; optional until frontend migration 013 is applied |
 | `research` | one per paper: venue, authors, supervisor, DOI, description |
 | `fyp` | one entry, title/description/dataset/supervisor/feedback/GitHub — only emitted once the admin fills it in (skipped while it's still the blank "Coming Soon" state) |
 

@@ -46,6 +46,10 @@ fetches its content from it.
      testimonial approval status, and meeting-request replies). Run them in numeric order.
      Each file says at the top what it adds, and the admin page for each feature just
      shows an empty state until you add content.
+   - `supabase/012_chat_feedback.sql` adds the chatbot feedback table.
+   - `supabase/013_project_case_studies.sql` adds structured engineering case studies and
+     fills empty drafts for Portfolio AI Chatbot, APMoodle, and SecInsight AI. Review the
+     starter text before running it. Existing authored case studies are preserved.
 
 Optional but recommended: also set `NEXT_PUBLIC_SITE_URL` in `.env.local` to your public
 URL. It drives canonical links, `sitemap.xml`, `robots.txt`, Open Graph and JSON-LD.
@@ -151,6 +155,27 @@ an invite-link card (copy link, WhatsApp, email) pointing to `/testimonial`, whi
 `noindex` and left out of the sitemap.
 
 ## SEO
+
+Project case studies support six optional sections: the problem, personal contribution,
+architecture, engineering decisions, evidence/evaluation, and limitations. Edit them in
+**Admin > Projects** after migration 013. Blank sections are hidden. Existing project
+editing and public pages also work before that migration is applied. Content appears in
+server-rendered HTML with headings and section links. Project saves invalidate project
+pages and the sitemap, and queue the existing chatbot sync after a successful write.
+The backend indexes each nonempty case study section separately and links directly to it.
+After applying migration 013 to an existing database, use **Admin > Chatbot > Sync chatbot
+now** to index the starter content. Deploy the frontend/backend updates and refresh the
+public project pages to see the sections. For a new database, run migration 013 after
+`seed.sql` so the matching project rows exist.
+
+Starter text distinguishes documented outcomes from unmeasured results. Add your actual
+role, experiment setup, measured results, and evidence links through the admin editor;
+do not replace missing measurements with estimates presented as facts.
+
+Local regression checks (no provider requests or database writes): run
+`node scripts/check-case-studies.mjs` from `frontend/` for legacy content handling and
+JSON-LD escaping, and `python -m unittest discover -s tests -v` from
+`portfolio-chatbot-backend/` for case study retrieval-source construction.
 
 `lib/seo.ts` holds the site URL helpers. The home page emits Person + WebSite JSON-LD,
 each `/projects/[slug]` page emits CreativeWork/SoftwareSourceCode + BreadcrumbList

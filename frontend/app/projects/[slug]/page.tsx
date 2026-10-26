@@ -5,6 +5,7 @@ import ProjectMedia from "@/components/ProjectMedia";
 import ThemeToggle from "@/components/ThemeToggle";
 import { getProfile, getProjects } from "@/lib/data";
 import { SITE_URL, absoluteUrl, jsonLdString } from "@/lib/seo";
+import { CASE_STUDY_SECTIONS } from "@/lib/project-case-study";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -46,6 +47,7 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
   const primaryLink = project.links[0];
   const repoLink = project.links.find((l) => /github\.com/i.test(l.url));
   const projectUrl = `${SITE_URL}/projects/${project.slug}`;
+  const sections = CASE_STUDY_SECTIONS.filter(({ key }) => project.caseStudy?.[key]);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -60,7 +62,7 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
         keywords: project.tags.join(", "),
         dateModified: project.updatedAt,
         author: { "@id": `${SITE_URL}/#person` },
-        ...(repoLink && { codeRepositoryUrl: repoLink.url }),
+        ...(repoLink && { codeRepository: repoLink.url }),
       },
       {
         "@type": "BreadcrumbList",
@@ -105,6 +107,7 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
           </div>
         )}
 
+        <p className="mt-8 text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">Engineering case study</p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{project.title}</h1>
         {project.role && <p className="mt-1 text-sm text-text-subtle">{project.role}</p>}
 
@@ -147,6 +150,38 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
             </a>
           ))}
         </div>
+
+        {sections.length > 0 && (
+          <>
+            <nav aria-label="Case study sections" className="mt-10 rounded-2xl border border-border bg-surface p-5">
+              <p className="mb-3 text-sm font-semibold text-foreground">Explore the engineering</p>
+              <div className="flex flex-wrap gap-2">
+                {sections.map(({ key, title }) => (
+                  <a key={key} href={`#${key}`} className="inline-flex min-h-11 items-center rounded-full border border-border px-4 text-sm text-text-secondary transition-colors hover:border-indigo-400 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">{title}</a>
+                ))}
+              </div>
+            </nav>
+            <div className="mt-12 space-y-12">
+              {sections.map(({ key, title }, index) => (
+                <section key={key} id={key} aria-labelledby={`${key}-heading`} className="scroll-mt-24 border-t border-border pt-7">
+                  <p aria-hidden="true" className="mb-2 font-mono text-xs text-indigo-600 dark:text-indigo-300">{String(index + 1).padStart(2, "0")}</p>
+                  <h2 id={`${key}-heading`} className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">{title}</h2>
+                  <div className="mt-4 space-y-4 text-base leading-relaxed text-text-secondary">
+                    {project.caseStudy![key]!.split(/\n\s*\n/).filter((paragraph) => paragraph.trim()).map((paragraph, paragraphIndex) => (
+                      <p key={paragraphIndex} className="whitespace-pre-line">{paragraph}</p>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          </>
+        )}
+
+        <aside className="mt-14 rounded-2xl border border-indigo-400/30 bg-indigo-500/5 p-6">
+          <h2 className="text-lg font-semibold text-foreground">Discuss this project</h2>
+          <p className="mt-2 text-sm leading-relaxed text-text-secondary">Interested in the implementation, an opportunity, or building something together?</p>
+          <Link href="/#contact" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-indigo-600 px-5 text-sm font-semibold text-white transition hover:bg-indigo-500">Get in touch &rarr;</Link>
+        </aside>
       </article>
     </main>
   );
