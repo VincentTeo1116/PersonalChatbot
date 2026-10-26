@@ -217,8 +217,8 @@ For a visual check of a running production server, run
 `node scripts/preview-seo.mjs http://127.0.0.1:3100`. It uses an isolated headless Chrome
 profile, checks 1440px desktop and 390px mobile layouts, verifies the hero image, and
 saves previews in `.generated/`. Set `CHROME_PATH` if Chrome is installed elsewhere.
-The homepage now puts projects, experience, and research before biography and GitHub
-extras. GitHub sections use Suspense and bounded external fetches; a static hero grid
+The homepage introduces Vincent and his skills before projects, experience, research,
+and GitHub extras. GitHub sections use Suspense and bounded external fetches; a static hero grid
 adds visual structure without a canvas or an extra animation dependency.
 
 Google's guidance: [SEO starter guide](https://developers.google.com/search/docs/fundamentals/seo-starter-guide),

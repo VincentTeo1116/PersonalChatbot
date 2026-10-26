@@ -61,9 +61,9 @@ try {
   }
   await evaluate("document.fonts.ready.then(() => true)");
   await sleep(1500);
-  const desktop = await evaluate("({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,h1:document.querySelector('h1')?.textContent,projectsBeforeAbout:!!(document.querySelector('#projects').compareDocumentPosition(document.querySelector('#about')) & Node.DOCUMENT_POSITION_FOLLOWING)})");
+  const desktop = await evaluate("({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,h1:document.querySelector('h1')?.textContent,aboutBeforeProjects:!!(document.querySelector('#about').compareDocumentPosition(document.querySelector('#projects')) & Node.DOCUMENT_POSITION_FOLLOWING)})");
   assert.ok(desktop.h1, "Homepage H1 missing");
-  assert.ok(desktop.projectsBeforeAbout, "Projects should appear before the biography");
+  assert.ok(desktop.aboutBeforeProjects, "About should appear before projects");
   assert.ok(desktop.scrollWidth <= desktop.width + 1, "Desktop horizontal overflow");
   await capture("desktop-home.png");
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });

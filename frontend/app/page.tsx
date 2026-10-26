@@ -42,11 +42,11 @@ export default async function Home() {
       <Nav profile={profile} />
       <main className="flex-1 overflow-x-clip">
         <Hero profile={profile} />
+        <About profile={profile} research={research} />
+        <TechMarquee items={profile.skills.flatMap((s) => s.items.map((i) => i.name))} />
         <Projects projects={projects} />
         <WorkExperience experience={workExperience} />
         <Research research={research} />
-        <About profile={profile} research={research} />
-        <TechMarquee items={profile.skills.flatMap((s) => s.items.map((i) => i.name))} />
         <FYP fyp={fyp} />
         <ExploreMore />
         <Suspense fallback={<div aria-hidden className="min-h-80" />}>
