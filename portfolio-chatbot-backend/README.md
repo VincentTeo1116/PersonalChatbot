@@ -137,11 +137,13 @@ visitor's question with Gemini (`task_type="retrieval_query"`), queries Pinecone
 `TOP_K` (default 4) nearest vectors above `MIN_SCORE` (default 0.55) cosine similarity,
 concatenates their `answer` metadata into a context block, and feeds that to Groq's
 `GROQ_CHAT_MODEL` (default `qwen/qwen3.8-27b`) to generate the final grounded answer.
-`POST /api/chat/stream` does the same retrieval, but
-streams the answer back as newline-delimited JSON (`{"type":"chunk","text":...}` lines, then
-one terminal `{"type":"done", answer, sources, cache_hit, latency_ms}` or `{"type":"error",
-message}`) so the widget can render it word-by-word; the widget falls back to the plain
-`/api/chat` call automatically if streaming isn't available.
+`POST /api/chat/stream` does the same retrieval and sends newline-delimited JSON. It emits
+`{"type":"status","stage":...}` when work starts, then `{"type":"chunk","text":...}` as
+the answer arrives, followed by one terminal `done` or `error` event. The widget shows
+actual request, search, preparation, and writing stages in a collapsible timeline. Cached
+answers and meeting requests have their own stages and skip search/generation. These stages
+describe backend actions, not a model reasoning trace. The widget falls back to the plain
+`/api/chat` call if streaming is unavailable.
 
 Every answered question (on either endpoint) is also logged to Supabase's `chat_logs` table
 in the background — see `src/services/chat_logging.py` and

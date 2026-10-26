@@ -91,6 +91,58 @@ try {
   assert.ok(article.sections >= 4, "Article sections missing");
   assert.ok(article.scrollWidth <= article.width + 1, "Article horizontal overflow");
   await capture("mobile-writing.png");
+  await send("Page.navigate", { url: base });
+  for (let attempt = 0; attempt < 60; attempt++) {
+    if (await evaluate("!!window.portfolioChatbot")) break;
+    await sleep(250);
+  }
+  assert.ok(await evaluate("!!window.portfolioChatbot"), "Chat widget did not load");
+  const chatEvents = [
+    { type: "status", stage: "checking_request" },
+    { type: "status", stage: "searching_knowledge" },
+    { type: "status", stage: "preparing_answer" },
+    { type: "status", stage: "writing_response" },
+    { type: "chunk", text: "I built a RAG assistant." },
+    { type: "done", answer: "I built a RAG assistant.", sources: [], cache_hit: false },
+  ];
+  await evaluate(`(() => {
+    const events = ${JSON.stringify(chatEvents)};
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = (input, options) => {
+      if (!String(input).endsWith('/api/chat/stream')) return originalFetch(input, options);
+      return Promise.resolve(new Response(new ReadableStream({
+        start(controller) {
+          events.forEach((event, index) => setTimeout(() => {
+            controller.enqueue(new TextEncoder().encode(JSON.stringify(event) + '\\n'));
+            if (index === events.length - 1) controller.close();
+          }, 100 + index * 300));
+        }
+      }), { status: 200, headers: { 'Content-Type': 'application/x-ndjson' } }));
+    };
+    const widget = window.portfolioChatbot;
+    widget.config.apiUrl = 'https://chat-preview.invalid/api/chat';
+    widget.open();
+    widget.inputEl.value = 'Tell me about your RAG assistant';
+    widget._send();
+    return true;
+  })()`);
+  await sleep(550);
+  const activeChat = await evaluate("({label:document.querySelector('.pcw-progress-label')?.textContent,steps:document.querySelectorAll('.pcw-progress-step').length,open:document.querySelector('.pcw-progress')?.open})");
+  assert.equal(activeChat.label, "Searching portfolio knowledge…", "Live search status missing");
+  assert.equal(activeChat.steps, 2, "Progress steps should reflect backend events");
+  assert.equal(activeChat.open, true, "Active progress should be expanded");
+  await capture("mobile-chat-progress.png");
+  await sleep(1250);
+  const finishedChat = await evaluate("({label:document.querySelector('.pcw-progress-label')?.textContent,steps:document.querySelectorAll('.pcw-progress-step').length,open:document.querySelector('.pcw-progress')?.open,answer:Array.from(document.querySelectorAll('.pcw-msg-bot')).at(-1)?.textContent})");
+  assert.equal(finishedChat.label, "How this answer was prepared", "Completed timeline missing");
+  assert.equal(finishedChat.steps, 4, "Completed timeline omitted a stage");
+  assert.equal(finishedChat.open, false, "Completed timeline should collapse");
+  assert.equal(finishedChat.answer, "I built a RAG assistant.");
+  await capture("mobile-chat-answer.png");
+  const reopened = await evaluate("(() => { document.querySelector('.pcw-progress-summary').click(); return document.querySelector('.pcw-progress').open && document.querySelectorAll('.pcw-progress-step').length === 4; })()");
+  assert.equal(reopened, true, "Completed answer timeline should reopen on click");
+  await capture("mobile-chat-steps.png");
+  console.log(JSON.stringify({ activeChat, finishedChat }, null, 2));
   console.log(JSON.stringify({ desktop, mobile, article, screenshots: directory }, null, 2));
 } finally {
   if (socket?.readyState === WebSocket.OPEN) { socket.send(JSON.stringify({ id: ++nextId, method: "Browser.close" })); socket.close(); }

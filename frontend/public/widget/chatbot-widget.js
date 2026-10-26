@@ -428,7 +428,66 @@
     window.dispatchEvent(new CustomEvent("portfolio:open-meeting-request", { detail: prefill }));
   };
 
+  var PROGRESS_LABELS = {
+    checking_request: "Checking your request",
+    searching_knowledge: "Searching portfolio knowledge",
+    preparing_answer: "Preparing an answer",
+    writing_response: "Writing the response",
+    loading_saved_answer: "Loading a saved answer",
+    opening_meeting: "Opening the meeting form",
+  };
+
+  ChatbotWidget.prototype._showProgress = function () {
+    var card = el("details", "pcw-progress");
+    var summary = el("summary", "pcw-progress-summary");
+    summary.appendChild(el("span", "pcw-progress-pulse", { "aria-hidden": "true" }));
+    this.progressLabel = el("span", "pcw-progress-label", { text: "Connecting to the assistant…", "aria-live": "polite" });
+    summary.appendChild(this.progressLabel);
+    card.appendChild(summary);
+    this.progressList = el("ol", "pcw-progress-list");
+    card.appendChild(this.progressList);
+    card.open = true;
+    this.messagesEl.appendChild(card);
+    this.progressEl = card;
+    this.progressActiveStep = null;
+    this._scrollToBottom();
+  };
+
+  ChatbotWidget.prototype._updateProgress = function (stage) {
+    var label = PROGRESS_LABELS[stage];
+    if (!label || !this.progressEl) return;
+    this._hideTyping();
+    if (this.progressActiveStep) this.progressActiveStep.classList.remove("pcw-progress-step--active");
+    var step = el("li", "pcw-progress-step pcw-progress-step--active", { text: label });
+    this.progressList.appendChild(step);
+    this.progressActiveStep = step;
+    this.progressLabel.textContent = label + "…";
+    this._scrollToBottom();
+  };
+
+  ChatbotWidget.prototype._finishProgress = function () {
+    if (!this.progressEl) return;
+    if (!this.progressList.childNodes.length) {
+      this._removeProgress();
+      return;
+    }
+    if (this.progressActiveStep) this.progressActiveStep.classList.remove("pcw-progress-step--active");
+    this.progressEl.classList.add("pcw-progress--complete");
+    this.progressLabel.textContent = "How this answer was prepared";
+    this.progressEl.open = false;
+    this.progressEl = null;
+  };
+
+  ChatbotWidget.prototype._removeProgress = function () {
+    if (this.progressEl && this.progressEl.parentNode) this.progressEl.parentNode.removeChild(this.progressEl);
+    this.progressEl = null;
+    this.progressList = null;
+    this.progressLabel = null;
+    this.progressActiveStep = null;
+  };
+
   ChatbotWidget.prototype._showTyping = function () {
+    if (this.typingEl) return;
     this.typingEl = el("div", "pcw-typing", { "aria-label": "Assistant is typing" });
     this.typingEl.appendChild(el("span"));
     this.typingEl.appendChild(el("span"));
@@ -563,8 +622,14 @@
           return; // ignore a malformed line rather than fail the whole stream over it
         }
 
-        if (msg.type === "chunk") {
+        if (msg.type === "status") {
+          self._updateProgress(msg.stage);
+        } else if (msg.type === "chunk") {
           gotAnyChunk = true;
+          if (self.progressEl) {
+            if (!self.progressList.childNodes.length) self._removeProgress();
+            else self.progressEl.open = false;
+          }
           if (!bubble) {
             self._hideTyping();
             bubble = self._addMessage("bot", "");
@@ -574,6 +639,7 @@
           self._scrollToBottom();
         } else if (msg.type === "done") {
           gotDone = true;
+          self._finishProgress();
           if (!bubble) {
             self._hideTyping();
             bubble = self._addMessage("bot", "");
@@ -586,12 +652,14 @@
           self._handleMeetingPrefill(msg.meeting_prefill);
         } else if (msg.type === "error") {
           gotDone = true;
+          self._removeProgress();
           if (!bubble) self._hideTyping();
           self._addMessage("error", msg.message || "Something went wrong reaching the assistant. Please try again in a moment.");
         }
       }
 
       function finishedIncomplete() {
+        self._removeProgress();
         self._addMessage("error", "Connection interrupted — the answer above may be incomplete. Try asking again.");
       }
 
@@ -634,6 +702,8 @@
   // redeployed with the /stream route, etc.).
   ChatbotWidget.prototype._sendNonStreaming = function (question) {
     var self = this;
+    this._removeProgress();
+    this._showTyping();
     return fetch(this.config.apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -673,7 +743,7 @@
       );
     }
 
-    this._showTyping();
+    this._showProgress();
 
     this._sendStreaming(question)
       .catch(function () {
@@ -681,6 +751,7 @@
       })
       .catch(function () {
         self._hideTyping();
+        self._removeProgress();
         self._addMessage("error", "Something went wrong reaching the assistant. Please try again in a moment.");
       })
       .finally(function () {

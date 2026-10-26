@@ -186,6 +186,86 @@
   border-bottom-left-radius: 4px;
 }
 
+.pcw-progress {
+  align-self: flex-start;
+  width: min(290px, 92%);
+  border: 1px solid var(--pcw-border);
+  border-radius: 14px;
+  background: var(--pcw-bot-bubble);
+  color: var(--pcw-fg);
+  overflow: hidden;
+}
+.pcw-progress-summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  padding: 9px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.pcw-progress-summary::-webkit-details-marker { display: none; }
+.pcw-progress-summary::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-left: auto;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  opacity: 0.65;
+  transition: transform 180ms ease;
+}
+.pcw-progress[open] .pcw-progress-summary::after { transform: rotate(225deg); }
+.pcw-progress-summary:focus-visible {
+  outline: 2px solid var(--pcw-link);
+  outline-offset: -3px;
+}
+.pcw-progress-pulse {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--pcw-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14);
+  animation: pcw-progress-pulse 1.5s ease-in-out infinite;
+}
+.pcw-progress--complete .pcw-progress-pulse {
+  background: #22a779;
+  animation: none;
+}
+@keyframes pcw-progress-pulse {
+  50% { box-shadow: 0 0 0 7px rgba(99, 102, 241, 0); }
+}
+.pcw-progress-list {
+  margin: 0 13px 12px 17px;
+  padding: 0 0 0 17px;
+  list-style: none;
+  border-left: 1px solid var(--pcw-border);
+}
+.pcw-progress-step {
+  position: relative;
+  padding: 3px 0 5px 2px;
+  color: var(--pcw-muted);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+.pcw-progress-step::before {
+  content: "";
+  position: absolute;
+  left: -22px;
+  top: 9px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22a779;
+  box-shadow: 0 0 0 3px var(--pcw-bot-bubble);
+}
+.pcw-progress-step--active { color: var(--pcw-fg); font-weight: 600; }
+.pcw-progress-step--active::before { background: var(--pcw-primary); }
+
 .pcw-suggestions {
   align-self: stretch;
   display: flex;
@@ -472,7 +552,9 @@
   }
   .pcw-msg,
   .pcw-status-dot--waking,
-  .pcw-typing span {
+  .pcw-typing span,
+  .pcw-progress-pulse {
     animation: none;
   }
+  .pcw-progress-summary::after { transition: none; }
 }

@@ -192,16 +192,18 @@ async def chat(payload: ChatRequest, background_tasks: BackgroundTasks) -> ChatR
 
 
 def _stream_chat(question: str) -> Iterator[str]:
-    # Yields "chunk" lines as text streams in, then one "done" (or "error") line with the final
-    # markdown-stripped answer -- clients should trust that over the concatenated chunks.
+    # Stage events describe completed/started backend operations, not model reasoning.
+    # "chunk" lines stream text; "done" contains the canonical, markdown-stripped answer.
     # Plain def, not async: the Gemini call blocks, so Starlette runs this in a worker thread.
     start = time.monotonic()
     cache_key = question.lower()
+    yield json.dumps({"type": "status", "stage": "checking_request"}) + "\n"
 
     # Checked first, same as the non-streaming endpoint: a meeting request short-circuits
     # straight to the one confirmation line, skipping retrieval/generation and the cache entirely.
     meeting_prefill = _detect_meeting_prefill(question)
     if meeting_prefill is not None:
+        yield json.dumps({"type": "status", "stage": "opening_meeting"}) + "\n"
         latency_ms = int((time.monotonic() - start) * 1000)
         yield json.dumps({
             "type": "done", "answer": MEETING_CONFIRMATION_MESSAGE, "sources": [], "cache_hit": False,
@@ -211,6 +213,7 @@ def _stream_chat(question: str) -> Iterator[str]:
         return
 
     if cache_key in _cache:
+        yield json.dumps({"type": "status", "stage": "loading_saved_answer"}) + "\n"
         cached = _cache[cache_key]
         answer, sources = cached["answer"], cached["sources"]
         yield json.dumps({"type": "chunk", "text": cached["plain"]}) + "\n"
@@ -222,11 +225,14 @@ def _stream_chat(question: str) -> Iterator[str]:
         return
 
     try:
+        yield json.dumps({"type": "status", "stage": "searching_knowledge"}) + "\n"
         matches = _retrieve(question)
+        yield json.dumps({"type": "status", "stage": "preparing_answer"}) + "\n"
         context = _build_context(matches)
         sources = _sources_from_matches(matches)
 
         pieces: list[str] = []
+        yield json.dumps({"type": "status", "stage": "writing_response"}) + "\n"
         for piece in generate_answer_stream(question, context):
             pieces.append(piece)
             yield json.dumps({"type": "chunk", "text": piece}) + "\n"

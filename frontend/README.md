@@ -112,6 +112,9 @@ NEXT_PUBLIC_CHATBOT_API_URL=http://localhost:8080/api/chat
 The widget itself (`public/widget/chatbot-widget.js` + `.css`) is a copy of
 `../portfolio-chatbot-backend/widget/`. If you update the widget there, re-copy both
 files here.
+The streaming endpoint sends real progress stages while a reply is prepared. The widget
+shows them live and keeps a collapsible record of the steps after the answer; cached
+answers and meeting requests use their own paths.
 
 The chatbot's knowledge base is built from these same Supabase tables (no spreadsheet). To
 keep it in sync, add these **server-only** vars to `.env.local` (values explained in
