@@ -35,6 +35,7 @@
         apiUrl: scriptEl.getAttribute("data-api-url"),
         ownerName: scriptEl.getAttribute("data-owner-name"),
         primaryColor: scriptEl.getAttribute("data-primary-color"),
+        avatarUrl: scriptEl.getAttribute("data-avatar-url"),
         greeting: scriptEl.getAttribute("data-greeting"),
         noCss: scriptEl.getAttribute("data-no-css") === "true",
       };
@@ -62,6 +63,7 @@
         apiUrl: "http://localhost:8080/api/chat",
         ownerName: "me",
         primaryColor: "#4f46e5",
+        avatarUrl: scriptEl && scriptEl.src ? new URL("chatbot-avatar.webp", scriptEl.src).toString() : "",
         greeting: "Hi! Ask me anything about my background, skills, or projects.",
         noCss: false,
         starterQuestions: [
@@ -186,8 +188,9 @@
       "aria-expanded": "false",
       type: "button",
     });
-    var launcherIcon = el("span");
-    launcherIcon.innerHTML = "&#128172;"; // speech balloon emoji, safe static markup
+    var launcherIcon = this.config.avatarUrl
+      ? el("img", "pcw-launcher-avatar", { src: this.config.avatarUrl, alt: "", width: "50", height: "50" })
+      : el("span", "", { text: "Chat" });
     this.launcher.appendChild(launcherIcon);
     this.launcherDot = el("span", "pcw-status-dot", { "aria-hidden": "true" });
     this.launcher.appendChild(this.launcherDot);
@@ -200,7 +203,10 @@
 
     this._defaultSubtitle = "AI assistant · answers from my portfolio";
     var header = el("div", "pcw-header");
-    var headerText = el("div");
+    if (this.config.avatarUrl) {
+      header.appendChild(el("img", "pcw-header-avatar", { src: this.config.avatarUrl, alt: "", width: "36", height: "36" }));
+    }
+    var headerText = el("div", "pcw-header-text");
     headerText.appendChild(el("div", "pcw-header-title", { text: "Ask " + this.config.ownerName }));
     var subtitleRow = el("div", "pcw-header-subtitle");
     this.headerDot = el("span", "pcw-status-dot", { "aria-hidden": "true" });

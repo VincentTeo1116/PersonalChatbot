@@ -43,6 +43,23 @@
   font-size: 24px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+.pcw-launcher-avatar {
+  display: block;
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pcw-launcher-avatar {
+    animation: pcw-avatar-float 4s ease-in-out infinite;
+  }
+}
+@keyframes pcw-avatar-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.035); }
+}
 .pcw-launcher:hover {
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 24px 50px -12px rgba(79, 70, 229, 0.5);
@@ -84,11 +101,24 @@
 .pcw-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
   padding: 16px 18px;
   background: var(--pcw-gradient);
   color: var(--pcw-primary-fg);
   flex-shrink: 0;
+}
+.pcw-header-avatar {
+  display: block;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+}
+.pcw-header-text {
+  min-width: 0;
+  flex: 1;
 }
 .pcw-header-title {
   font-weight: 600;

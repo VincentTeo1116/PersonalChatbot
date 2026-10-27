@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
 import type { Profile } from "@/lib/types";
 
 const SHOW_AFTER_PX = 240;
@@ -15,16 +16,20 @@ function shouldHide() {
   return contactInView || layerOpen;
 }
 
-function BarButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+function BarButton({ label, onClick, children, avatar = false }: { label: string; onClick: () => void; children?: ReactNode; avatar?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-semibold text-text-secondary transition-colors active:bg-foreground/10 active:text-foreground"
     >
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        {children}
-      </svg>
+      {avatar ? (
+        <Image src="/widget/chatbot-avatar.webp" alt="" width={24} height={24} className="size-6 rounded-full border border-indigo-400/60 object-cover" />
+      ) : (
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          {children}
+        </svg>
+      )}
       {label}
     </button>
   );
@@ -65,12 +70,11 @@ export default function MobileActionBar({ profile }: { profile: Profile }) {
       </BarButton>
       <BarButton
         label="Chat"
+        avatar
         onClick={() =>
           (window as unknown as { portfolioChatbot?: { open?: () => void } }).portfolioChatbot?.open?.()
         }
-      >
-        <path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z" />
-      </BarButton>
+      />
     </nav>
   );
 }
