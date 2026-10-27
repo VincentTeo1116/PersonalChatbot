@@ -267,6 +267,15 @@
     this.launcher.setAttribute("aria-expanded", "false");
   };
 
+  // Public, intentional entry point for the evaluation lab: prefill for review, never auto-send.
+  ChatbotWidget.prototype.prefillQuestion = function (question) {
+    var value = String(question || "").trim().slice(0, 500);
+    if (!value) return;
+    this.open();
+    this.inputEl.value = value;
+    this.inputEl.focus();
+  };
+
   ChatbotWidget.prototype._addMessage = function (role, text) {
     var bubble = el("div", "pcw-msg pcw-msg-" + role);
     if (role === "bot") renderRich(bubble, text);
@@ -302,50 +311,79 @@
     this.suggestionsEl = null;
   };
 
-  ChatbotWidget.prototype._addSources = function (sources) {
-    if (!sources || !sources.length) return;
+  ChatbotWidget.prototype._addSources = function (sources, data) {
+    if (data && data.meeting_prefill) return;
+    sources = sources || [];
     var self = this;
     var wrap = el("div", "pcw-sources");
-    var pills = el("div", "pcw-source-pills");
-    var evidence = el("ul", "pcw-evidence");
-    evidence.hidden = true;
-
-    sources.forEach(function (s) {
-      var label = s.label || s.category || "Source";
-      if (isSitePath(s.url)) {
-        var link = el("a", "pcw-source-pill pcw-source-link", { href: s.url, text: label });
-        if (s.url.indexOf("/#") !== 0) {
-          link.target = "_blank";
-          link.rel = "noopener";
+    if (sources.length) {
+      var pills = el("div", "pcw-source-pills");
+      sources.forEach(function (s) {
+        var label = s.label || s.category || "Source";
+        if (isSitePath(s.url)) {
+          var link = el("a", "pcw-source-pill pcw-source-link", { href: s.url, text: label });
+          if (s.url.indexOf("/#") !== 0) {
+            link.target = "_blank";
+            link.rel = "noopener";
+          } else {
+            link.addEventListener("click", function () { self.close(); });
+          }
+          pills.appendChild(link);
         } else {
-          // Section links jump within the page, so tuck the chat away to reveal where they land.
-          link.addEventListener("click", function () { self.close(); });
+          pills.appendChild(el("span", "pcw-source-pill", { text: label }));
         }
-        pills.appendChild(link);
-      } else {
-        pills.appendChild(el("span", "pcw-source-pill", { text: label }));
-      }
-      if (s.snippet) {
-        var item = el("li", "pcw-evidence-item");
-        item.appendChild(el("strong", "", { text: label }));
-        item.appendChild(el("span", "", { text: s.snippet }));
-        evidence.appendChild(item);
-      }
-    });
-
-    wrap.appendChild(pills);
-    if (evidence.childNodes.length) {
-      var toggle = el("button", "pcw-evidence-toggle", { type: "button", text: "What supports this?", "aria-expanded": "false" });
-      toggle.addEventListener("click", function () {
-        var open = evidence.hidden;
-        evidence.hidden = !open;
-        toggle.setAttribute("aria-expanded", String(open));
-        toggle.textContent = open ? "Hide sources" : "What supports this?";
-        self._scrollToBottom();
       });
-      wrap.appendChild(toggle);
-      wrap.appendChild(evidence);
+      wrap.appendChild(pills);
     }
+
+    var inspect = el("details", "pcw-inspect");
+    var summary = el("summary", "pcw-inspect-summary");
+    var icon = el("span", "pcw-inspect-icon", { "aria-hidden": "true" });
+    icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4.5 4.5M18.5 3v3m-1.5-1.5h3"/></svg>';
+    summary.appendChild(icon);
+    summary.appendChild(el("span", "", { text: "Inspect answer" }));
+    summary.appendChild(el("span", "pcw-inspect-chevron", { "aria-hidden": "true" }));
+    inspect.appendChild(summary);
+    var body = el("div", "pcw-inspect-body");
+    var metrics = el("div", "pcw-inspect-metrics");
+    var ms = Number(data && data.latency_ms);
+    if (Number.isFinite(ms) && ms >= 0) {
+      metrics.appendChild(el("span", "pcw-inspect-metric", { text: "Server time: " + (ms < 1000 ? Math.round(ms) + " ms" : (ms / 1000).toFixed(1) + " s") }));
+    }
+    if (data && data.cache_hit) metrics.appendChild(el("span", "pcw-inspect-metric", { text: "Saved answer" }));
+    if (metrics.childNodes.length) body.appendChild(metrics);
+    if (sources.length) {
+      body.appendChild(el("p", "pcw-inspect-note", { text: "These are selected portfolio entries. Similarity measures relatedness, not whether every claim is correct. Server time excludes browser and network delay." }));
+      var list = el("ol", "pcw-inspect-list");
+      sources.forEach(function (s, index) {
+        var item = el("li", "pcw-inspect-source");
+        var head = el("div", "pcw-inspect-source-head");
+        head.appendChild(el("strong", "", { text: (index + 1) + ". " + (s.label || s.category || "Portfolio entry") }));
+        if (typeof s.score === "number" && Number.isFinite(s.score)) {
+          head.appendChild(el("span", "", { text: "Similarity " + s.score.toFixed(3) }));
+        }
+        item.appendChild(head);
+        if (s.snippet) item.appendChild(el("p", "", { text: s.snippet }));
+        if (isSitePath(s.url)) {
+          var sourceLink = el("a", "pcw-inspect-link", { href: s.url, text: "Read this source ↗" });
+          if (s.url.indexOf("/#") !== 0) {
+            sourceLink.target = "_blank";
+            sourceLink.rel = "noopener";
+          } else {
+            sourceLink.addEventListener("click", function () { self.close(); });
+          }
+          item.appendChild(sourceLink);
+        }
+        list.appendChild(item);
+      });
+      body.appendChild(list);
+    } else {
+      body.appendChild(el("p", "pcw-inspect-note", { text: "No portfolio entry passed the retrieval cutoff for this answer. Please treat it as unverified and ask Vincent directly if it matters to you." }));
+    }
+    body.appendChild(el("a", "pcw-inspect-lab-link", { href: "/ai-lab", text: "Explore the AI evaluation lab ↗" }));
+    inspect.appendChild(body);
+    inspect.addEventListener("toggle", function () { self._scrollToBottom(); });
+    wrap.appendChild(inspect);
     this.messagesEl.appendChild(wrap);
     this._scrollToBottom();
   };
@@ -647,7 +685,7 @@
           // Snap to the server's canonical, fully markdown-cleaned answer, even if the
           // raw streamed chunks briefly differed from it.
           renderRich(bubble, msg.answer || text || "Sorry, I couldn't find an answer to that.");
-          self._addSources(msg.sources);
+          self._addSources(msg.sources, msg);
           self._addFollowUps(question, msg);
           self._handleMeetingPrefill(msg.meeting_prefill);
         } else if (msg.type === "error") {
@@ -716,7 +754,7 @@
       .then(function (data) {
         self._hideTyping();
         self._addMessage("bot", data.answer || "Sorry, I couldn't find an answer to that.");
-        self._addSources(data.sources);
+        self._addSources(data.sources, data);
         self._addFollowUps(question, data);
         self._handleMeetingPrefill(data.meeting_prefill);
       });

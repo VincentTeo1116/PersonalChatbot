@@ -48,7 +48,7 @@ def main() -> None:
         shown = f"{top['score']:.3f} {top['metadata'].get('label') or top['metadata'].get('category')}" if top else "-"
         print(f"{'OK ' if rank == 1 else ('~3 ' if rank and rank <= 3 else 'MISS')} rank={rank or '-'}  {question}  -> top: {shown}")
     n = len(CASES)
-    print(f"\nnamespace={os.getenv('PINECONE_NAMESPACE', 'default')}  hit@1={hits1}/{n}  hit@3={hits3}/{n}  MRR={reciprocal / n:.2f}")
+    print(f"\nnamespace={os.getenv('PINECONE_NAMESPACE', 'default')}  hit@1={hits1}/{n}  hit@3={hits3}/{n}  MRR={reciprocal / n:.3f}")
 
 
 if __name__ == "__main__":

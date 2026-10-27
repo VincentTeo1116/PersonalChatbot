@@ -134,7 +134,7 @@ the kind of thing a visitor asks the chatbot about.
 
 **Retrieval side** (for context — this doesn't run during sync): `POST /api/chat` embeds the
 visitor's question with Gemini (`task_type="retrieval_query"`), queries Pinecone for the
-`TOP_K` (default 4) nearest vectors above `MIN_SCORE` (default 0.55) cosine similarity,
+`TOP_K` (default 4) nearest vectors above `MIN_SCORE` (default 0.58) cosine similarity,
 concatenates their `answer` metadata into a context block, and feeds that to Groq's
 `GROQ_CHAT_MODEL` (default `qwen/qwen3.8-27b`) to generate the final grounded answer.
 `POST /api/chat/stream` does the same retrieval and sends newline-delimited JSON. It emits
@@ -144,6 +144,9 @@ actual request, search, preparation, and writing stages in a collapsible timelin
 answers and meeting requests have their own stages and skip search/generation. These stages
 describe backend actions, not a model reasoning trace. The widget falls back to the plain
 `/api/chat` call if streaming is unavailable.
+Each reply keeps a compact **Inspect answer** control with selected source snippets,
+similarity values, server time, and a link to the public `/ai-lab` page. The values are
+retrieval evidence and timing, not a probability that every claim is correct.
 
 Every answered question (on either endpoint) is also logged to Supabase's `chat_logs` table
 in the background — see `src/services/chat_logging.py` and

@@ -7,8 +7,9 @@ export default function ExploreMore() {
     <section id="explore" className="border-y border-border bg-surface/50 py-20">
       <div className="mx-auto max-w-6xl px-6">
         <SectionHeading eyebrow="Go deeper" title="The thinking behind the work" />
-        <div className="mt-8 grid gap-5 sm:grid-cols-3">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {[
+            { href: "/ai-lab", title: "AI evaluation lab", text: "Try the assistant, inspect its sources, and see a real retrieval test and ranking miss." },
             { href: "/research", title: "Research", text: "Machine learning methods, publication details, and links to the original work." },
             { href: "/writing", title: "Engineering notes", text: "How the RAG assistant works, how retrieval is evaluated, and what can be improved." },
             { href: "/services", title: "Web development", text: "Explore the applications I build and discuss a website or AI integration." },

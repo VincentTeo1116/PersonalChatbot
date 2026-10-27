@@ -13,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Omit lastModified for aggregate pages: multiple independent sections can change.
     { url: SITE_URL },
     { url: `${SITE_URL}/research` },
+    { url: `${SITE_URL}/ai-lab` },
     { url: `${SITE_URL}/writing` },
     { url: `${SITE_URL}/services` },
     ...projects.map((p) => ({

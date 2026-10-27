@@ -8,10 +8,11 @@ export default function ContentShell({ eyebrow, title, intro, children }: { eyeb
     <main className="flex-1">
       <header className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-5 px-6 pt-8">
         <Link href="/" className="text-sm font-medium text-text-secondary hover:text-foreground"><AnimatedArrow direction="left" /> Portfolio</Link>
-        <nav aria-label="Explore the portfolio" className="flex flex-wrap items-center gap-4 text-sm text-text-secondary">
+        <nav aria-label="Explore the portfolio" className="flex w-full flex-wrap items-center justify-between gap-2 text-sm text-text-secondary sm:w-auto sm:justify-start sm:gap-4">
+          <Link href="/ai-lab" className="hover:text-foreground">AI lab</Link>
           <Link href="/research" className="hover:text-foreground">Research</Link>
           <Link href="/writing" className="hover:text-foreground">Writing</Link>
-          <Link href="/services" className="hover:text-foreground">Web development</Link>
+          <Link href="/services" className="hover:text-foreground">Services</Link>
           <ThemeToggle />
         </nav>
       </header>

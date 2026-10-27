@@ -115,6 +115,22 @@ files here.
 The streaming endpoint sends real progress stages while a reply is prepared. The widget
 shows them live and keeps a collapsible record of the steps after the answer; cached
 answers and meeting requests use their own paths.
+After a reply, **Inspect answer** reveals the selected source snippets, similarity values,
+and server time without changing the main chat view. `/ai-lab` contains a dated retrieval
+test snapshot (20 questions; hit@1 19/20, hit@3 20/20, MRR 0.975 on 2026-10-27), an honest
+ranking miss, and buttons that prefill the chatbot for visitors to try. Re-run
+`python -m scripts.eval_retrieval` from the backend folder before updating those published
+numbers; retrieval rank alone does not measure final answer accuracy.
+
+To try the lab locally, start the backend with `python app.py` in
+`portfolio-chatbot-backend/`, then run `npm run dev` in `frontend/`. Check that
+`NEXT_PUBLIC_CHATBOT_API_URL` points to that backend and open
+`http://localhost:3000/ai-lab`. Choose a question, review it in the existing chat,
+press Send, then expand **Inspect answer** under the reply. Ask the same question again
+to see the saved-answer indicator when the same backend process serves both requests.
+For a repeatable UI check after `npm run build` and `npm run start -- --port 3100`, run
+`node scripts/preview-seo.mjs http://127.0.0.1:3100`; the chat part uses a simulated
+stream and saves mobile screenshots under `.generated/`.
 
 The chatbot's knowledge base is built from these same Supabase tables (no spreadsheet). To
 keep it in sync, add these **server-only** vars to `.env.local` (values explained in
