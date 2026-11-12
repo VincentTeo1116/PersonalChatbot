@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
+import { flushSync } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
+
+const THEME_EVENT = "portfolio:theme-changed";
 
 export default function ThemeToggle({ className = "" }: { className?: string }) {
   const [isDark, setIsDark] = useState<boolean | null>(null);
@@ -12,18 +15,52 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
     setIsDark(document.documentElement.classList.contains("dark"));
   }, []);
 
-  const toggle = () => {
+  // Keeps every toggle on the page (desktop nav, phone menu) showing the same icon.
+  useEffect(() => {
+    const sync = () => setIsDark(document.documentElement.classList.contains("dark"));
+    window.addEventListener(THEME_EVENT, sync);
+    return () => window.removeEventListener(THEME_EVENT, sync);
+  }, []);
+
+  const toggle = (event: MouseEvent<HTMLButtonElement>) => {
     const root = document.documentElement;
     const next = !root.classList.contains("dark");
-    // Hundreds of elements have colour transitions; letting them all animate at once makes the switch stall and paint in pieces, so freeze transitions for the switch itself.
-    root.classList.add("theme-switching");
-    root.classList.toggle("dark", next);
-    void root.offsetHeight;
-    window.setTimeout(() => root.classList.remove("theme-switching"), 120);
-    try {
-      localStorage.setItem("theme", next ? "dark" : "light");
-    } catch {}
-    setIsDark(next);
+
+    const apply = () => {
+      // Colour transitions are frozen for the switch so every element changes in the same frame.
+      root.classList.add("theme-switching");
+      root.classList.toggle("dark", next);
+      void root.offsetHeight;
+      window.setTimeout(() => root.classList.remove("theme-switching"), 120);
+      try {
+        localStorage.setItem("theme", next ? "dark" : "light");
+      } catch {}
+      window.dispatchEvent(new Event(THEME_EVENT));
+    };
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!document.startViewTransition || reducedMotion) {
+      apply();
+      return;
+    }
+
+    // The browser snapshots the old page, paints the new theme underneath, then this reveals it as a circle growing from the button. The reveal runs on the compositor, so it stays smooth on any page, however long the repaint took.
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+
+    root.classList.add("theme-ripple");
+    const transition = document.startViewTransition(() => flushSync(apply));
+    transition.ready
+      .then(() => {
+        root.animate(
+          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+          { duration: 520, easing: "cubic-bezier(0.4, 0, 0.2, 1)", pseudoElement: "::view-transition-new(root)" }
+        );
+      })
+      .catch(() => {});
+    transition.finished.finally(() => root.classList.remove("theme-ripple"));
   };
 
   return (

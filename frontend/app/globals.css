@@ -504,3 +504,16 @@ main > section:not(:first-child) {
   content-visibility: auto;
   contain-intrinsic-size: auto 900px;
 }
+
+/* Theme ripple (see ThemeToggle): the old page stays still underneath while the new one is revealed by a clip-path circle, so the default cross-fade is switched off. Scoped to .theme-ripple so other view transitions keep their defaults. */
+.theme-ripple::view-transition-old(root),
+.theme-ripple::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+.theme-ripple::view-transition-old(root) {
+  z-index: 1;
+}
+.theme-ripple::view-transition-new(root) {
+  z-index: 2;
+}
