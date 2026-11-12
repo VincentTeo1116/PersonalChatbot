@@ -703,8 +703,11 @@
           // Snap to the server's canonical, fully markdown-cleaned answer, even if the
           // raw streamed chunks briefly differed from it.
           renderRich(bubble, msg.answer || text || "Sorry, I couldn't find an answer to that.");
-          self._addSources(msg.sources, msg);
-          self._addFollowUps(question, msg);
+          // A greeting has nothing to inspect or rate, so it gets no sources panel or feedback row.
+          if (msg.kind !== "smalltalk") {
+            self._addSources(msg.sources, msg);
+            self._addFollowUps(question, msg);
+          }
           self._handleMeetingPrefill(msg.meeting_prefill);
         } else if (msg.type === "error") {
           gotDone = true;
@@ -773,8 +776,10 @@
       .then(function (data) {
         self._hideTyping();
         self._addMessage("bot", data.answer || "Sorry, I couldn't find an answer to that.");
-        self._addSources(data.sources, data);
-        self._addFollowUps(question, data);
+        if (data.kind !== "smalltalk") {
+          self._addSources(data.sources, data);
+          self._addFollowUps(question, data);
+        }
         self._handleMeetingPrefill(data.meeting_prefill);
       });
   };

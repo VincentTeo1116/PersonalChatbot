@@ -49,6 +49,21 @@ class ChatProgressTests(unittest.TestCase):
         retrieve.assert_not_called()
 
     @patch.object(chat_route, "log_chat")
+    @patch.object(chat_route, "_retrieve")
+    @patch.object(chat_route, "_detect_meeting_prefill")
+    def test_greeting_gets_a_canned_reply_without_search_or_model(self, meeting, retrieve, _log):
+        for text in ("Hi", "hello there!", "Thanks a lot", "Good morning"):
+            stream = events(text)
+            self.assertEqual(stream[-1]["kind"], "smalltalk", text)
+            self.assertEqual(stream[-1]["sources"], [])
+        retrieve.assert_not_called()
+        meeting.assert_not_called()
+
+    def test_real_questions_are_not_treated_as_greetings(self):
+        for text in ("Hi, what did you build at FootfallCam?", "What is your CGPA?", "hello can we schedule a meeting", "Tell me about APMoodle"):
+            self.assertIsNone(chat_route._small_talk(text), text)
+
+    @patch.object(chat_route, "log_chat")
     @patch.object(chat_route, "generate_answer_stream", side_effect=chat_route.BusyError("busy"))
     @patch.object(chat_route, "_retrieve", return_value=[])
     @patch.object(chat_route, "_detect_meeting_prefill", return_value=None)

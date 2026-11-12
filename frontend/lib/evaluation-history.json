@@ -1,0 +1,93 @@
+[
+  {
+    "date": "2026-10-27",
+    "commit": null,
+    "namespace": "portfolio-kb",
+    "cutoff": 0.58,
+    "topK": 4,
+    "depth": 6,
+    "questions": 20,
+    "retrieval": {
+      "questions": 20,
+      "hitAtOne": 19,
+      "hitAtThree": 20,
+      "mrr": 0.975,
+      "live": null,
+      "byKind": {}
+    },
+    "outOfScope": null,
+    "smallTalk": null,
+    "answers": null
+  },
+  {
+    "date": "2026-11-12",
+    "commit": "809f80e",
+    "namespace": "portfolio-kb",
+    "cutoff": 0.58,
+    "topK": 4,
+    "depth": 6,
+    "questions": 107,
+    "retrieval": {
+      "questions": 81,
+      "hitAtOne": 77,
+      "hitAtThree": 81,
+      "mrr": 0.975,
+      "live": 81,
+      "byKind": {
+        "direct": {
+          "questions": 35,
+          "hitAtOne": 33,
+          "hitAtThree": 35
+        },
+        "paraphrase": {
+          "questions": 43,
+          "hitAtOne": 42,
+          "hitAtThree": 43
+        },
+        "multi": {
+          "questions": 3,
+          "hitAtOne": 2,
+          "hitAtThree": 3
+        }
+      }
+    },
+    "outOfScope": {
+      "questions": 26,
+      "blockedByCutoff": 12
+    },
+    "smallTalk": {
+      "greetings": 8,
+      "recognised": 8,
+      "falsePositives": 0
+    },
+    "answers": {
+      "factual": {
+        "questions": 29,
+        "passed": 28
+      },
+      "declines": {
+        "questions": 17,
+        "passed": 17,
+        "byKind": {
+          "unanswerable": {
+            "questions": 6,
+            "passed": 6
+          },
+          "off_topic": {
+            "questions": 4,
+            "passed": 4
+          },
+          "adversarial": {
+            "questions": 7,
+            "passed": 7
+          }
+        }
+      },
+      "numbersTraceable": 46,
+      "answered": 46,
+      "medianSeconds": 0.53,
+      "p95Seconds": 1.86,
+      "model": "qwen/qwen3.8-27b"
+    }
+  }
+]

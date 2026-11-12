@@ -14,6 +14,7 @@ from src.services.chat_logging import log_chat, log_feedback
 from src.services.groq_service import BusyError, detect_meeting_intent, generate_answer, generate_answer_stream
 from src.services.kb_sync import source_url
 from src.services.rate_limit import limiter
+from src.services.small_talk import small_talk_reply
 from src.services.text_utils import highlight, strip_markdown
 
 logger = logging.getLogger(__name__)
@@ -63,6 +64,12 @@ class ChatResponse(BaseModel):
     cache_hit: bool
     latency_ms: int
     meeting_prefill: MeetingPrefill | None = None
+    # "smalltalk" marks a canned greeting/thanks reply: nothing was searched, so the widget shows no sources or feedback controls for it.
+    kind: str = "answer"
+
+
+def _small_talk(question: str) -> str | None:
+    return small_talk_reply(question, Config.OWNER_NAME.split()[0])
 
 
 def _build_context(matches: list[dict]) -> str:
@@ -159,6 +166,12 @@ def chat(payload: ChatRequest, background_tasks: BackgroundTasks) -> ChatRespons
     clean_question = payload.question.strip()
     cache_key = clean_question.lower()
 
+    greeting = _small_talk(clean_question)
+    if greeting is not None:
+        latency_ms = int((time.monotonic() - start) * 1000)
+        background_tasks.add_task(log_chat, clean_question, greeting, False, None, False, latency_ms)
+        return ChatResponse(answer=greeting, sources=[], cache_hit=False, latency_ms=latency_ms, kind="smalltalk")
+
     # Checked first and short-circuits everything else below -- a meeting request gets the
     # one confirmation message, never also the normal grounded (and often unhelpful, "I can't
     # schedule that") answer. Never cached either: the drafted fields are specific to this
@@ -204,6 +217,16 @@ def _stream_chat(question: str) -> Iterator[str]:
     start = time.monotonic()
     cache_key = question.lower()
     yield json.dumps({"type": "status", "stage": "checking_request"}) + "\n"
+
+    greeting = _small_talk(question)
+    if greeting is not None:
+        yield json.dumps({"type": "chunk", "text": greeting}) + "\n"
+        latency_ms = int((time.monotonic() - start) * 1000)
+        yield json.dumps({
+            "type": "done", "answer": greeting, "sources": [], "cache_hit": False, "latency_ms": latency_ms, "kind": "smalltalk",
+        }) + "\n"
+        log_chat(question, greeting, False, None, False, latency_ms)
+        return
 
     # Checked first, same as the non-streaming endpoint: a meeting request short-circuits
     # straight to the one confirmation line, skipping retrieval/generation and the cache entirely.
