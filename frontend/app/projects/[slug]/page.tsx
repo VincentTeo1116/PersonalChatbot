@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProjectMedia from "@/components/ProjectMedia";
@@ -85,6 +86,7 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
       </header>
 
       <article className="mx-auto max-w-3xl px-6 pb-24 pt-8">
+        <ViewTransition name={`project-media-${project.slug}`} share="morph" default="none">
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
           <ProjectMedia
             title={project.title}
@@ -94,6 +96,7 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
             aspectClassName="aspect-[16/9]"
           />
         </div>
+        </ViewTransition>
 
         {(project.featured || project.award) && (
           <div className="mt-8 flex flex-wrap items-center gap-3">

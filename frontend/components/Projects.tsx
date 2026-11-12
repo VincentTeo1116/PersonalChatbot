@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, ViewTransition } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
@@ -72,6 +72,8 @@ export default function Projects({ projects }: { projects: Project[] }) {
                   id={`project-${p.slug}`}
                   className="group h-full scroll-mt-24 rounded-2xl border border-border bg-surface overflow-hidden transition-colors duration-300 hover:border-indigo-400/40 hover:shadow-2xl hover:shadow-indigo-500/10 target:border-indigo-400/70 target:ring-2 target:ring-indigo-400/40"
                 >
+                  {/* Same name as the media on /projects/[slug]: opening the case study grows this image into that page's header. */}
+                  <ViewTransition name={`project-media-${p.slug}`} share="morph" default="none">
                   <div
                     className={`relative aspect-[8/5] overflow-hidden ${previewable ? "cursor-pointer" : ""}`}
                     onClick={previewable ? () => setPreviewSlug(p.slug) : undefined}
@@ -94,6 +96,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                       </span>
                     )}
                   </div>
+                  </ViewTransition>
                   <div className="p-6">
                     <h3 className="font-semibold text-foreground text-lg">
                       <Link href={`/projects/${p.slug}`} className="transition-colors hover:text-indigo-500 dark:hover:text-indigo-300">

@@ -29,6 +29,24 @@ export default function Nav({ profile }: { profile: Profile }) {
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 24, restDelta: 0.001 });
   const [hoveredHref, setHoveredHref] = useState<string | null>(null);
+  const [activeHref, setActiveHref] = useState<string | null>(null);
+
+  // Highlights the link for the section currently crossing the middle of the screen, so visitors always know where they are on a long page.
+  useEffect(() => {
+    const sections = LINKS.map((l) => document.getElementById(l.href.slice(1))).filter((el): el is HTMLElement => !!el);
+    if (!sections.length) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActiveHref(`#${entry.target.id}`);
+          else setActiveHref((current) => (current === `#${entry.target.id}` ? null : current));
+        }
+      },
+      { rootMargin: "-45% 0px -50% 0px" }
+    );
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {
@@ -64,7 +82,7 @@ export default function Nav({ profile }: { profile: Profile }) {
         >
           {LINKS.map((l) => (
             <li key={l.href} className="relative">
-              {hoveredHref === l.href && (
+              {(hoveredHref ?? activeHref) === l.href && (
                 <motion.span
                   layoutId="nav-pill"
                   className="absolute inset-0 rounded-full bg-surface-hover"
@@ -74,7 +92,8 @@ export default function Nav({ profile }: { profile: Profile }) {
               <a
                 href={l.href}
                 onMouseEnter={() => setHoveredHref(l.href)}
-                className="relative z-10 block px-3 py-1.5 hover:text-foreground transition-colors"
+                aria-current={activeHref === l.href ? "location" : undefined}
+                className={`relative z-10 block px-3 py-1.5 hover:text-foreground transition-colors ${activeHref === l.href ? "text-foreground" : ""}`}
               >
                 {l.label}
               </a>

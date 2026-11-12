@@ -517,3 +517,16 @@ main > section:not(:first-child) {
 .theme-ripple::view-transition-new(root) {
   z-index: 2;
 }
+
+/* Project card image -> case study header (see Projects.tsx and app/projects/[slug]/page.tsx). */
+::view-transition-group(.morph) {
+  animation-duration: 380ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
