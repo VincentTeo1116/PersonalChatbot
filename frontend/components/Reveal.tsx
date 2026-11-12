@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import { motion } from "motion/react";
 
 const OFFSETS = {
@@ -23,21 +22,14 @@ export default function Reveal({
   direction?: keyof typeof OFFSETS;
 }) {
   const { x, y } = OFFSETS[direction];
-  const ref = useRef<HTMLDivElement>(null);
 
   return (
     <motion.div
-      initial={{ opacity: 0, x, y, scale: 0.97, filter: "blur(6px)" }}
-      whileInView={{ opacity: 1, x: 0, y: 0, scale: 1, filter: "blur(0px)" }}
+      // Fade and slide only: an animated blur filter is the most expensive effect to paint and kept finished blocks on their own layers.
+      initial={{ opacity: 0, x, y, scale: 0.97 }}
+      whileInView={{ opacity: 1, x: 0, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{ delay: delay / 1000, duration: 0.8 }}
-      // Leaving filter: blur(0px) behind keeps every revealed block on its own expensive paint layer, which makes theme changes slow.
-      onAnimationComplete={(definition) => {
-        if (typeof definition === "object" && definition !== null && "opacity" in definition) {
-          ref.current?.style.setProperty("filter", "none");
-        }
-      }}
-      ref={ref}
       className={className}
     >
       {children}

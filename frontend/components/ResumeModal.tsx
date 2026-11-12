@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import AnimatedArrow from "@/components/AnimatedArrow";
 
@@ -17,7 +18,8 @@ export default function ResumeModal({ resumeUrl, onClose }: { resumeUrl: string;
     };
   }, [onClose]);
 
-  return (
+  // Rendered into <body>: the page sections use content-visibility, which would otherwise trap a fixed overlay inside its own section.
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -57,5 +59,7 @@ export default function ResumeModal({ resumeUrl, onClose }: { resumeUrl: string;
         <iframe src={resumeUrl} title="Resume preview" className="min-h-0 flex-1 bg-white" />
       </motion.div>
     </motion.div>
+    ,
+    document.body
   );
 }

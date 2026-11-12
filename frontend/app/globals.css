@@ -498,3 +498,9 @@ button:focus-visible .animated-arrow--down svg { transform: translateY(4px); }
   .animated-arrow svg { transition: none; }
   .flow-arrow__signal { animation: none; opacity: 0; }
 }
+
+/* Sections that are off screen skip layout and paint until they come near the viewport. A theme switch then repaints only what is visible instead of the whole (very tall) page at once, which is what left stale pieces on slower laptops. The first section (hero) is excluded so the first paint is unaffected. */
+main > section:not(:first-child) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
