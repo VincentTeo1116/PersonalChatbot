@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -61,7 +62,7 @@ const THEME_INIT_SCRIPT = `
 })();
 `;
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
   const profile = await getProfile();
 
   // Person structured data -- lets Google build a richer result (and potential knowledge panel) when someone searches the name, instead of just a plain blue link.
