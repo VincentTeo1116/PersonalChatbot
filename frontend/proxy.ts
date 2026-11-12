@@ -1,8 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { isAllowedAdmin } from "@/lib/admin-access";
 import { updateSession } from "@/lib/supabase/proxy";
 
 export async function proxy(request: NextRequest) {
-  const { response, user } = await updateSession(request);
+  const { response, user: sessionUser } = await updateSession(request);
+  // Having an account is not enough: only an allow-listed admin counts as signed in here.
+  const user = isAllowedAdmin(sessionUser) ? sessionUser : null;
 
   const isLoginPage = request.nextUrl.pathname === "/admin/login";
 

@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { getProfile } from "@/lib/data";
 import MotionProvider from "@/components/MotionProvider";
+import ConsentBanner from "@/components/ConsentBanner";
 import GoogleAnalyticsLoader from "@/components/GoogleAnalyticsLoader";
 import InteractionAnalytics from "@/components/InteractionAnalytics";
 import { SITE_URL, absoluteUrl, jsonLdString } from "@/lib/seo";
@@ -105,6 +106,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <MotionProvider>{children}</MotionProvider>
         <Analytics />
         <GoogleAnalyticsLoader />
+        <ConsentBanner />
         <InteractionAnalytics />
       </body>
     </html>

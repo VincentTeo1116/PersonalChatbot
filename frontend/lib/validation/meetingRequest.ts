@@ -75,16 +75,26 @@ export function validateMeetingRequest(input: MeetingRequestInput): MeetingReque
     errors.name = "That doesn't look like a real name.";
   }
 
+  if (name.length > 100) errors.name = "That name is too long.";
+
   if (input.position.trim().length < 2) {
     errors.position = "Please enter your job title.";
+  } else if (input.position.trim().length > 100) {
+    errors.position = "That job title is too long.";
   }
 
   if (input.company.trim().length < 2) {
     errors.company = "Please enter your company name.";
+  } else if (input.company.trim().length > 120) {
+    errors.company = "That company name is too long.";
+  }
+
+  if (input.message.trim().length > 2000) {
+    errors.message = "Please keep your message under 2000 characters.";
   }
 
   const email = input.email.trim().toLowerCase();
-  const emailMatch = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  const emailMatch = email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
   if (!emailMatch) {
     errors.email = "Please enter a valid email address.";
   } else {

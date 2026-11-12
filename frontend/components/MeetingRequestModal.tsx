@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { motion } from "motion/react";
+import TurnstileField from "@/components/TurnstileField";
 import { submitMeetingRequest, type MeetingRequestState } from "@/lib/actions/meetingRequest";
 import { validateMeetingRequest, type MeetingRequestInput } from "@/lib/validation/meetingRequest";
 import { trackPortfolioEvent } from "@/lib/analytics";
@@ -115,6 +116,8 @@ export default function MeetingRequestModal({
                 <input type="text" name="website" tabIndex={-1} autoComplete="off" />
               </label>
 
+              <TurnstileField />
+
               <div>
                 <label className={labelClass} htmlFor="mr-name">Full name</label>
                 <input id="mr-name" className={inputClass} placeholder="David Ali Muthu" {...field("name")} />
@@ -160,6 +163,10 @@ export default function MeetingRequestModal({
               >
                 {pending ? "Sending…" : "Send request"}
               </button>
+              <p className="text-xs text-text-subtle">
+                Your details are used only to reply to you. See the{" "}
+                <a href="/privacy" target="_blank" rel="noreferrer" className="underline">privacy policy</a>.
+              </p>
             </form>
           )}
         </div>

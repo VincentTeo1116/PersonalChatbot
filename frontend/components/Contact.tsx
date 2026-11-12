@@ -106,7 +106,8 @@ export default function Contact({ profile }: { profile: Profile }) {
         </div>
 
         <p className="mt-20 text-xs text-text-subtle">
-          Built with Next.js &amp; Tailwind CSS. © {new Date().getFullYear()} Vincent Teo Kai Qi. All rights reserved.
+          Built with Next.js &amp; Tailwind CSS. © {new Date().getFullYear()} Vincent Teo Kai Qi. All rights reserved.{" "}
+          <a href="/privacy" className="underline hover:text-foreground">Privacy policy</a>
         </p>
       </div>
 

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
+import { requireAdmin } from "@/lib/auth";
 
 function refresh() {
   revalidatePath("/");
@@ -11,6 +12,7 @@ function refresh() {
 }
 
 export async function createEducation(formData: FormData) {
+  await requireAdmin();
   queueChatbotSync();
   const supabase = await createClient();
   const { count } = await supabase.from("education").select("*", { count: "exact", head: true });
@@ -34,6 +36,7 @@ export async function createEducation(formData: FormData) {
 }
 
 export async function updateEducation(formData: FormData) {
+  await requireAdmin();
   queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
@@ -55,6 +58,7 @@ export async function updateEducation(formData: FormData) {
 }
 
 export async function deleteEducation(formData: FormData) {
+  await requireAdmin();
   queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
@@ -70,6 +74,7 @@ export async function deleteEducation(formData: FormData) {
 }
 
 export async function moveEducation(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const direction = String(formData.get("direction") ?? "");
   const supabase = await createClient();
@@ -92,6 +97,7 @@ export async function moveEducation(formData: FormData) {
 }
 
 export async function uploadEducationImage(formData: FormData) {
+  await requireAdmin();
   const educationId = String(formData.get("educationId") ?? "");
   const caption = String(formData.get("caption") ?? "");
   const file = formData.get("file");
@@ -116,6 +122,7 @@ export async function uploadEducationImage(formData: FormData) {
 }
 
 export async function deleteEducationImage(formData: FormData) {
+  await requireAdmin();
   const imageId = String(formData.get("imageId") ?? "");
   const educationId = String(formData.get("educationId") ?? "");
   const storagePath = String(formData.get("storagePath") ?? "");

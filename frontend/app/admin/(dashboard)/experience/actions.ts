@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
+import { requireAdmin } from "@/lib/auth";
 
 const MAX_PHOTOS = 2;
 
@@ -13,6 +14,7 @@ function refresh() {
 }
 
 export async function createExperience(formData: FormData) {
+  await requireAdmin();
   queueChatbotSync();
   const supabase = await createClient();
   const { count } = await supabase.from("work_experience").select("*", { count: "exact", head: true });
@@ -36,6 +38,7 @@ export async function createExperience(formData: FormData) {
 }
 
 export async function updateExperience(formData: FormData) {
+  await requireAdmin();
   queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
@@ -58,6 +61,7 @@ export async function updateExperience(formData: FormData) {
 }
 
 export async function deleteExperience(formData: FormData) {
+  await requireAdmin();
   queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
@@ -79,6 +83,7 @@ export async function deleteExperience(formData: FormData) {
 }
 
 export async function moveExperience(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const direction = String(formData.get("direction") ?? "");
   const supabase = await createClient();
@@ -101,6 +106,7 @@ export async function moveExperience(formData: FormData) {
 }
 
 export async function uploadExperienceLogo(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
@@ -116,6 +122,7 @@ export async function uploadExperienceLogo(formData: FormData) {
 }
 
 export async function uploadExperiencePhoto(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const caption = String(formData.get("caption") ?? "");
   const file = formData.get("file");
@@ -144,6 +151,7 @@ export async function uploadExperiencePhoto(formData: FormData) {
 }
 
 export async function deleteExperiencePhoto(formData: FormData) {
+  await requireAdmin();
   const imageId = String(formData.get("imageId") ?? "");
   const experienceId = String(formData.get("experienceId") ?? "");
   const storagePath = String(formData.get("storagePath") ?? "");

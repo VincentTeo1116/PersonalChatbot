@@ -16,7 +16,7 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
+              cookieStore.set(name, value, { ...options, httpOnly: true });
             });
           } catch {
             // Safe to ignore here -- the proxy already refreshes the session cookie.

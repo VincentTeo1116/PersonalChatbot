@@ -2,6 +2,7 @@ import { cache } from "react";
 import { normalizeCaseStudy } from "@/lib/project-case-study";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/public";
+import { safeLinks, safeUrl } from "@/lib/safe-url";
 // chat_logs and meeting_requests deliberately have NO public-read RLS policy (they hold visitor questions and contact details) -- only an authenticated admin session can read them back, so their getters below use this client instead of the public one above.
 import { createClient as createAdminClient } from "@/lib/supabase/server";
 import type {
@@ -69,10 +70,10 @@ export const getProfile = cache(async (): Promise<Profile> => {
     availability: profileRow.availability ?? null,
     contact: {
       email: profileRow.contact_email,
-      github: profileRow.contact_github,
-      linkedin: profileRow.contact_linkedin,
+      github: safeUrl(profileRow.contact_github),
+      linkedin: safeUrl(profileRow.contact_linkedin),
       // An uploaded resume (resume_path, via Storage) takes priority over a manually typed external URL, so re-uploading a new PDF from /admin always wins.
-      resumeUrl: publicUrl(supabase, profileRow.resume_path, profileRow.contact_resume_url ?? ""),
+      resumeUrl: publicUrl(supabase, profileRow.resume_path, safeUrl(profileRow.contact_resume_url)),
     },
   };
 });
@@ -102,9 +103,9 @@ export const getFyp = cache(async (): Promise<Fyp | null> => {
   return {
     title: row.title,
     description: row.description,
-    githubUrl: row.github_url,
+    githubUrl: safeUrl(row.github_url) || null,
     datasetDescription: row.dataset_description,
-    videoUrl: row.video_url,
+    videoUrl: safeUrl(row.video_url) || null,
     supervisor: row.supervisor,
     lecturerFeedback: row.lecturer_feedback,
     images: (images ?? []).map((img) => ({
@@ -158,8 +159,8 @@ export const getProjects = cache(async (): Promise<Project[]> => {
       screenshots: rest.length > 0
         ? rest.map((img) => publicUrl(supabase, img.storage_path, "/projects/placeholder.svg"))
         : undefined,
-      demoVideoUrl: row.demo_video_url ?? undefined,
-      links: row.links ?? [],
+      demoVideoUrl: safeUrl(row.demo_video_url) || undefined,
+      links: safeLinks(row.links),
       featured: row.featured ?? undefined,
       award: row.award ?? undefined,
       role: row.role ?? undefined,
@@ -184,7 +185,7 @@ export const getResearch = cache(async (): Promise<Publication[]> => {
     authors: row.authors ?? [],
     supervisor: row.supervisor,
     doi: row.doi,
-    doiUrl: row.doi_url,
+    doiUrl: safeUrl(row.doi_url),
     description: row.description,
     image: publicUrl(supabase, row.image_path, "/projects/placeholder.svg"),
     updatedAt: row.updated_at,

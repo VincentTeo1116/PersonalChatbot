@@ -45,10 +45,13 @@ class Config:
     CACHE_TTL: int = int(os.getenv("CACHE_TTL", "1800"))
     CACHE_SIZE: int = int(os.getenv("CACHE_SIZE", "200"))
 
-    # --- CORS: comma-separated list of allowed origins (your portfolio site) ---
+    # --- CORS: comma-separated list of allowed origins (your portfolio site). Empty means no browser origin is allowed. ---
     ALLOWED_ORIGINS: list[str] = [
-        o.strip() for o in os.getenv("ALLOWED_ORIGINS", "*").split(",") if o.strip()
+        o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()
     ]
+
+    # --- Interactive API docs (/docs, /redoc, /openapi.json) are for local development only ---
+    ENABLE_DOCS: bool = os.getenv("ENABLE_DOCS", "false").strip().lower() in ("1", "true", "yes")
 
     @classmethod
     def validate(cls) -> None:

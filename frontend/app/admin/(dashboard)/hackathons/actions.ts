@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
+import { requireAdmin } from "@/lib/auth";
 
 function refresh() {
   revalidatePath("/");
@@ -10,6 +11,7 @@ function refresh() {
 }
 
 export async function uploadHackathonPhoto(formData: FormData) {
+  await requireAdmin();
   const caption = String(formData.get("caption") ?? "");
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
@@ -26,6 +28,7 @@ export async function uploadHackathonPhoto(formData: FormData) {
 }
 
 export async function updateHackathonCaption(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const caption = String(formData.get("caption") ?? "");
   const supabase = await createClient();
@@ -36,6 +39,7 @@ export async function updateHackathonCaption(formData: FormData) {
 }
 
 export async function deleteHackathonPhoto(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const storagePath = String(formData.get("storagePath") ?? "");
   const supabase = await createClient();
@@ -47,6 +51,7 @@ export async function deleteHackathonPhoto(formData: FormData) {
 }
 
 export async function moveHackathonPhoto(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const direction = String(formData.get("direction") ?? "");
   const supabase = await createClient();

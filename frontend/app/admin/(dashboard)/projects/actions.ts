@@ -6,6 +6,7 @@ import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
 import { CASE_STUDY_MAX_LENGTH, CASE_STUDY_SECTIONS, normalizeCaseStudy } from "@/lib/project-case-study";
 import { editorialSeoFields } from "@/lib/editorial-seo";
+import { requireAdmin } from "@/lib/auth";
 
 function refresh() {
   revalidatePath("/");
@@ -39,6 +40,7 @@ function parseLinks(raw: string): { label: string; url: string }[] {
 }
 
 export async function createProject(formData: FormData) {
+  await requireAdmin();
   const validationError = caseStudyError(formData);
   if (validationError) return { error: validationError };
   const supabase = await createClient();
@@ -72,6 +74,7 @@ export async function createProject(formData: FormData) {
 }
 
 export async function updateProject(formData: FormData) {
+  await requireAdmin();
   const validationError = caseStudyError(formData);
   if (validationError) return { error: validationError };
   const id = String(formData.get("id") ?? "");
@@ -104,6 +107,7 @@ export async function updateProject(formData: FormData) {
 }
 
 export async function deleteProject(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
 
@@ -119,6 +123,7 @@ export async function deleteProject(formData: FormData) {
 }
 
 export async function moveProject(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const direction = String(formData.get("direction") ?? "");
   const supabase = await createClient();
@@ -141,6 +146,7 @@ export async function moveProject(formData: FormData) {
 }
 
 export async function uploadProjectImage(formData: FormData) {
+  await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "");
   const makeCover = formData.get("isCover") === "on";
   const file = formData.get("file");
@@ -173,6 +179,7 @@ export async function uploadProjectImage(formData: FormData) {
 }
 
 export async function setCoverImage(formData: FormData) {
+  await requireAdmin();
   const imageId = String(formData.get("imageId") ?? "");
   const projectId = String(formData.get("projectId") ?? "");
 
@@ -187,6 +194,7 @@ export async function setCoverImage(formData: FormData) {
 }
 
 export async function deleteProjectImage(formData: FormData) {
+  await requireAdmin();
   const imageId = String(formData.get("imageId") ?? "");
   const projectId = String(formData.get("projectId") ?? "");
   const storagePath = String(formData.get("storagePath") ?? "");

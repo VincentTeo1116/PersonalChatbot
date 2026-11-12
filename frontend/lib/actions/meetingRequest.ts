@@ -3,6 +3,7 @@
 import { after } from "next/server";
 import { getProfile } from "@/lib/data";
 import { sendMeetingRequestEmail } from "@/lib/notify";
+import { HUMAN_CHECK_MESSAGE, passesHumanCheck, RATE_LIMIT_MESSAGE, tooManyRequests } from "@/lib/request-guard";
 import { createClient } from "@/lib/supabase/server";
 import { validateMeetingRequest, hasErrors, type MeetingRequestErrors } from "@/lib/validation/meetingRequest";
 
@@ -18,6 +19,9 @@ export async function submitMeetingRequest(
   // Honeypot: real visitors never see or fill this field, so a non-empty value means a bot. Fake success rather than an error, so the bot doesn't learn to adjust and try again.
   if (String(formData.get("website") ?? "").trim()) return { ok: true };
 
+  // Every submission emails the owner, so this is the form most worth protecting: a handful per visitor per 10 minutes.
+  if (await tooManyRequests("meeting-request", 5, 10 * 60 * 1000)) return { ok: false, error: RATE_LIMIT_MESSAGE };
+
   const input = {
     name: String(formData.get("name") ?? ""),
     position: String(formData.get("position") ?? ""),
@@ -30,6 +34,7 @@ export async function submitMeetingRequest(
   // Re-validate here even though the client already checked -- client-side validation is only ever a UX convenience, never a security boundary; it can be bypassed by anyone submitting the form directly.
   const errors = validateMeetingRequest(input);
   if (hasErrors(errors)) return { ok: false, errors };
+  if (!(await passesHumanCheck(formData))) return { ok: false, error: HUMAN_CHECK_MESSAGE };
 
   const supabase = await createClient();
   const { error } = await supabase.from("meeting_requests").insert({

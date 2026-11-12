@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { adminAllowListConfigured, isAllowedAdmin } from "@/lib/admin-access";
 import { createClient } from "@/lib/supabase/server";
 import AdminNav from "@/components/admin/AdminNav";
 import Spotlight from "@/components/admin/Spotlight";
@@ -14,7 +15,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   } = await supabase.auth.getUser();
 
   // Defense-in-depth alongside proxy.ts, which already redirects unauthenticated requests to /admin/login before this layout ever renders.
-  if (!user) redirect("/admin/login");
+  if (!user || !isAllowedAdmin(user)) redirect("/admin/login");
 
   return (
     <AdminFeedbackProvider>
@@ -48,7 +49,15 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
             </div>
           </div>
         </aside>
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="min-w-0 flex-1">
+          {!adminAllowListConfigured() && (
+            <p role="alert" className="mb-6 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+              Security: <code>ADMIN_EMAILS</code> is not set, so any signed-in account can use this admin. Set it to your email in the
+              hosting environment variables and redeploy.
+            </p>
+          )}
+          {children}
+        </main>
       </div>
     </div>
     </AdminFeedbackProvider>

@@ -6,6 +6,7 @@ import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { uploadNextImage } from "@/lib/storage";
 import { editorialSeoFields } from "@/lib/editorial-seo";
 import { CASE_STUDY_MAX_LENGTH, CASE_STUDY_SECTIONS, normalizeCaseStudy } from "@/lib/project-case-study";
+import { requireAdmin } from "@/lib/auth";
 
 function refresh() {
   revalidatePath("/");
@@ -28,6 +29,7 @@ function detailsError(formData: FormData) {
 }
 
 export async function createResearch(formData: FormData) {
+  await requireAdmin();
   const validationError = detailsError(formData);
   if (validationError) return { error: validationError };
   const supabase = await createClient();
@@ -59,6 +61,7 @@ export async function createResearch(formData: FormData) {
 }
 
 export async function updateResearch(formData: FormData) {
+  await requireAdmin();
   const validationError = detailsError(formData);
   if (validationError) return { error: validationError };
   const id = String(formData.get("id") ?? "");
@@ -89,6 +92,7 @@ export async function updateResearch(formData: FormData) {
 }
 
 export async function deleteResearch(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase.from("research").delete().eq("id", id);
@@ -99,6 +103,7 @@ export async function deleteResearch(formData: FormData) {
 }
 
 export async function moveResearch(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const direction = String(formData.get("direction") ?? "");
   const supabase = await createClient();
@@ -121,6 +126,7 @@ export async function moveResearch(formData: FormData) {
 }
 
 export async function uploadResearchImage(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };

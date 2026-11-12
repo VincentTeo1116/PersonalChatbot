@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { queueChatbotSync } from "@/lib/chatbot-sync";
-import { deleteImage, extOf, uploadFixedFile, uploadNextImage } from "@/lib/storage";
+import { deleteImage, uploadFixedPdf, uploadNextImage } from "@/lib/storage";
+import { requireAdmin } from "@/lib/auth";
 
 export type ProfileFormState = { error?: string; success?: boolean } | undefined;
 
@@ -14,6 +15,7 @@ export async function saveProfile(
   _prevState: ProfileFormState,
   formData: FormData
 ): Promise<ProfileFormState> {
+  await requireAdmin();
   let skills: SkillCategoryInput[];
   try {
     skills = JSON.parse(String(formData.get("skills") ?? "[]"));
@@ -63,6 +65,7 @@ export async function saveProfile(
 }
 
 export async function uploadAvatar(formData: FormData): Promise<{ publicUrl?: string; error?: string }> {
+  await requireAdmin();
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
 
@@ -81,6 +84,7 @@ export async function uploadAvatar(formData: FormData): Promise<{ publicUrl?: st
 }
 
 export async function uploadResume(formData: FormData): Promise<{ publicUrl?: string; error?: string }> {
+  await requireAdmin();
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
   // The inline preview modal embeds this in an <iframe>, which only reliably renders PDFs across browsers -- reject anything else up front rather than accept a file that would silently fail to preview later.
@@ -89,7 +93,7 @@ export async function uploadResume(formData: FormData): Promise<{ publicUrl?: st
   const supabase = await createClient();
   try {
     const { data: current } = await supabase.from("profile").select("resume_path").eq("id", 1).single();
-    const { path, publicUrl } = await uploadFixedFile(supabase, "profile", `resume${extOf(file.name)}`, file);
+    const { path, publicUrl } = await uploadFixedPdf(supabase, "profile", "resume", file);
 
     // Clean up a stale file from a previous upload with a different extension (rare, since we only accept PDFs now, but harmless to guard against old data).
     if (current?.resume_path && current.resume_path !== path) {

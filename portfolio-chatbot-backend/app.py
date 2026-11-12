@@ -10,13 +10,14 @@ from src.services.pinecone_service import ensure_index
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Portfolio Chatbot API", version="1.0.0")
+docs_kwargs = {} if Config.ENABLE_DOCS else {"docs_url": None, "redoc_url": None, "openapi_url": None}
+app = FastAPI(title="Portfolio Chatbot API", version="1.0.0", **docs_kwargs)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=Config.ALLOWED_ORIGINS,
     allow_methods=["GET", "POST"],
-    allow_headers=["*"],
+    allow_headers=["Content-Type"],
 )
 
 app.include_router(chat.router)
@@ -26,6 +27,10 @@ app.include_router(webhook.router)
 @app.on_event("startup")
 async def startup() -> None:
     Config.validate()
+    if "*" in Config.ALLOWED_ORIGINS:
+        logger.warning("ALLOWED_ORIGINS contains '*': any website can call this API from a browser")
+    if not Config.ALLOWED_ORIGINS:
+        logger.warning("ALLOWED_ORIGINS is empty: browsers on other sites (including your portfolio) are blocked")
     ensure_index()
     logger.info("Portfolio chatbot API ready (index=%s, namespace=%s)", Config.PINECONE_INDEX_NAME, Config.PINECONE_NAMESPACE)
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState, type ChangeEvent } from "react";
+import TurnstileField from "@/components/TurnstileField";
 import { submitTestimonial, type TestimonialState } from "@/lib/actions/testimonial";
 import { validateTestimonial, type TestimonialInput } from "@/lib/validation/testimonial";
 
@@ -66,6 +67,8 @@ export default function TestimonialSubmitForm({
         <input type="text" name="website" tabIndex={-1} autoComplete="off" />
       </label>
 
+      <TurnstileField />
+
       <div>
         <label className={labelClass} htmlFor="t-name">Your name</label>
         <input id="t-name" className={inputClass} placeholder="Jane Doe" {...field("authorName")} />
@@ -90,6 +93,10 @@ export default function TestimonialSubmitForm({
       </div>
 
       {state?.ok === false && state.error && <p className="text-sm text-red-500">{state.error}</p>}
+      <p className="text-xs text-text-subtle">
+        Your name, role and text are shown publicly once approved. See the{" "}
+        <a href="/privacy" target="_blank" rel="noreferrer" className="underline">privacy policy</a>.
+      </p>
 
       <button
         type="submit"

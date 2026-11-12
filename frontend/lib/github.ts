@@ -118,7 +118,7 @@ export async function getRepoLanguages(owner: string, repo: string): Promise<Rep
 }
 
 // Pulls the username out of a github.com profile URL; null if it isn't actually one.
-function extractUsername(githubUrl: string): string | null {
+export function extractUsername(githubUrl: string): string | null {
   try {
     const u = new URL(githubUrl);
     if (u.hostname.replace(/^www\./, "").toLowerCase() !== "github.com") return null;

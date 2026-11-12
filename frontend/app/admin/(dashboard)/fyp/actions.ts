@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
+import { requireAdmin } from "@/lib/auth";
 
 export type FypFormState = { error?: string; success?: boolean } | undefined;
 
@@ -18,6 +19,7 @@ function orNull(formData: FormData, name: string): string | null {
 }
 
 export async function saveFyp(_prevState: FypFormState, formData: FormData): Promise<FypFormState> {
+  await requireAdmin();
   const supabase = await createClient();
   const { error } = await supabase
     .from("fyp")
@@ -41,6 +43,7 @@ export async function saveFyp(_prevState: FypFormState, formData: FormData): Pro
 }
 
 export async function uploadFypImage(formData: FormData) {
+  await requireAdmin();
   const makeCover = formData.get("isCover") === "on";
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };
@@ -67,6 +70,7 @@ export async function uploadFypImage(formData: FormData) {
 }
 
 export async function setFypCoverImage(formData: FormData) {
+  await requireAdmin();
   const imageId = String(formData.get("imageId") ?? "");
 
   const supabase = await createClient();
@@ -79,6 +83,7 @@ export async function setFypCoverImage(formData: FormData) {
 }
 
 export async function deleteFypImage(formData: FormData) {
+  await requireAdmin();
   const imageId = String(formData.get("imageId") ?? "");
   const storagePath = String(formData.get("storagePath") ?? "");
 

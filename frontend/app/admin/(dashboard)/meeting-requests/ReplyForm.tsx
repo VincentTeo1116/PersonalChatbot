@@ -18,8 +18,6 @@ export default function ReplyForm({ request }: { request: MeetingRequest }) {
   return (
     <form action={action} className="mt-3 space-y-2">
       <input type="hidden" name="id" value={request.id} />
-      <input type="hidden" name="requesterName" value={request.name} />
-      <input type="hidden" name="requesterEmail" value={request.email} />
       <textarea
         name="replyMessage"
         rows={3}

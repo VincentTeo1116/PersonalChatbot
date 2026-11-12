@@ -13,6 +13,12 @@ export function validateTestimonial(input: TestimonialInput): TestimonialErrors 
 
   if (input.authorName.trim().length < 2) {
     errors.authorName = "Please enter your name.";
+  } else if (input.authorName.trim().length > 100) {
+    errors.authorName = "That name is too long.";
+  }
+
+  if (input.authorRole.trim().length > 120) {
+    errors.authorRole = "That role is too long.";
   }
 
   const quote = input.quote.trim();

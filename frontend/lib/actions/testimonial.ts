@@ -1,5 +1,6 @@
 "use server";
 
+import { HUMAN_CHECK_MESSAGE, passesHumanCheck, RATE_LIMIT_MESSAGE, tooManyRequests } from "@/lib/request-guard";
 import { createClient } from "@/lib/supabase/server";
 import { validateTestimonial, hasErrors, type TestimonialErrors } from "@/lib/validation/testimonial";
 
@@ -15,6 +16,8 @@ export async function submitTestimonial(
   // Honeypot: real visitors never see or fill this field, so a non-empty value means a bot. Fake success rather than an error, so the bot doesn't learn to adjust and try again.
   if (String(formData.get("website") ?? "").trim()) return { ok: true };
 
+  if (await tooManyRequests("testimonial", 5, 10 * 60 * 1000)) return { ok: false, error: RATE_LIMIT_MESSAGE };
+
   const input = {
     authorName: String(formData.get("authorName") ?? ""),
     authorRole: String(formData.get("authorRole") ?? ""),
@@ -24,6 +27,7 @@ export async function submitTestimonial(
   // Re-validate here even though the client already checked -- client-side validation is only ever a UX convenience, it can be bypassed by anyone submitting the form directly.
   const errors = validateTestimonial(input);
   if (hasErrors(errors)) return { ok: false, errors };
+  if (!(await passesHumanCheck(formData))) return { ok: false, error: HUMAN_CHECK_MESSAGE };
 
   const supabase = await createClient();
   const { error } = await supabase.from("testimonials").insert({

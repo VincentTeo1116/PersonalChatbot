@@ -4,7 +4,7 @@ import time
 from typing import Annotated, Iterator, Literal
 
 from cachetools import TTLCache
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, StringConstraints
 
@@ -13,6 +13,7 @@ from src.services import retrieval
 from src.services.chat_logging import log_chat, log_feedback
 from src.services.groq_service import BusyError, detect_meeting_intent, generate_answer, generate_answer_stream
 from src.services.kb_sync import source_url
+from src.services.rate_limit import limiter
 from src.services.text_utils import highlight, strip_markdown
 
 logger = logging.getLogger(__name__)
@@ -147,8 +148,13 @@ def _detect_meeting_prefill(question: str) -> MeetingPrefill | None:
     return MeetingPrefill.model_validate(fields) if fields is not None else None
 
 
-@router.post("", response_model=ChatResponse)
-async def chat(payload: ChatRequest, background_tasks: BackgroundTasks) -> ChatResponse:
+# Each question can cost two model calls, so the free-tier quota is shared fairly: a burst allowance plus an hourly cap per caller.
+chat_limit = limiter("chat", (15, 60), (120, 3600))
+
+
+# Plain def (not async): the model and search calls block, so FastAPI runs this in a worker thread instead of stalling the event loop.
+@router.post("", response_model=ChatResponse, dependencies=[Depends(chat_limit)])
+def chat(payload: ChatRequest, background_tasks: BackgroundTasks) -> ChatResponse:
     start = time.monotonic()
     clean_question = payload.question.strip()
     cache_key = clean_question.lower()
@@ -252,13 +258,13 @@ def _stream_chat(question: str) -> Iterator[str]:
         yield json.dumps({"type": "error", "message": "Something went wrong generating a response."}) + "\n"
 
 
-@router.post("/stream")
+@router.post("/stream", dependencies=[Depends(chat_limit)])
 def chat_stream(payload: ChatRequest) -> StreamingResponse:
     clean_question = payload.question.strip()
     return StreamingResponse(_stream_chat(clean_question), media_type="application/x-ndjson")
 
 
-@router.post("/feedback")
+@router.post("/feedback", dependencies=[Depends(limiter("feedback", (30, 60)))])
 def chat_feedback(payload: FeedbackRequest, background_tasks: BackgroundTasks) -> dict[str, str]:
     """Thumbs up/down from the widget; stored for the admin to review in /admin/chatbot."""
     background_tasks.add_task(log_feedback, payload.question, payload.answer, payload.rating, payload.matched)

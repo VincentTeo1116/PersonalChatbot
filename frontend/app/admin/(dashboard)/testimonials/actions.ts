@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { queueChatbotSync } from "@/lib/chatbot-sync";
 import { deleteImage, uploadNextImage } from "@/lib/storage";
+import { requireAdmin } from "@/lib/auth";
 
 function refresh() {
   revalidatePath("/");
@@ -11,6 +12,7 @@ function refresh() {
 }
 
 export async function approveTestimonial(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase.from("testimonials").update({ status: "approved" }).eq("id", id);
@@ -20,6 +22,7 @@ export async function approveTestimonial(formData: FormData) {
 }
 
 export async function createTestimonial(formData: FormData) {
+  await requireAdmin();
   queueChatbotSync();
   const supabase = await createClient();
   const { count } = await supabase.from("testimonials").select("*", { count: "exact", head: true });
@@ -42,6 +45,7 @@ export async function createTestimonial(formData: FormData) {
 }
 
 export async function updateTestimonial(formData: FormData) {
+  await requireAdmin();
   queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
@@ -63,6 +67,7 @@ export async function updateTestimonial(formData: FormData) {
 }
 
 export async function deleteTestimonial(formData: FormData) {
+  await requireAdmin();
   queueChatbotSync();
   const id = String(formData.get("id") ?? "");
   const supabase = await createClient();
@@ -77,6 +82,7 @@ export async function deleteTestimonial(formData: FormData) {
 }
 
 export async function moveTestimonial(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const direction = String(formData.get("direction") ?? "");
   const supabase = await createClient();
@@ -99,6 +105,7 @@ export async function moveTestimonial(formData: FormData) {
 }
 
 export async function uploadTestimonialAvatar(formData: FormData) {
+  await requireAdmin();
   const id = String(formData.get("id") ?? "");
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "No file provided." };

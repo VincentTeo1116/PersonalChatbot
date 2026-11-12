@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import TurnstileField from "@/components/TurnstileField";
 import { login, type LoginState } from "./actions";
 
 export default function LoginPage() {
@@ -30,6 +31,8 @@ export default function LoginPage() {
           <label htmlFor="password" className="admin-label">Password</label>
           <input id="password" name="password" type="password" required autoComplete="current-password" className="admin-input" />
         </div>
+
+        <TurnstileField />
 
         {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
 

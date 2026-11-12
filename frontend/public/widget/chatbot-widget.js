@@ -167,6 +167,12 @@
     }
   }
 
+  function rateLimitedError() {
+    var err = new Error("Rate limited");
+    err.rateLimited = true;
+    return err;
+  }
+
   function ChatbotWidget(config) {
     this.config = config;
     this.isOpen = false;
@@ -242,8 +248,13 @@
     inputRow.appendChild(this.inputEl);
     inputRow.appendChild(this.sendBtn);
 
+    var privacy = el("p", "pcw-privacy", { text: "Questions are saved to improve answers; please don't share personal details. " });
+    var privacyLink = el("a", "", { href: "/privacy", target: "_blank", rel: "noopener", text: "Privacy" });
+    privacy.appendChild(privacyLink);
+
     this.panel.appendChild(header);
     this.panel.appendChild(this.messagesEl);
+    this.panel.appendChild(privacy);
     this.panel.appendChild(inputRow);
 
     document.body.appendChild(this.launcher);
@@ -645,6 +656,7 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: question }),
     }).then(function (res) {
+      if (res.status === 429) throw rateLimitedError();
       if (!res.ok || !res.body || !res.body.getReader) {
         throw new Error("Streaming not available (" + (res && res.status) + ")");
       }
@@ -754,6 +766,7 @@
       body: JSON.stringify({ question: question }),
     })
       .then(function (res) {
+        if (res.status === 429) throw rateLimitedError();
         if (!res.ok) throw new Error("Request failed (" + res.status + ")");
         return res.json();
       })
@@ -790,13 +803,20 @@
     this._showProgress();
 
     this._sendStreaming(question)
-      .catch(function () {
+      .catch(function (err) {
+        // A rate-limited caller would only be refused again by the fallback, so don't retry.
+        if (err && err.rateLimited) throw err;
         return self._sendNonStreaming(question);
       })
-      .catch(function () {
+      .catch(function (err) {
         self._hideTyping();
         self._removeProgress();
-        self._addMessage("error", "Something went wrong reaching the assistant. Please try again in a moment.");
+        self._addMessage(
+          "error",
+          err && err.rateLimited
+            ? "You're asking quite quickly. Please wait a minute and try again."
+            : "Something went wrong reaching the assistant. Please try again in a moment."
+        );
       })
       .finally(function () {
         self.isLoading = false;
