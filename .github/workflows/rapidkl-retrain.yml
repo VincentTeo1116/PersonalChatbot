@@ -1,0 +1,67 @@
+name: Rapid KL retrain
+
+# On the 1st of every month this retrains the forecasting model on all the data published so far, so it keeps up with slow
+# changes in ridership. The design (features, number of trees, range calibration) stays as tested in results/metrics.json;
+# only the training data grows. The new model files go on the "forecast-data" release, where the daily forecast picks them up.
+on:
+  schedule:
+    - cron: "0 17 1 * *" # 01:00 Malaysia time on the 2nd, after that evening's forecast
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rapidkl-forecast # shared with the daily forecast, so the two never run at the same time
+  cancel-in-progress: false
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: rapidkl-forecast
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: rapidkl-forecast/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Refresh the data
+        run: python prepare.py
+      - name: Keep the model that is in use now, for comparison
+        run: |
+          mkdir -p current retrained
+          gh release download forecast-data --pattern "model_production*.json" --dir current --clobber || echo "no retrained model yet: comparing with the repository copy"
+          python forecast.py --models current --previous none.json --out before.json
+      - name: Retrain on all data
+        run: |
+          python model.py --production
+          cp results/model_production.json results/model_production_range.json retrained/
+          python forecast.py --models retrained --previous none.json --out after.json
+      - name: Check the new model before publishing it
+        run: |
+          python - <<'EOF'
+          import json
+          before, after = (json.load(open(f)) for f in ("before.json", "after.json"))
+          old = {s["id"]: s for s in before["series"]}
+          worst = 0.0
+          for s in after["series"]:
+              if s["kind"] == "stations" or s["id"] not in old:
+                  continue
+              assert all(lo <= f <= hi for lo, f, hi in zip(s["low"], s["forecast"], s["high"])), f"{s['id']}: forecast outside its own range"
+              change = abs(sum(s["forecast"]) / sum(old[s["id"]]["forecast"]) - 1)
+              worst = max(worst, change)
+              print(f"{s['label']:40} 28-day total changes by {change:.1%}")
+          # A month of extra data should nudge the forecast, not rewrite it. A large jump means something is wrong with the data or the run.
+          assert worst < 0.15, f"largest change {worst:.1%} is over the 15% limit: not publishing"
+          EOF
+      - name: Publish the retrained model
+        run: |
+          gh release view forecast-data >/dev/null 2>&1 || gh release create forecast-data --title "Forecast data" --notes "Machine-generated forecast files read by the portfolio site."
+          gh release upload forecast-data retrained/model_production.json retrained/model_production_range.json --clobber

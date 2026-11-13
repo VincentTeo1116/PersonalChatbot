@@ -259,7 +259,7 @@ export default function RapidKlForecastChart() {
         )}
       </div>
       <p className="mt-1 text-[11px] text-text-subtle">
-        Entries per day: each journey is counted once, at the station where it starts. The range is where 8 in 10 past forecasts fell.
+        Entries per day: each journey is counted once, at the station where it starts. The shaded range is where about 8 in 10 outcomes are expected to fall; it is wider around holidays.
       </p>
 
       {view && (

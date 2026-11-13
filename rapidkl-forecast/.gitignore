@@ -3,3 +3,8 @@ raw/
 __pycache__/
 # Every backtest forecast row: re-created by model.py.
 results/backtest.parquet
+# Scratch files from the workflows.
+current/
+retrained/
+before.json
+after.json

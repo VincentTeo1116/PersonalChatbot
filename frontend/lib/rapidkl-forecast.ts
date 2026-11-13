@@ -37,7 +37,7 @@ function looksValid(data: unknown): data is RapidKlForecast {
 export async function getRapidKlForecast(): Promise<RapidKlForecast> {
   const bundled = seed as RapidKlForecast;
   try {
-    const res = await fetch(REMOTE, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(8000) });
+    const res = await fetch(REMOTE, { next: { revalidate: 600 }, signal: AbortSignal.timeout(8000) });
     if (res.ok) {
       const remote: unknown = await res.json();
       if (looksValid(remote) && remote.dataThrough >= bundled.dataThrough) return remote;

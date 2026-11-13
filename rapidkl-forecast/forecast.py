@@ -10,7 +10,10 @@ forecast.json holds, for the network, every line and every station:
   - a track record: earlier forecasts compared with what then happened (carried over from the previous forecast.json)
   - backtest summary numbers from results/metrics.json
 
-Usage : python forecast.py [--previous path/to/yesterdays/forecast.json] [--out path]
+The model files come from results/ (trained when the design last changed). The monthly retraining job publishes newer
+ones; pass their folder with --models and they are used when they match the current feature list.
+
+Usage : python forecast.py [--previous path/to/yesterdays/forecast.json] [--out path] [--models folder]
 """
 import argparse
 import datetime as dt
@@ -40,19 +43,36 @@ def label(series: str) -> str:
     return f"{name} ({code})"
 
 
-def interval_bucket(horizon: int) -> str:
-    return "1-7" if horizon <= 7 else "8-14" if horizon <= 14 else "15-28"
+def load_model(name: str, folder: str | None) -> tuple[xgb.Booster, str]:
+    """The retrained copy in `folder` when it exists and was trained on today's feature list, otherwise the copy in results/."""
+    for path, origin in ((Path(folder) / name if folder else None, "retrained"), (m.OUT / name, "repository")):
+        if path is None or not path.exists():
+            continue
+        try:
+            booster = xgb.Booster()
+            booster.load_model(path)
+        except Exception as error:  # a damaged download must not stop the daily forecast
+            print(f"skipping {path}: {error}")
+            continue
+        if booster.feature_names == m.features():
+            return booster, origin
+        print(f"skipping {path}: trained on a different feature list")
+    raise SystemExit(f"no usable {name}")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--previous", default=str(HERE / "forecast.json"))
     parser.add_argument("--out", default=str(HERE / "forecast.json"))
+    parser.add_argument("--models", default=None)
     args = parser.parse_args()
 
     metrics = json.loads((m.OUT / "metrics.json").read_text(encoding="utf-8"))
-    booster = xgb.Booster()
-    booster.load_model(m.OUT / "model_production.json")
+    booster, origin = load_model("model_production.json", args.models)
+    range_booster, range_origin = load_model("model_production_range.json", args.models)
+    if origin != range_origin:  # never mix a retrained forecast with an older range
+        booster, range_booster = load_model("model_production.json", None)[0], load_model("model_production_range.json", None)[0]
+        origin = "repository"
     entries, meta = m.load()
     values, days = entries.to_numpy(dtype=np.float32), entries.index
     last = len(days) - 1
@@ -63,6 +83,7 @@ def main() -> None:
     frames = [m.build(values, cal, meta, np.array([last + k]), k, keep_unknown_targets=True) for k in range(1, DAYS_AHEAD + 1)]
     frame = pd.concat(frames, ignore_index=True)
     frame["forecast"] = m.predict(booster, frame)
+    frame["low"], frame["high"] = m.predict_range(range_booster, frame, frame["forecast"].to_numpy(), metrics["rangeCorrection"])
 
     kind_name = {0: "network", 1: "lines", 2: "stations"}
     my = holidays.MY(subdiv="KUL", years=sorted(set(future.year)))
@@ -77,15 +98,14 @@ def main() -> None:
         if len(rows) < DAYS_AHEAD:  # too little recent data (for example a station closed for works)
             continue
         kind = kind_name[int(meta["kind"].iloc[i])]
-        low_high = [metrics["intervals"][kind][interval_bucket(k)] for k in range(1, DAYS_AHEAD + 1)]
         forecast = rows.loc[range(1, DAYS_AHEAD + 1), "forecast"].to_numpy()
         history = values[last - CONTEXT_DAYS + 1:, i]
         series_out.append({
             "id": name, "label": label(name), "kind": kind,
             "history": [None if not np.isfinite(v) else int(round(v)) for v in history],
             "forecast": [int(round(v)) for v in forecast],
-            "low": [int(round(v * (1 + lh[0]))) for v, lh in zip(forecast, low_high)],
-            "high": [int(round(v * (1 + lh[1]))) for v, lh in zip(forecast, low_high)],
+            "low": [int(round(v)) for v in rows.loc[range(1, DAYS_AHEAD + 1), "low"].to_numpy()],
+            "high": [int(round(v)) for v in rows.loc[range(1, DAYS_AHEAD + 1), "high"].to_numpy()],
             "usual": [int(round(v)) for v in rows.loc[range(1, DAYS_AHEAD + 1), "usual"].to_numpy()],
         })
 
@@ -127,6 +147,7 @@ def main() -> None:
     }
     Path(args.out).write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
     network = next(s for s in series_out if s["id"] == "ALL")
+    print(f"model: {origin} copy")
     print(f"data through {out['dataThrough']}; {len(series_out)} series; {Path(args.out).stat().st_size / 1024:.0f} KB; track {len(track)} days")
     for day, f, u in list(zip(day_list, network["forecast"], network["usual"]))[:10]:
         print(f"  {day['date']} {pd.Timestamp(day['date']).day_name()[:3]}  forecast {f:>8,}  usual {u:>8,}  {day['holiday'] or ''}")
