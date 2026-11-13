@@ -33,7 +33,7 @@ jobs:
       - name: Fetch yesterday's forecast (for the track record)
         run: gh release download forecast-data --pattern rapidkl-forecast.json --dir . --clobber || echo "no previous forecast yet"
       - name: Fetch the newest retrained model (published monthly by the retrain workflow)
-        run: gh release download forecast-data --pattern "model_production*.json" --dir retrained --clobber || echo "no retrained model yet: using the repository copy"
+        run: gh release download forecast-data --pattern "model_production*.json" --dir retrained --clobber || echo "no retrained model yet, using the repository copy"
       - name: Refresh the data
         run: python prepare.py
       - name: Forecast the next 28 days
