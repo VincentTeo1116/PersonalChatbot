@@ -2,9 +2,24 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ContentShell from "@/components/ContentShell";
 import AnimatedArrow from "@/components/AnimatedArrow";
+import ArticleFigure from "@/components/ArticleFigure";
+import { safeUrl } from "@/lib/safe-url";
 import { articles, getArticle } from "@/lib/writing";
 import { absoluteUrl, contentMetadata, jsonLdString, SITE_URL } from "@/lib/seo";
 import { getProfile } from "@/lib/data";
+
+/** Turns [text](url) into links. Anything that is not an http(s) address or a path on this site stays as plain text. */
+function withLinks(text: string) {
+  return text.split(/(\[[^\]]+\]\([^)\s]+\))/g).map((part, index) => {
+    const match = /^\[([^\]]+)\]\(([^)\s]+)\)$/.exec(part);
+    const href = match && safeUrl(match[2]);
+    if (!match || !href) return match ? match[1] : part;
+    const external = /^https?:/i.test(href);
+    return external
+      ? <a key={index} href={href} target="_blank" rel="noreferrer" className="text-indigo-600 underline underline-offset-4 dark:text-indigo-300">{match[1]}</a>
+      : <Link key={index} href={href} className="text-indigo-600 underline underline-offset-4 dark:text-indigo-300">{match[1]}</Link>;
+  });
+}
 
 export function generateStaticParams() { return articles.map(({ slug }) => ({ slug })); }
 
@@ -46,14 +61,15 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         {article.sections.map((section) => (
           <section key={section.id} id={section.id} className="scroll-mt-8">
             <h2 className="text-2xl font-semibold text-foreground">{section.title}</h2>
-            <div className="mt-4 space-y-4 text-base leading-relaxed text-text-secondary">{section.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
+            <div className="mt-4 space-y-4 text-base leading-relaxed text-text-secondary">{section.paragraphs.map((paragraph, index) => <p key={index}>{withLinks(paragraph)}</p>)}</div>
+            {section.figure && <ArticleFigure id={section.figure.id} caption={section.figure.caption} />}
           </section>
         ))}
       </div>
       <aside className="mt-12 rounded-2xl border border-border bg-surface p-6">
         <h2 className="text-xl font-semibold text-foreground">Explore the implementation</h2>
         <div className="mt-4 flex flex-wrap gap-5 text-sm font-medium text-indigo-600 dark:text-indigo-300">
-          <Link href="/projects/portfolio-chatbot">RAG portfolio case study <AnimatedArrow /></Link>
+          <Link href={article.related?.href ?? "/projects/portfolio-chatbot"}>{article.related?.label ?? "RAG portfolio case study"} <AnimatedArrow /></Link>
           {profile.contact.github && <a href={profile.contact.github} target="_blank" rel="noreferrer">Explore my GitHub <AnimatedArrow direction="up-right" /></a>}
           <Link href="/#contact">Discuss an AI project <AnimatedArrow /></Link>
         </div>

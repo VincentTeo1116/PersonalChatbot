@@ -8,6 +8,7 @@ import AnimatedArrow from "@/components/AnimatedArrow";
 import { getProfile, getProjects } from "@/lib/data";
 import { SITE_URL, absoluteUrl, jsonLdString, metaDescription } from "@/lib/seo";
 import { CASE_STUDY_SECTIONS } from "@/lib/project-case-study";
+import { articles } from "@/lib/writing";
 
 // Built once and served from the cache. Saving a project in admin refreshes these pages straight away (revalidatePath in the
 // admin actions); the hourly refresh is a safety net. Without generateStaticParams each visit rebuilt the page from the database.
@@ -52,6 +53,8 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
   const project = projects.find((p) => p.slug === slug);
   if (!project) notFound();
 
+  // Articles in lib/writing.ts that say they are about this project (their "related" link points here).
+  const written = articles.filter((article) => article.related?.href === `/projects/${project.slug}`);
   const primaryLink = project.links[0];
   const repoLink = project.links.find((l) => /github\.com/i.test(l.url));
   const projectUrl = `${SITE_URL}/projects/${project.slug}`;
@@ -185,6 +188,22 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
               ))}
             </div>
           </>
+        )}
+
+        {written.length > 0 && (
+          <section aria-labelledby="written-heading" className="mt-14">
+            <h2 id="written-heading" className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">The story behind it</h2>
+            <ul className="mt-4 space-y-3">
+              {written.map((article) => (
+                <li key={article.slug}>
+                  <Link href={`/writing/${article.slug}`} className="block rounded-2xl border border-border bg-surface p-5 transition hover:border-indigo-400/60">
+                    <span className="font-semibold text-foreground">{article.title} <AnimatedArrow /></span>
+                    <span className="mt-1 block text-sm leading-relaxed text-text-secondary">{article.description}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         <aside className="mt-14 rounded-2xl border border-indigo-400/30 bg-indigo-500/5 p-6">
