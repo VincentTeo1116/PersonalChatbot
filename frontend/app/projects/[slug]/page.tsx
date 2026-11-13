@@ -9,6 +9,14 @@ import { getProfile, getProjects } from "@/lib/data";
 import { SITE_URL, absoluteUrl, jsonLdString, metaDescription } from "@/lib/seo";
 import { CASE_STUDY_SECTIONS } from "@/lib/project-case-study";
 
+// Built once and served from the cache. Saving a project in admin refreshes these pages straight away (revalidatePath in the
+// admin actions); the hourly refresh is a safety net. Without generateStaticParams each visit rebuilt the page from the database.
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  return (await getProjects()).map(({ slug }) => ({ slug }));
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const [profile, projects] = await Promise.all([getProfile(), getProjects()]);

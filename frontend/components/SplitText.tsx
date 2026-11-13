@@ -3,11 +3,14 @@ import { Fragment, type CSSProperties } from "react";
 /** Each word slides up out of an invisible mask, one after another (CSS-driven, so it runs before hydration). */
 export default function SplitText({
   text,
+  label,
   className = "",
   delay = 0,
   stagger = 0.07,
 }: {
   text: string;
+  /** What screen readers and search engines read in place of the animated words. Defaults to the text itself. */
+  label?: string;
   className?: string;
   delay?: number;
   stagger?: number;
@@ -17,7 +20,7 @@ export default function SplitText({
   return (
     <span className={className}>
       {/* aria-label isn't permitted on a bare span, so screen readers get the sentence as real text and the per-word animation spans are hidden from them. */}
-      <span className="sr-only">{text}</span>
+      <span className="sr-only">{label ?? text}</span>
       {words.map((word, i) => (
         <Fragment key={i}>
           <span aria-hidden className="inline-block overflow-hidden pb-[0.12em] -mb-[0.12em] align-bottom">

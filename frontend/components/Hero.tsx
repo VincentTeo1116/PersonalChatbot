@@ -71,7 +71,7 @@ export default function Hero({ profile }: { profile: Profile }) {
           </p>
 
           <h1 className="text-3xl sm:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
-            <SplitText text={`Hi, I'm ${profile.name}.`} delay={0.15} />
+            <SplitText text={`Hi, I'm ${profile.name}.`} label={`Hi, I'm ${profile.name}, an AI/ML developer in ${profile.location}.`} delay={0.15} />
             <span className="mt-2 block overflow-hidden pb-[0.15em] -mb-[0.15em] text-2xl leading-tight sm:text-4xl">
               {/* Two layers on purpose: the outer one plays the one-off slide-in, the inner one keeps the looping gradient shimmer. Both set `animation`, so sharing an element made the slide repeat. */}
               <span style={delay(0.4)} className="enter-word block">

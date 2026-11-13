@@ -8,6 +8,11 @@ import { absoluteUrl, contentMetadata, jsonLdString, SITE_URL } from "@/lib/seo"
 
 export const revalidate = 3600;
 
+// Needed for the page to be cached at all: without it each visit rebuilt the page from the database.
+export async function generateStaticParams() {
+  return (await getResearch()).map(({ slug }) => ({ slug }));
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const [papers, profile] = await Promise.all([getResearch(), getProfile()]);
