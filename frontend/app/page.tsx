@@ -8,7 +8,7 @@ import GithubExhibitionSection from "@/components/GithubExhibitionSection";
 import ExploreMore from "@/components/ExploreMore";
 import WorkExperience from "@/components/WorkExperience";
 import MobileActionBar from "@/components/MobileActionBar";
-import ModelDemo, { TRAFFIC_PROJECT_SLUG } from "@/components/ModelDemo";
+import ModelDemo from "@/components/ModelDemo";
 import Projects from "@/components/Projects";
 import Research from "@/components/Research";
 import FYP from "@/components/FYP";
@@ -48,7 +48,7 @@ export default async function Home() {
         <Projects projects={projects} />
         <WorkExperience experience={workExperience} />
         <Research research={research} />
-        <ModelDemo caseStudyHref={projects.some((p) => p.slug === TRAFFIC_PROJECT_SLUG) ? `/projects/${TRAFFIC_PROJECT_SLUG}` : undefined} />
+        <ModelDemo caseStudies={projects.map((p) => p.slug)} />
         <FYP fyp={fyp} />
         <ExploreMore />
         <Suspense fallback={<div aria-hidden className="min-h-80" />}>

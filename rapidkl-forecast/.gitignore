@@ -1,0 +1,5 @@
+# Yearly source files (about 6 MB each): prepare.py downloads them again.
+raw/
+__pycache__/
+# Every backtest forecast row: re-created by model.py.
+results/backtest.parquet

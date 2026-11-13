@@ -34,8 +34,15 @@ HORIZONS = [1, 2, 3, 5, 7, 10, 14]
 TEST_START = pd.Timestamp("2026-10-01")
 VALID_START = pd.Timestamp("2026-09-10")  # three weeks covering both school term and school holidays
 FIRST_TARGET = pd.Timestamp("2026-08-22")  # leaves 21 days of history for the longest lag
-# Victorian government school term dates 2026: term 3 ends 18 Sep, term 4 starts 5 Oct.
-SCHOOL_HOLIDAYS = (pd.Timestamp("2026-09-19"), pd.Timestamp("2026-10-04"))
+# Victorian government school holidays (first and last day off). 2026 term 3 ended 18 Sep and term 4 started 5 Oct.
+# The later ranges are only used when forecasting future dates: check them against the published term dates each year.
+SCHOOL_HOLIDAYS = [
+    ("2026-09-19", "2026-10-04"),
+    ("2026-12-19", "2027-01-27"),
+    ("2027-03-26", "2027-04-11"),
+    ("2027-06-26", "2027-07-11"),
+    ("2027-09-18", "2027-10-03"),
+]
 
 FEATURES = [
     "horizon", "hour", "hour_sin", "hour_cos", "dow", "is_weekend", "public_holiday", "school_holiday",
@@ -74,7 +81,7 @@ def calendar(days: pd.DatetimeIndex) -> dict[str, np.ndarray]:
         "dow": dow,
         "day_type": np.where(dow < 5, 0, dow - 4),  # 0 weekday, 1 Saturday, 2 Sunday
         "public_holiday": np.array([d.date() in vic for d in days], dtype=np.float32),
-        "school_holiday": ((days >= SCHOOL_HOLIDAYS[0]) & (days <= SCHOOL_HOLIDAYS[1])).astype(np.float32),
+        "school_holiday": np.any([(days >= pd.Timestamp(a)) & (days <= pd.Timestamp(b)) for a, b in SCHOOL_HOLIDAYS], axis=0).astype(np.float32),
     }
 
 
@@ -92,12 +99,13 @@ def expanding_typical(volumes: np.ndarray, day_type: np.ndarray) -> tuple[np.nda
     return out, seen
 
 
-def build(volumes: np.ndarray, days: pd.DatetimeIndex, cal: dict, target_days: np.ndarray, horizon: int) -> pd.DataFrame:
+def build(volumes: np.ndarray, days: pd.DatetimeIndex, cal: dict, target_days: np.ndarray, horizon: int, keep_unknown_targets: bool = False) -> pd.DataFrame:
     """One row per (site, target day, hour) for one horizon. Volumes are divided by the site's scale so busy and quiet sites are comparable."""
     n_sites = volumes.shape[0]
     weeks_back = -(-horizon // 7)  # the latest same-weekday that is on or before the cutoff
     cutoff = target_days - horizon
     lag1, lag2 = target_days - 7 * weeks_back, target_days - 7 * (weeks_back + 1)
+    assert lag2.min() >= 0, "not enough history before the first target day (a negative index would wrap round to future days)"
 
     daily = np.nansum(volumes, axis=2)
     daily[np.isnan(volumes[:, :, 0])] = np.nan
@@ -155,6 +163,8 @@ def build(volumes: np.ndarray, days: pd.DatetimeIndex, cal: dict, target_days: n
     frame["actual"] = volumes[:, target_days].ravel()
     # Target: deviation from the typical day, in units of the site's scale. Rows with no typical value yet are dropped.
     frame["y"] = frame["actual"] / frame["scale"] - frame["typical"]
+    if keep_unknown_targets:  # forecasting days that have not happened yet: there is no actual value to require
+        return frame[np.isfinite(frame["typical"]) & (frame["scale"] > 0)]
     return frame[np.isfinite(frame["y"]) & (frame["scale"] > 0)]
 
 

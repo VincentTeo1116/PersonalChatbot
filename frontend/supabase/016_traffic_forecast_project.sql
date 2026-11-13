@@ -13,7 +13,7 @@ select
   coalesce((select max(sort_order) + 1 from public.projects), 0),
   'Group assignment: project idea, model design and backend code',
   '7.7% average error on 1.2 million hourly forecasts; 16.6% less error than "same hour last week".',
-  'Traffic Volume Forecasting with XGBoost: an Honest Evaluation | Vincent Teo',
+  'Traffic Volume Forecasting with XGBoost: an Honest Evaluation',
   'Hourly traffic forecasts for 300 intersections in Victoria with XGBoost: a time-based test on unseen data, two baselines, a data leak found and fixed, and the limits.',
   jsonb_build_object(
     'problem', $$Road authorities and drivers both benefit from knowing how busy an intersection will be before the day arrives. The question for this project was how well next week's traffic can be predicted, hour by hour, from nothing more than the counts the traffic signals already record.

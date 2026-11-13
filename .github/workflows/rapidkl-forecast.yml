@@ -1,0 +1,42 @@
+name: Rapid KL forecast
+
+# Every evening (Malaysia time) this refreshes the ridership data, forecasts the next 28 days with the trained model and
+# publishes the result as a file on the "forecast-data" release. The website reads that file, so no commit or redeploy is needed.
+on:
+  schedule:
+    - cron: "30 15 * * *" # 23:30 Malaysia time, after data.gov.my's daily update
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rapidkl-forecast
+  cancel-in-progress: false
+
+jobs:
+  forecast:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rapidkl-forecast
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: rapidkl-forecast/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Fetch yesterday's forecast (for the track record)
+        run: gh release download forecast-data --pattern rapidkl-forecast.json --dir . --clobber || echo "no previous forecast yet"
+      - name: Refresh the data
+        run: python prepare.py
+      - name: Forecast the next 28 days
+        run: python forecast.py --previous rapidkl-forecast.json --out rapidkl-forecast.json
+      - name: Publish
+        run: |
+          gh release view forecast-data >/dev/null 2>&1 || gh release create forecast-data --title "Forecast data" --notes "Machine-generated forecast files read by the portfolio site. Updated daily by the Rapid KL forecast workflow."
+          gh release upload forecast-data rapidkl-forecast.json --clobber
