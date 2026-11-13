@@ -1,0 +1,7 @@
+# Raw SCATS downloads and any extracted CSVs: each monthly ZIP is over GitHub's 100 MB file limit. See README.md for the source links.
+raw/
+*.csv
+*.zip
+__pycache__/
+# Every test-month forecast (94 MB): re-created by train.py, and too close to GitHub's 100 MB limit to commit.
+results/test_predictions.parquet

@@ -1,0 +1,718 @@
+{
+  "trainedOn": "2026-11-13",
+  "data": {
+    "source": "Traffic Signal Volume Data, Department of Transport and Planning (Victoria), CC BY 4.0",
+    "sites": 300,
+    "period": [
+      "2026-08-01",
+      "2026-10-31"
+    ],
+    "trainTargets": [
+      "2026-08-22",
+      "2026-09-30"
+    ],
+    "testTargets": [
+      "2026-10-01",
+      "2026-10-31"
+    ],
+    "trainRows": 1911840,
+    "testRows": 1217664
+  },
+  "validation": {
+    "period": [
+      "2026-09-10",
+      "2026-09-30"
+    ],
+    "model": {
+      "mae": 119.09,
+      "rmse": 269.46,
+      "wape": 0.0994,
+      "r2": 0.9426
+    },
+    "typical_day": {
+      "mae": 124.2,
+      "rmse": 263.96,
+      "wape": 0.1037,
+      "r2": 0.945
+    }
+  },
+  "model": {
+    "type": "XGBoost regression on the deviation from the typical day",
+    "trees": 14,
+    "features": [
+      "horizon",
+      "hour",
+      "hour_sin",
+      "hour_cos",
+      "dow",
+      "is_weekend",
+      "public_holiday",
+      "school_holiday",
+      "lag_week_1",
+      "lag_week_2",
+      "lag_week_1_day_total",
+      "lag_week_1_public_holiday",
+      "lag_week_1_school_holiday",
+      "typical",
+      "last_known_day",
+      "last_known_dow",
+      "recent_level",
+      "site_scale",
+      "lag_week_1_dev",
+      "lag_week_2_dev",
+      "last_known_dev",
+      "recent_dev",
+      "history_days"
+    ],
+    "params": {
+      "objective": "reg:squarederror",
+      "tree_method": "hist",
+      "max_depth": 8,
+      "learning_rate": 0.06,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "min_child_weight": 20,
+      "reg_lambda": 2.0,
+      "seed": 42
+    }
+  },
+  "overall": {
+    "rows": 1217664,
+    "hourly": {
+      "model": {
+        "mae": 98.13,
+        "rmse": 196.9,
+        "wape": 0.0772,
+        "r2": 0.971
+      },
+      "last_week": {
+        "mae": 117.64,
+        "rmse": 260.53,
+        "wape": 0.0926,
+        "r2": 0.9493
+      },
+      "typical_day": {
+        "mae": 102.47,
+        "rmse": 202.65,
+        "wape": 0.0807,
+        "r2": 0.9693
+      }
+    },
+    "daily": {
+      "model": {
+        "mae": 1642.17,
+        "rmse": 2848.69,
+        "wape": 0.0539,
+        "r2": 0.9745
+      },
+      "last_week": {
+        "mae": 1806.08,
+        "rmse": 3482.25,
+        "wape": 0.0592,
+        "r2": 0.9619
+      },
+      "typical_day": {
+        "mae": 1699.73,
+        "rmse": 2851.71,
+        "wape": 0.0557,
+        "r2": 0.9745
+      }
+    },
+    "improvementOverLastWeek": 0.1658,
+    "improvementOverTypicalDay": 0.0424
+  },
+  "byHorizon": {
+    "1": {
+      "rows": 173904,
+      "hourly": {
+        "model": {
+          "mae": 96.44,
+          "rmse": 195.87,
+          "wape": 0.0759,
+          "r2": 0.9713
+        },
+        "last_week": {
+          "mae": 111.73,
+          "rmse": 250.78,
+          "wape": 0.0879,
+          "r2": 0.953
+        },
+        "typical_day": {
+          "mae": 101.9,
+          "rmse": 201.08,
+          "wape": 0.0802,
+          "r2": 0.9698
+        }
+      },
+      "daily": {
+        "model": {
+          "mae": 1614.5,
+          "rmse": 2868.6,
+          "wape": 0.0529,
+          "r2": 0.9741
+        },
+        "last_week": {
+          "mae": 1673.82,
+          "rmse": 3307.28,
+          "wape": 0.0549,
+          "r2": 0.9656
+        },
+        "typical_day": {
+          "mae": 1690.36,
+          "rmse": 2837.8,
+          "wape": 0.0554,
+          "r2": 0.9747
+        }
+      },
+      "improvementOverLastWeek": 0.1368,
+      "improvementOverTypicalDay": 0.0536
+    },
+    "2": {
+      "rows": 173904,
+      "hourly": {
+        "model": {
+          "mae": 96.79,
+          "rmse": 195.08,
+          "wape": 0.0761,
+          "r2": 0.9716
+        },
+        "last_week": {
+          "mae": 111.73,
+          "rmse": 250.78,
+          "wape": 0.0879,
+          "r2": 0.953
+        },
+        "typical_day": {
+          "mae": 102.43,
+          "rmse": 202.03,
+          "wape": 0.0806,
+          "r2": 0.9695
+        }
+      },
+      "daily": {
+        "model": {
+          "mae": 1624.16,
+          "rmse": 2831.9,
+          "wape": 0.0532,
+          "r2": 0.9748
+        },
+        "last_week": {
+          "mae": 1673.82,
+          "rmse": 3307.28,
+          "wape": 0.0549,
+          "r2": 0.9656
+        },
+        "typical_day": {
+          "mae": 1701.95,
+          "rmse": 2856.79,
+          "wape": 0.0558,
+          "r2": 0.9744
+        }
+      },
+      "improvementOverLastWeek": 0.1337,
+      "improvementOverTypicalDay": 0.0551
+    },
+    "3": {
+      "rows": 173904,
+      "hourly": {
+        "model": {
+          "mae": 97.06,
+          "rmse": 195.25,
+          "wape": 0.0764,
+          "r2": 0.9715
+        },
+        "last_week": {
+          "mae": 111.73,
+          "rmse": 250.78,
+          "wape": 0.0879,
+          "r2": 0.953
+        },
+        "typical_day": {
+          "mae": 102.67,
+          "rmse": 202.57,
+          "wape": 0.0808,
+          "r2": 0.9693
+        }
+      },
+      "daily": {
+        "model": {
+          "mae": 1624.59,
+          "rmse": 2816.72,
+          "wape": 0.0533,
+          "r2": 0.9751
+        },
+        "last_week": {
+          "mae": 1673.82,
+          "rmse": 3307.28,
+          "wape": 0.0549,
+          "r2": 0.9656
+        },
+        "typical_day": {
+          "mae": 1706.1,
+          "rmse": 2866.49,
+          "wape": 0.0559,
+          "r2": 0.9742
+        }
+      },
+      "improvementOverLastWeek": 0.1313,
+      "improvementOverTypicalDay": 0.0546
+    },
+    "5": {
+      "rows": 173904,
+      "hourly": {
+        "model": {
+          "mae": 97.31,
+          "rmse": 195.94,
+          "wape": 0.0766,
+          "r2": 0.9713
+        },
+        "last_week": {
+          "mae": 111.73,
+          "rmse": 250.78,
+          "wape": 0.0879,
+          "r2": 0.953
+        },
+        "typical_day": {
+          "mae": 102.38,
+          "rmse": 202.86,
+          "wape": 0.0805,
+          "r2": 0.9693
+        }
+      },
+      "daily": {
+        "model": {
+          "mae": 1621.51,
+          "rmse": 2827.03,
+          "wape": 0.0531,
+          "r2": 0.9749
+        },
+        "last_week": {
+          "mae": 1673.82,
+          "rmse": 3307.28,
+          "wape": 0.0549,
+          "r2": 0.9656
+        },
+        "typical_day": {
+          "mae": 1699.26,
+          "rmse": 2870.87,
+          "wape": 0.0557,
+          "r2": 0.9741
+        }
+      },
+      "improvementOverLastWeek": 0.1291,
+      "improvementOverTypicalDay": 0.0495
+    },
+    "7": {
+      "rows": 173904,
+      "hourly": {
+        "model": {
+          "mae": 98.01,
+          "rmse": 198.46,
+          "wape": 0.0771,
+          "r2": 0.9706
+        },
+        "last_week": {
+          "mae": 111.73,
+          "rmse": 250.78,
+          "wape": 0.0879,
+          "r2": 0.953
+        },
+        "typical_day": {
+          "mae": 102.81,
+          "rmse": 203.53,
+          "wape": 0.0809,
+          "r2": 0.9691
+        }
+      },
+      "daily": {
+        "model": {
+          "mae": 1637.01,
+          "rmse": 2926.14,
+          "wape": 0.0537,
+          "r2": 0.9731
+        },
+        "last_week": {
+          "mae": 1673.82,
+          "rmse": 3307.28,
+          "wape": 0.0549,
+          "r2": 0.9656
+        },
+        "typical_day": {
+          "mae": 1715.8,
+          "rmse": 2888.16,
+          "wape": 0.0562,
+          "r2": 0.9738
+        }
+      },
+      "improvementOverLastWeek": 0.1228,
+      "improvementOverTypicalDay": 0.0467
+    },
+    "10": {
+      "rows": 174072,
+      "hourly": {
+        "model": {
+          "mae": 100.93,
+          "rmse": 198.87,
+          "wape": 0.0795,
+          "r2": 0.9704
+        },
+        "last_week": {
+          "mae": 132.39,
+          "rmse": 283.42,
+          "wape": 0.1043,
+          "r2": 0.9399
+        },
+        "typical_day": {
+          "mae": 102.74,
+          "rmse": 203.04,
+          "wape": 0.081,
+          "r2": 0.9692
+        }
+      },
+      "daily": {
+        "model": {
+          "mae": 1688.07,
+          "rmse": 2832.48,
+          "wape": 0.0554,
+          "r2": 0.9748
+        },
+        "last_week": {
+          "mae": 2136.42,
+          "rmse": 3884.98,
+          "wape": 0.0701,
+          "r2": 0.9526
+        },
+        "typical_day": {
+          "mae": 1691.07,
+          "rmse": 2813.2,
+          "wape": 0.0555,
+          "r2": 0.9751
+        }
+      },
+      "improvementOverLastWeek": 0.2376,
+      "improvementOverTypicalDay": 0.0176
+    },
+    "14": {
+      "rows": 174072,
+      "hourly": {
+        "model": {
+          "mae": 100.37,
+          "rmse": 198.78,
+          "wape": 0.0791,
+          "r2": 0.9705
+        },
+        "last_week": {
+          "mae": 132.39,
+          "rmse": 283.42,
+          "wape": 0.1043,
+          "r2": 0.9399
+        },
+        "typical_day": {
+          "mae": 102.38,
+          "rmse": 203.44,
+          "wape": 0.0807,
+          "r2": 0.9691
+        }
+      },
+      "daily": {
+        "model": {
+          "mae": 1685.28,
+          "rmse": 2836.46,
+          "wape": 0.0553,
+          "r2": 0.9747
+        },
+        "last_week": {
+          "mae": 2136.42,
+          "rmse": 3884.98,
+          "wape": 0.0701,
+          "r2": 0.9526
+        },
+        "typical_day": {
+          "mae": 1693.61,
+          "rmse": 2828.02,
+          "wape": 0.0556,
+          "r2": 0.9749
+        }
+      },
+      "improvementOverLastWeek": 0.2419,
+      "improvementOverTypicalDay": 0.0196
+    }
+  },
+  "byDayType": {
+    "weekday": {
+      "rows": 968976,
+      "hourly": {
+        "model": {
+          "mae": 95.32,
+          "rmse": 189.86,
+          "wape": 0.0727,
+          "r2": 0.9741
+        },
+        "last_week": {
+          "mae": 113.76,
+          "rmse": 260.19,
+          "wape": 0.0868,
+          "r2": 0.9514
+        },
+        "typical_day": {
+          "mae": 102.05,
+          "rmse": 199.03,
+          "wape": 0.0779,
+          "r2": 0.9716
+        }
+      },
+      "daily": {
+        "model": {
+          "mae": 1544.62,
+          "rmse": 2635.5,
+          "wape": 0.0491,
+          "r2": 0.9788
+        },
+        "last_week": {
+          "mae": 1638.46,
+          "rmse": 3303.14,
+          "wape": 0.0521,
+          "r2": 0.9667
+        },
+        "typical_day": {
+          "mae": 1661.48,
+          "rmse": 2733.62,
+          "wape": 0.0528,
+          "r2": 0.9772
+        }
+      },
+      "improvementOverLastWeek": 0.1621,
+      "improvementOverTypicalDay": 0.0659
+    },
+    "weekend": {
+      "rows": 248688,
+      "hourly": {
+        "model": {
+          "mae": 109.08,
+          "rmse": 222.2,
+          "wape": 0.0979,
+          "r2": 0.9547
+        },
+        "last_week": {
+          "mae": 132.73,
+          "rmse": 261.83,
+          "wape": 0.1192,
+          "r2": 0.9371
+        },
+        "typical_day": {
+          "mae": 104.12,
+          "rmse": 216.19,
+          "wape": 0.0935,
+          "r2": 0.9571
+        }
+      },
+      "daily": {
+        "model": {
+          "mae": 2022.26,
+          "rmse": 3559.56,
+          "wape": 0.0756,
+          "r2": 0.9522
+        },
+        "last_week": {
+          "mae": 2459.23,
+          "rmse": 4106.26,
+          "wape": 0.092,
+          "r2": 0.9364
+        },
+        "typical_day": {
+          "mae": 1848.77,
+          "rmse": 3271.43,
+          "wape": 0.0692,
+          "r2": 0.9596
+        }
+      },
+      "improvementOverLastWeek": 0.1782,
+      "improvementOverTypicalDay": -0.0476
+    },
+    "schoolHoliday": {
+      "rows": 97536,
+      "hourly": {
+        "model": {
+          "mae": 123.74,
+          "rmse": 225.57,
+          "wape": 0.0974,
+          "r2": 0.9606
+        },
+        "last_week": {
+          "mae": 201.3,
+          "rmse": 389.48,
+          "wape": 0.1585,
+          "r2": 0.8825
+        },
+        "typical_day": {
+          "mae": 130.31,
+          "rmse": 242.92,
+          "wape": 0.1026,
+          "r2": 0.9543
+        }
+      },
+      "daily": {
+        "model": {
+          "mae": 2052.79,
+          "rmse": 3178.3,
+          "wape": 0.0673,
+          "r2": 0.9677
+        },
+        "last_week": {
+          "mae": 3644.27,
+          "rmse": 5658.87,
+          "wape": 0.1195,
+          "r2": 0.8977
+        },
+        "typical_day": {
+          "mae": 1525.62,
+          "rmse": 2508.63,
+          "wape": 0.05,
+          "r2": 0.9799
+        }
+      },
+      "improvementOverLastWeek": 0.3853,
+      "improvementOverTypicalDay": 0.0504
+    },
+    "schoolTerm": {
+      "rows": 1120128,
+      "hourly": {
+        "model": {
+          "mae": 95.9,
+          "rmse": 194.2,
+          "wape": 0.0755,
+          "r2": 0.9719
+        },
+        "last_week": {
+          "mae": 110.35,
+          "rmse": 246.12,
+          "wape": 0.0869,
+          "r2": 0.9549
+        },
+        "typical_day": {
+          "mae": 100.05,
+          "rmse": 198.76,
+          "wape": 0.0787,
+          "r2": 0.9706
+        }
+      },
+      "daily": {
+        "model": {
+          "mae": 1606.42,
+          "rmse": 2818.16,
+          "wape": 0.0527,
+          "r2": 0.9751
+        },
+        "last_week": {
+          "mae": 1646.02,
+          "rmse": 3223.9,
+          "wape": 0.054,
+          "r2": 0.9674
+        },
+        "typical_day": {
+          "mae": 1714.9,
+          "rmse": 2879.65,
+          "wape": 0.0562,
+          "r2": 0.974
+        }
+      },
+      "improvementOverLastWeek": 0.1309,
+      "improvementOverTypicalDay": 0.0415
+    }
+  },
+  "meanHourlyVolume": 1270.6,
+  "featureImportance": [
+    {
+      "feature": "lag_week_1_dev",
+      "share": 0.1794
+    },
+    {
+      "feature": "school_holiday",
+      "share": 0.1419
+    },
+    {
+      "feature": "lag_week_2_dev",
+      "share": 0.1385
+    },
+    {
+      "feature": "dow",
+      "share": 0.0852
+    },
+    {
+      "feature": "typical",
+      "share": 0.0786
+    },
+    {
+      "feature": "recent_level",
+      "share": 0.055
+    },
+    {
+      "feature": "recent_dev",
+      "share": 0.0471
+    },
+    {
+      "feature": "lag_week_1_day_total",
+      "share": 0.0424
+    },
+    {
+      "feature": "lag_week_1_school_holiday",
+      "share": 0.0336
+    },
+    {
+      "feature": "hour",
+      "share": 0.0303
+    },
+    {
+      "feature": "hour_sin",
+      "share": 0.0291
+    },
+    {
+      "feature": "public_holiday",
+      "share": 0.0249
+    },
+    {
+      "feature": "lag_week_1",
+      "share": 0.0245
+    },
+    {
+      "feature": "history_days",
+      "share": 0.0206
+    },
+    {
+      "feature": "lag_week_2",
+      "share": 0.0182
+    },
+    {
+      "feature": "site_scale",
+      "share": 0.018
+    },
+    {
+      "feature": "hour_cos",
+      "share": 0.0149
+    },
+    {
+      "feature": "is_weekend",
+      "share": 0.0048
+    },
+    {
+      "feature": "last_known_day",
+      "share": 0.0044
+    },
+    {
+      "feature": "horizon",
+      "share": 0.0043
+    },
+    {
+      "feature": "last_known_dev",
+      "share": 0.0038
+    },
+    {
+      "feature": "last_known_dow",
+      "share": 0.0005
+    },
+    {
+      "feature": "lag_week_1_public_holiday",
+      "share": 0.0
+    }
+  ]
+}

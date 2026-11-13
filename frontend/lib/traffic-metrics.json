@@ -1,0 +1,164 @@
+{
+  "trainedOn": "2026-11-13",
+  "sites": 300,
+  "testRows": 1217664,
+  "testPeriod": [
+    "2026-10-01",
+    "2026-10-31"
+  ],
+  "trainPeriod": [
+    "2026-08-22",
+    "2026-09-30"
+  ],
+  "meanHourlyVolume": 1270.6,
+  "trees": 14,
+  "overall": {
+    "model": {
+      "mae": 98.13,
+      "rmse": 196.9,
+      "wape": 0.0772,
+      "r2": 0.971
+    },
+    "typical_day": {
+      "mae": 102.47,
+      "rmse": 202.65,
+      "wape": 0.0807,
+      "r2": 0.9693
+    },
+    "last_week": {
+      "mae": 117.64,
+      "rmse": 260.53,
+      "wape": 0.0926,
+      "r2": 0.9493
+    }
+  },
+  "daily": {
+    "model": {
+      "mae": 1642.17,
+      "rmse": 2848.69,
+      "wape": 0.0539,
+      "r2": 0.9745
+    },
+    "typical_day": {
+      "mae": 1699.73,
+      "rmse": 2851.71,
+      "wape": 0.0557,
+      "r2": 0.9745
+    },
+    "last_week": {
+      "mae": 1806.08,
+      "rmse": 3482.25,
+      "wape": 0.0592,
+      "r2": 0.9619
+    }
+  },
+  "improvementOverLastWeek": 0.1658,
+  "improvementOverTypicalDay": 0.0424,
+  "byHorizon": [
+    {
+      "days": 1,
+      "model": 96.44,
+      "typical_day": 101.9,
+      "last_week": 111.73,
+      "wape": 0.0759
+    },
+    {
+      "days": 2,
+      "model": 96.79,
+      "typical_day": 102.43,
+      "last_week": 111.73,
+      "wape": 0.0761
+    },
+    {
+      "days": 3,
+      "model": 97.06,
+      "typical_day": 102.67,
+      "last_week": 111.73,
+      "wape": 0.0764
+    },
+    {
+      "days": 5,
+      "model": 97.31,
+      "typical_day": 102.38,
+      "last_week": 111.73,
+      "wape": 0.0766
+    },
+    {
+      "days": 7,
+      "model": 98.01,
+      "typical_day": 102.81,
+      "last_week": 111.73,
+      "wape": 0.0771
+    },
+    {
+      "days": 10,
+      "model": 100.93,
+      "typical_day": 102.74,
+      "last_week": 132.39,
+      "wape": 0.0795
+    },
+    {
+      "days": 14,
+      "model": 100.37,
+      "typical_day": 102.38,
+      "last_week": 132.39,
+      "wape": 0.0791
+    }
+  ],
+  "byDayType": {
+    "weekday": {
+      "model": 95.32,
+      "typical_day": 102.05,
+      "last_week": 113.76
+    },
+    "weekend": {
+      "model": 109.08,
+      "typical_day": 104.12,
+      "last_week": 132.73
+    },
+    "schoolHoliday": {
+      "model": 123.74,
+      "typical_day": 130.31,
+      "last_week": 201.3
+    },
+    "schoolTerm": {
+      "model": 95.9,
+      "typical_day": 100.05,
+      "last_week": 110.35
+    }
+  },
+  "featureImportance": [
+    {
+      "feature": "lag_week_1_dev",
+      "share": 0.1794
+    },
+    {
+      "feature": "school_holiday",
+      "share": 0.1419
+    },
+    {
+      "feature": "lag_week_2_dev",
+      "share": 0.1385
+    },
+    {
+      "feature": "dow",
+      "share": 0.0852
+    },
+    {
+      "feature": "typical",
+      "share": 0.0786
+    },
+    {
+      "feature": "recent_level",
+      "share": 0.055
+    },
+    {
+      "feature": "recent_dev",
+      "share": 0.0471
+    },
+    {
+      "feature": "lag_week_1_day_total",
+      "share": 0.0424
+    }
+  ]
+}

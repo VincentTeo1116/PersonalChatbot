@@ -530,3 +530,15 @@ main > section:not(:first-child) {
     animation: none !important;
   }
 }
+
+/* Chart series colours (TrafficForecastChart). Each theme has its own step, checked for colour-blind separation and 3:1 contrast against that theme's card surface. The baseline is a neutral grey on purpose: it is context, not a headline series. */
+:root {
+  --viz-actual: #2a78d6;
+  --viz-model: #eb6834;
+  --viz-baseline: #64748b;
+}
+:root.dark {
+  --viz-actual: #3987e5;
+  --viz-model: #d95926;
+  --viz-baseline: #94a3b8;
+}
