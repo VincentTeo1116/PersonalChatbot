@@ -122,7 +122,6 @@ const allArticles: EngineeringArticle[] = [
   },
   {
     slug: "reading-malaysian-receipts-without-ai",
-    draft: true,
     title: "Teaching my expense app to read Malaysian receipts, mostly without AI",
     description: "How VinExpenses finds the total, merchant and date on a Malaysian receipt with a scoring parser instead of a language model, and why it would rather ask than guess.",
     published: "2026-11-13",
@@ -163,7 +162,6 @@ const allArticles: EngineeringArticle[] = [
   },
   {
     slug: "data-leak-traffic-forecast",
-    draft: true,
     title: "Our traffic model was looking at the answer",
     description: "A data leak in a group assignment on SCATS traffic data: how a feature that was secretly the target got in, how I found it when rebuilding the project, and what the honest numbers look like.",
     published: "2026-11-13",
@@ -206,7 +204,6 @@ const allArticles: EngineeringArticle[] = [
   },
   {
     slug: "telegram-bot-cloudflare-workers-free",
-    draft: true,
     title: "A haze and rain bot on Telegram that costs me nothing to run",
     description: "How SkyBrief sends each user a weather and air-quality report at their own local time using one Cloudflare Workers cron job, a small database and a backup data source, all on the free plan.",
     published: "2026-11-13",
@@ -245,7 +242,6 @@ const allArticles: EngineeringArticle[] = [
   },
   {
     slug: "building-apmoodle-lms-team-of-five",
-    draft: true,
     title: "Five of us built a learning platform for an assignment. Here is what I learned",
     description: "Notes from building APMoodle, an ASP.NET learning management system with themed quizzes, chat and secure password recovery, as a team of five: what went well, the last-week merge, and what I would change.",
     published: "2026-11-13",
