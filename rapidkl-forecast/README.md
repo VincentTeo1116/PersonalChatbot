@@ -23,6 +23,7 @@ python prepare.py              # download the data and rebuild entries.parquet
 python model.py                # train, test on the last 12 months, write results/metrics.json
 python model.py --production   # refit on all data for live forecasting -> results/model_production*.json
 python experiments.py          # optional: re-test the design ideas on data from before the test year
+python compare_models.py       # optional: XGBoost vs LightGBM, random forest, ridge and a neural network (pip install -r requirements-compare.txt)
 python forecast.py             # forecast the next 28 days -> forecast.json
 ```
 
