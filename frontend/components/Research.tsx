@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence } from "motion/react";
@@ -9,20 +9,27 @@ import SectionHeading from "@/components/SectionHeading";
 import TiltCard from "@/components/TiltCard";
 import ProjectModal from "@/components/ProjectModal";
 import AnimatedArrow from "@/components/AnimatedArrow";
+import PartHeading from "@/components/PartHeading";
 import type { Publication } from "@/lib/types";
 
-export default function Research({ research }: { research: Publication[] }) {
+/** Published papers, followed by whatever is passed as children (the final year project) as a second part of the same section. */
+export default function Research({ research, children }: { research: Publication[]; children?: ReactNode }) {
   const [previewSlug, setPreviewSlug] = useState<string | null>(null);
   const previewPaper = research.find((r) => r.slug === previewSlug) ?? null;
 
-  if (research.length === 0) return null;
+  if (research.length === 0 && !children) return null;
 
   return (
     <section id="research" className="py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6">
-        <SectionHeading eyebrow="Research" title="Published work" />
+        <SectionHeading eyebrow="Research" title="Research and academic work" />
 
-        <div className="mt-12 grid gap-8 sm:grid-cols-2">
+        {research.length > 0 && (
+          <div className="mt-12">
+            <PartHeading number="01" title={research.length > 1 ? "Published papers" : "Published paper"} />
+          </div>
+        )}
+        <div className="mt-8 grid gap-8 sm:grid-cols-2">
           {research.map((r, i) => (
             <Reveal key={r.slug} delay={i * 80} direction={i % 2 === 0 ? "left" : "right"}>
               <TiltCard
@@ -73,6 +80,7 @@ export default function Research({ research }: { research: Publication[] }) {
             </Reveal>
           ))}
         </div>
+        {children}
       </div>
 
       <AnimatePresence>

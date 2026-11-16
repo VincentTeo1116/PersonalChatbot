@@ -5,6 +5,7 @@
   --pcw-primary-fg: #ffffff;
   --pcw-bg: #ffffff;
   --pcw-fg: #1f2937;
+  --pcw-strong: #111827;
   --pcw-muted: #6b7280;
   --pcw-border: #e5e7eb;
   --pcw-bot-bubble: #f3f4f6;
@@ -17,6 +18,7 @@
     --pcw-link: #a5b4fc;
     --pcw-bg: #1a1e2b;
     --pcw-fg: #f3f4f6;
+    --pcw-strong: #ffffff;
     --pcw-muted: #9ca3af;
     --pcw-border: #333a4d;
     --pcw-bot-bubble: #272d3d;
@@ -202,6 +204,139 @@
   color: var(--pcw-fg);
   border-bottom-left-radius: 4px;
 }
+/* ---- Formatted answers: paragraphs, emphasis, lists, code and tables inside a bot bubble ---- */
+.pcw-msg-bot {
+  white-space: normal;
+}
+.pcw-msg-bot > * {
+  margin: 0;
+}
+.pcw-msg-bot > * + * {
+  margin-top: 8px;
+}
+.pcw-msg-bot strong {
+  font-weight: 650;
+  color: var(--pcw-strong);
+}
+.pcw-msg-bot em {
+  font-style: italic;
+}
+.pcw-link {
+  color: var(--pcw-link);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--pcw-link) 45%, transparent);
+  text-underline-offset: 2px;
+}
+.pcw-link:hover {
+  text-decoration-color: currentColor;
+}
+.pcw-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--pcw-primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pcw-primary) 22%, transparent);
+  color: var(--pcw-strong);
+  overflow-wrap: anywhere;
+}
+/* A line that is only a bold phrase reads as a small heading, marked with the accent bar. */
+.pcw-h {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 700;
+  color: var(--pcw-strong);
+}
+.pcw-h::before {
+  content: "";
+  flex: none;
+  width: 3px;
+  height: 1.05em;
+  border-radius: 2px;
+  background: var(--pcw-gradient);
+}
+.pcw-msg-bot > * + .pcw-h {
+  margin-top: 12px;
+}
+.pcw-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.pcw-list > li {
+  position: relative;
+}
+ul.pcw-list > li {
+  padding-left: 16px;
+}
+ul.pcw-list > li::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0.58em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pcw-gradient);
+}
+ol.pcw-list {
+  counter-reset: pcw-item;
+}
+ol.pcw-list > li {
+  counter-increment: pcw-item;
+  padding-left: 26px;
+}
+ol.pcw-list > li::before {
+  content: counter(pcw-item);
+  position: absolute;
+  left: 0;
+  top: 0.12em;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--pcw-link);
+  background: color-mix(in srgb, var(--pcw-primary) 14%, transparent);
+}
+/* Wide tables scroll sideways inside the bubble instead of stretching it. */
+.pcw-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--pcw-border);
+  border-radius: 10px;
+  background: var(--pcw-bg);
+}
+.pcw-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.pcw-table th,
+.pcw-table td {
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+.pcw-table th {
+  font-weight: 650;
+  color: var(--pcw-strong);
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--pcw-primary) 12%, transparent);
+}
+.pcw-table tbody tr {
+  border-top: 1px solid var(--pcw-border);
+}
+.pcw-table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--pcw-fg) 4%, transparent);
+}
+
 .pcw-msg-user {
   align-self: flex-end;
   background: var(--pcw-gradient);

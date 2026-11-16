@@ -1,7 +1,7 @@
 "use client";
 
 import Reveal from "@/components/Reveal";
-import SectionHeading from "@/components/SectionHeading";
+import PartHeading from "@/components/PartHeading";
 import ProjectMedia from "@/components/ProjectMedia";
 import type { Fyp } from "@/lib/types";
 import AnimatedArrow from "@/components/AnimatedArrow";
@@ -10,13 +10,13 @@ export default function FYP({ fyp }: { fyp: Fyp | null }) {
   const hasContent = Boolean(fyp?.title);
 
   return (
-    <section id="fyp" className="py-24 sm:py-32">
-      <div className="mx-auto max-w-6xl px-6">
-        <SectionHeading eyebrow="Academic" title="Final Year Project" />
+    <div id="fyp" className="mt-16 scroll-mt-24">
+      <div>
+        <PartHeading number="02" title="Final year project" />
 
         {!hasContent || !fyp ? (
           <Reveal delay={80}>
-            <div className="mt-12 flex flex-col items-start justify-center gap-2 rounded-2xl border border-dashed border-border bg-surface/50 px-8 py-16">
+            <div className="mt-8 flex flex-col items-start justify-center gap-2 rounded-2xl border border-dashed border-border bg-surface/50 px-6 py-8 sm:px-8">
               <p className="text-lg font-medium text-foreground">Coming soon</p>
               <p className="max-w-md text-sm text-text-subtle">
                 The Final Year Project writeup is still in progress -- check back later for the title, approach, and demo.
@@ -25,7 +25,7 @@ export default function FYP({ fyp }: { fyp: Fyp | null }) {
           </Reveal>
         ) : (
           <Reveal delay={80}>
-            <div className="mt-12 overflow-hidden rounded-2xl border border-border bg-surface">
+            <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-surface">
               <ProjectMedia
                 title={fyp.title ?? "Final Year Project"}
                 image="/projects/placeholder.svg"
@@ -35,7 +35,7 @@ export default function FYP({ fyp }: { fyp: Fyp | null }) {
               />
 
               <div className="p-6 sm:p-8">
-                <h3 className="text-xl font-semibold text-foreground">{fyp.title}</h3>
+                <h4 className="text-xl font-semibold text-foreground">{fyp.title}</h4>
                 {fyp.supervisor && (
                   <p className="mt-1 text-xs text-text-subtle">Supervised by {fyp.supervisor}</p>
                 )}
@@ -47,7 +47,7 @@ export default function FYP({ fyp }: { fyp: Fyp | null }) {
 
                 {fyp.datasetDescription && (
                   <div className="mt-6">
-                    <h4 className="text-sm font-semibold text-foreground">Dataset</h4>
+                    <h5 className="text-sm font-semibold text-foreground">Dataset</h5>
                     <p className="mt-1 text-sm leading-relaxed text-text-secondary whitespace-pre-line">
                       {fyp.datasetDescription}
                     </p>
@@ -56,7 +56,7 @@ export default function FYP({ fyp }: { fyp: Fyp | null }) {
 
                 {fyp.lecturerFeedback && (
                   <div className="mt-6 rounded-xl border border-border bg-background p-4">
-                    <h4 className="text-sm font-semibold text-foreground">Lecturer feedback</h4>
+                    <h5 className="text-sm font-semibold text-foreground">Lecturer feedback</h5>
                     <p className="mt-1 text-sm leading-relaxed text-text-secondary italic whitespace-pre-line">
                       &ldquo;{fyp.lecturerFeedback}&rdquo;
                     </p>
@@ -81,6 +81,6 @@ export default function FYP({ fyp }: { fyp: Fyp | null }) {
           </Reveal>
         )}
       </div>
-    </section>
+    </div>
   );
 }

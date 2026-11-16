@@ -6,15 +6,18 @@ import type { Profile } from "@/lib/types";
 import ThemeToggle from "@/components/ThemeToggle";
 import MagneticButton from "@/components/MagneticButton";
 
+// In page order. "Contact" is left out of the desktop row because the "Get in touch" button beside it goes to the same place.
 const LINKS = [
   { href: "#about", label: "About" },
   { href: "#projects", label: "Projects" },
+  { href: "#model-demo", label: "Demos" },
+  { href: "#writing", label: "Writing" },
   { href: "#experience", label: "Experience" },
   { href: "#research", label: "Research" },
-  { href: "#writing", label: "Writing" },
-  { href: "#explore", label: "Explore" },
-  { href: "#contact", label: "Contact" },
+  { href: "#github", label: "GitHub" },
+  { href: "#contact", label: "Contact", mobileOnly: true },
 ];
+const DESKTOP_LINKS = LINKS.filter((link) => !link.mobileOnly);
 
 function LinkedInIcon() {
   return (
@@ -72,21 +75,22 @@ export default function Nav({ profile }: { profile: Profile }) {
         />
       </div>
 
-      <nav className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-        <a href="#top" className="font-semibold text-foreground tracking-tight transition-transform hover:scale-105">
+      {/* Three columns: the side columns share the leftover width equally, so the links sit in the exact centre whatever the name or buttons measure. */}
+      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-4">
+        <a href="#top" className="justify-self-start font-semibold text-foreground tracking-tight transition-transform hover:scale-105">
           {profile.name}
         </a>
 
         <ul
-          className="hidden md:flex items-center gap-1 text-sm text-text-secondary"
+          className="hidden lg:flex items-center gap-0.5 rounded-full border border-border bg-surface/70 p-1 text-sm text-text-secondary shadow-sm shadow-indigo-950/5 backdrop-blur"
           onMouseLeave={() => setHoveredHref(null)}
         >
-          {LINKS.map((l) => (
+          {DESKTOP_LINKS.map((l) => (
             <li key={l.href} className="relative">
               {(hoveredHref ?? activeHref) === l.href && (
                 <motion.span
                   layoutId="nav-pill"
-                  className="absolute inset-0 rounded-full bg-surface-hover"
+                  className="absolute inset-0 rounded-full bg-indigo-500/10 ring-1 ring-inset ring-indigo-400/30"
                   transition={{ type: "spring", stiffness: 350, damping: 30 }}
                 />
               )}
@@ -94,7 +98,7 @@ export default function Nav({ profile }: { profile: Profile }) {
                 href={l.href}
                 onMouseEnter={() => setHoveredHref(l.href)}
                 aria-current={activeHref === l.href ? "location" : undefined}
-                className={`relative z-10 block px-3 py-1.5 hover:text-foreground transition-colors ${activeHref === l.href ? "text-foreground" : ""}`}
+                className={`relative z-10 block whitespace-nowrap rounded-full px-3 py-1.5 transition-colors hover:text-foreground ${activeHref === l.href ? "font-medium text-foreground" : ""}`}
               >
                 {l.label}
               </a>
@@ -102,14 +106,14 @@ export default function Nav({ profile }: { profile: Profile }) {
           ))}
         </ul>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden lg:flex items-center justify-self-end gap-2">
           <button
             type="button"
             aria-label="Open command palette"
             onClick={() => window.dispatchEvent(new CustomEvent("portfolio:open-palette"))}
             className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-2 text-xs text-text-secondary transition-all duration-200 hover:border-indigo-400/40 hover:text-foreground hover:scale-105"
           >
-            Search
+            <span className="hidden xl:inline">Search</span>
             <kbd className="rounded border border-border bg-surface px-1.5 py-0.5 text-[10px]">{"⌘K"}</kbd>
           </button>
           {profile.contact.linkedin && (
@@ -118,7 +122,7 @@ export default function Nav({ profile }: { profile: Profile }) {
               target="_blank"
               rel="noreferrer"
               aria-label="LinkedIn profile"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-text-secondary transition-all duration-200 hover:border-indigo-400/40 hover:text-foreground hover:scale-105"
+              className="hidden xl:inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-text-secondary transition-all duration-200 hover:border-indigo-400/40 hover:text-foreground hover:scale-105"
             >
               <LinkedInIcon />
             </a>
@@ -127,14 +131,14 @@ export default function Nav({ profile }: { profile: Profile }) {
           <MagneticButton>
             <a
               href="#contact"
-              className="inline-flex items-center rounded-full bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-indigo-400 active:scale-95"
+              className="inline-flex items-center whitespace-nowrap rounded-full bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-indigo-400 active:scale-95"
             >
               Get in touch
             </a>
           </MagneticButton>
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <ThemeToggle />
           <button
             aria-label="Toggle menu"
@@ -157,7 +161,7 @@ export default function Nav({ profile }: { profile: Profile }) {
         initial={false}
         animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
         transition={{ duration: 0.25, ease: "easeInOut" }}
-        className="md:hidden max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain bg-background/95 backdrop-blur border-b border-border"
+        className="lg:hidden max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain bg-background/95 backdrop-blur border-b border-border"
         aria-hidden={!open}
       >
         <ul className="flex flex-col gap-1 px-6 py-3 text-text-secondary">

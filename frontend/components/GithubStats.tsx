@@ -1,6 +1,6 @@
 import Reveal from "@/components/Reveal";
 import AnimatedArrow from "@/components/AnimatedArrow";
-import SectionHeading from "@/components/SectionHeading";
+import PartHeading from "@/components/PartHeading";
 import StatCounter from "@/components/StatCounter";
 import ContributionGraph from "@/components/ContributionGraph";
 import { getGithubStats } from "@/lib/github";
@@ -11,12 +11,12 @@ export default async function GithubStats({ githubUrl }: { githubUrl: string | u
   if (!stats) return null;
 
   return (
-    <section className="py-16 sm:py-20">
+    <div id="github-activity" className="mt-12 scroll-mt-24">
       <div className="mx-auto max-w-6xl px-6">
-        <SectionHeading eyebrow="GitHub" title="Open-source activity" />
+        <PartHeading number="01" title="Activity" />
 
         <Reveal delay={100}>
-          <div className="mt-10 flex flex-wrap gap-x-14 gap-y-6">
+          <div className="mt-8 flex flex-wrap gap-x-14 gap-y-6">
             <StatCounter value={stats.publicRepos} label="Public repos" />
             {/* A zero reads as "nobody cares" rather than "just starting", so only show these once they're non-zero. */}
             {stats.totalStars > 0 && <StatCounter value={stats.totalStars} label="Stars earned" />}
@@ -59,6 +59,6 @@ export default async function GithubStats({ githubUrl }: { githubUrl: string | u
           </a>
         </Reveal>
       </div>
-    </section>
+    </div>
   );
 }

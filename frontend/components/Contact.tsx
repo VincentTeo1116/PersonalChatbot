@@ -105,10 +105,24 @@ export default function Contact({ profile }: { profile: Profile }) {
           )}
         </div>
 
-        <p className="mt-20 text-xs text-text-subtle">
-          Built with Next.js &amp; Tailwind CSS. © {new Date().getFullYear()} Vincent Teo Kai Qi. All rights reserved.{" "}
-          <a href="/privacy" className="underline hover:text-foreground">Privacy policy</a>
-        </p>
+        <footer className="mt-20 border-t border-border pt-6">
+          <nav aria-label="More pages" className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-text-secondary">
+            {[
+              { href: "/ai-lab", label: "AI evaluation lab" },
+              { href: "/research", label: "Research" },
+              { href: "/writing", label: "Writing" },
+              { href: "/services", label: "Web development" },
+              { href: "/privacy", label: "Privacy policy" },
+            ].map(({ href, label }) => (
+              <a key={href} href={href} className="inline-flex min-h-11 items-center underline-offset-4 transition-colors hover:text-foreground hover:underline sm:min-h-0 sm:py-1">
+                {label}
+              </a>
+            ))}
+          </nav>
+          <p className="mt-4 text-xs text-text-subtle">
+            Built with Next.js &amp; Tailwind CSS. © {new Date().getFullYear()} Vincent Teo Kai Qi. All rights reserved.
+          </p>
+        </footer>
       </div>
 
       <AnimatePresence>

@@ -10,7 +10,7 @@ from groq import Groq, RateLimitError
 
 from src.config import Config
 from src.services.prompting import build_prompt
-from src.services.text_utils import strip_markdown
+from src.services.text_utils import strip_markdown, tidy_markdown
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +117,12 @@ def detect_meeting_intent(question: str) -> dict[str, Any] | None:
 
 
 def generate_answer(question: str, context: str, owner_name: str = "Vincent") -> str:
-    """Generate a grounded answer from retrieved context (non-streaming)."""
+    """Generate a grounded answer as plain text (used by the evaluation, whose checks compare text)."""
+    return strip_markdown(generate_answer_formatted(question, context, owner_name))
+
+
+def generate_answer_formatted(question: str, context: str, owner_name: str = "Vincent") -> str:
+    """Generate a grounded answer from retrieved context (non-streaming), keeping the markdown the widget can show."""
     prompt = build_prompt(question, context, owner_name)
     response = _create_with_retry(
         model=Config.GROQ_CHAT_MODEL,
@@ -125,12 +130,12 @@ def generate_answer(question: str, context: str, owner_name: str = "Vincent") ->
         max_tokens=Config.GROQ_MAX_ANSWER_TOKENS,
     )
     text = response.choices[0].message.content or ""
-    return strip_markdown(text.strip())
+    return tidy_markdown(text.strip())
 
 
 def generate_answer_stream(question: str, context: str, owner_name: str = "Vincent") -> Iterator[str]:
     """Yields raw text chunks as Groq produces them -- not markdown-stripped individually, since a
-    marker like "**" could land split across chunks. Caller should strip_markdown() the final text."""
+    marker like "**" could land split across chunks. Caller should tidy_markdown() the final text."""
     prompt = build_prompt(question, context, owner_name)
     stream = _create_with_retry(
         model=Config.GROQ_CHAT_MODEL,

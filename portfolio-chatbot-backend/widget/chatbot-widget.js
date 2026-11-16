@@ -136,16 +136,149 @@
     return node;
   }
 
-  // Renders the answer's **bold** markers as <strong> using DOM nodes only (never innerHTML), so answer text can't inject markup.
-  function renderRich(node, text) {
-    node.textContent = "";
-    String(text).split(/(\*\*[^*\n]+?\*\*)/).forEach(function (part) {
-      if (/^\*\*[^*\n]+\*\*$/.test(part)) {
-        node.appendChild(el("strong", "", { text: part.slice(2, -2) }));
-      } else if (part) {
+  // ---- Answer formatting ----
+  // Renders a small, fixed subset of markdown: paragraphs, bold, italic, inline code, links, bullet and numbered lists, and tables.
+  // Everything is built with DOM nodes and textContent (never innerHTML), so answer text can't inject markup.
+
+  // Links are followed only to web addresses and paths on this site; anything else stays as plain text.
+  function safeHref(url) {
+    return /^https?:\/\//i.test(url) || /^\/(?!\/)/.test(url) ? url : "";
+  }
+
+  var INLINE_RE = /(\*\*[^*\n]+?\*\*|`[^`\n]+`|\[[^\]\n]+\]\([^)\s]+\)|\*[^*\s](?:[^*\n]*?[^*\s])?\*)/;
+
+  function renderInline(node, text) {
+    String(text).split(INLINE_RE).forEach(function (part, index) {
+      if (!part) return;
+      if (index % 2 === 0) {
         node.appendChild(document.createTextNode(part));
+      } else if (part.slice(0, 2) === "**") {
+        var strong = el("strong");
+        renderInline(strong, part.slice(2, -2)); // bold may contain code or a link
+        node.appendChild(strong);
+      } else if (part.charAt(0) === "`") {
+        node.appendChild(el("code", "pcw-code", { text: part.slice(1, -1) }));
+      } else if (part.charAt(0) === "[") {
+        var m = /^\[([^\]]+)\]\(([^)\s]+)\)$/.exec(part);
+        var href = safeHref(m[2]);
+        if (!href) {
+          node.appendChild(document.createTextNode(m[1]));
+        } else {
+          var external = /^https?:/i.test(href);
+          var link = el("a", "pcw-link", external ? { href: href, target: "_blank", rel: "noopener noreferrer" } : { href: href });
+          renderInline(link, m[1]);
+          node.appendChild(link);
+        }
+      } else {
+        node.appendChild(el("em", "", { text: part.slice(1, -1) }));
       }
     });
+  }
+
+  var TABLE_ROW_RE = /^\s*\|.*\|\s*$/;
+  var TABLE_RULE_RE = /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/;
+  var BULLET_RE = /^\s*[-\u2022]\s+(.*)$/;
+  var NUMBER_RE = /^\s*(\d+)[.)]\s+(.*)$/;
+  var HEADING_RE = /^\s*\*\*([^*\n]+)\*\*:?\s*$/;
+
+  function tableCells(line) {
+    return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map(function (cell) { return cell.trim(); });
+  }
+
+  // While an answer is still arriving, a marker may have opened without its closing half yet. Hide it until it is complete.
+  function hideDangling(text) {
+    if ((text.match(/\*\*/g) || []).length % 2) text = text.slice(0, text.lastIndexOf("**")) + text.slice(text.lastIndexOf("**") + 2);
+    if ((text.match(/`/g) || []).length % 2) text = text.slice(0, text.lastIndexOf("`")) + text.slice(text.lastIndexOf("`") + 1);
+    return text;
+  }
+
+  function renderRich(node, text, streaming) {
+    node.textContent = "";
+    var source = String(text).replace(/\r/g, "");
+    var lines = (streaming ? hideDangling(source) : source).split("\n");
+    var paragraph = [];
+    var i = 0;
+
+    function flush() {
+      if (!paragraph.length) return;
+      var p = el("p", "pcw-p");
+      paragraph.forEach(function (line, k) {
+        if (k) p.appendChild(document.createElement("br"));
+        renderInline(p, line);
+      });
+      node.appendChild(p);
+      paragraph = [];
+    }
+
+    while (i < lines.length) {
+      var line = lines[i];
+      if (!line.trim()) { flush(); i++; continue; }
+
+      // A line that is only a bold phrase works as a small heading.
+      var heading = HEADING_RE.exec(line);
+      if (heading && lines.length > 1) {
+        flush();
+        node.appendChild(el("p", "pcw-h", { text: heading[1].replace(/:$/, "") }));
+        i++;
+        continue;
+      }
+
+      if (TABLE_ROW_RE.test(line) && i + 1 < lines.length && TABLE_RULE_RE.test(lines[i + 1])) {
+        flush();
+        var wrap = el("div", "pcw-table-wrap");
+        var table = el("table", "pcw-table");
+        var head = el("tr");
+        tableCells(line).forEach(function (cell) {
+          var th = el("th", "", { scope: "col" });
+          renderInline(th, cell);
+          head.appendChild(th);
+        });
+        var thead = el("thead");
+        thead.appendChild(head);
+        table.appendChild(thead);
+        var tbody = el("tbody");
+        i += 2;
+        while (i < lines.length && TABLE_ROW_RE.test(lines[i])) {
+          var row = el("tr");
+          tableCells(lines[i]).forEach(function (cell) {
+            var td = el("td");
+            renderInline(td, cell);
+            row.appendChild(td);
+          });
+          tbody.appendChild(row);
+          i++;
+        }
+        table.appendChild(tbody);
+        wrap.appendChild(table);
+        node.appendChild(wrap);
+        continue;
+      }
+
+      var numbered = NUMBER_RE.exec(line);
+      if (BULLET_RE.test(line) || numbered) {
+        flush();
+        var itemRe = numbered ? NUMBER_RE : BULLET_RE;
+        var list = el(numbered ? "ol" : "ul", "pcw-list");
+        if (numbered && numbered[1] !== "1") {
+          list.setAttribute("start", numbered[1]);
+          list.style.counterReset = "pcw-item " + (parseInt(numbered[1], 10) - 1);
+        }
+        while (i < lines.length) {
+          var item = itemRe.exec(lines[i]);
+          if (!item) break;
+          var li = el("li");
+          renderInline(li, item[item.length - 1]);
+          list.appendChild(li);
+          i++;
+        }
+        node.appendChild(list);
+        continue;
+      }
+
+      paragraph.push(line);
+      i++;
+    }
+    flush();
   }
 
   // Only same-site paths ("/projects/x", "/#about") are linked; anything else a source might carry is shown as plain text.
@@ -691,7 +824,7 @@
             bubble = self._addMessage("bot", "");
           }
           text += msg.text;
-          bubble.textContent = text;
+          renderRich(bubble, text, true);
           self._scrollToBottom();
         } else if (msg.type === "done") {
           gotDone = true;
@@ -700,7 +833,7 @@
             self._hideTyping();
             bubble = self._addMessage("bot", "");
           }
-          // Snap to the server's canonical, fully markdown-cleaned answer, even if the
+          // Snap to the server's canonical answer (tidied, with key names in bold), even if the
           // raw streamed chunks briefly differed from it.
           renderRich(bubble, msg.answer || text || "Sorry, I couldn't find an answer to that.");
           // A greeting has nothing to inspect or rate, so it gets no sources panel or feedback row.

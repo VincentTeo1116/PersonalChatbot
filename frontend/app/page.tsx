@@ -5,7 +5,6 @@ import About from "@/components/About";
 import TechMarquee from "@/components/TechMarquee";
 import GithubStats from "@/components/GithubStats";
 import GithubExhibitionSection from "@/components/GithubExhibitionSection";
-import ExploreMore from "@/components/ExploreMore";
 import WorkExperience from "@/components/WorkExperience";
 import MobileActionBar from "@/components/MobileActionBar";
 import ModelDemo from "@/components/ModelDemo";
@@ -15,6 +14,7 @@ import FYP from "@/components/FYP";
 import HackathonGallery from "@/components/HackathonGallery";
 import Testimonials from "@/components/Testimonials";
 import Contact from "@/components/Contact";
+import SectionHeading from "@/components/SectionHeading";
 import LatestWriting from "@/components/LatestWriting";
 import ChatWidgetLoader from "@/components/ChatWidgetLoader";
 import CommandPalette from "@/components/CommandPalette";
@@ -47,22 +47,29 @@ export default async function Home() {
         <About profile={profile} research={research} />
         <TechMarquee items={profile.skills.flatMap((s) => s.items.map((i) => i.name))} />
         <Projects projects={projects} />
-        <WorkExperience experience={workExperience} />
-        <Research research={research} />
+        {/* Proof first: something a visitor can use, then the story behind it, then who has worked with me. */}
         <ModelDemo caseStudies={projects.map((p) => p.slug)} />
         <LatestWriting />
-        <FYP fyp={fyp} />
-        <ExploreMore />
-        <Suspense fallback={<div aria-hidden className="min-h-80" />}>
-          <GithubStats githubUrl={profile.contact.github} />
-        </Suspense>
+        <WorkExperience experience={workExperience} />
+        <Testimonials testimonials={testimonials} />
+        <Research research={research}>
+          <FYP fyp={fyp} />
+        </Research>
         {profile.contact.github && (
-          <Suspense fallback={<section aria-label="GitHub gallery loading" className="min-h-[44rem] py-24"><p className="mx-auto max-w-6xl px-6 text-text-secondary">Loading public repositories…</p></section>}>
-            <GithubExhibitionSection githubUrl={profile.contact.github} />
-          </Suspense>
+          <section id="github" className="relative isolate overflow-hidden py-24 sm:py-32">
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-indigo-400/40 to-transparent" />
+            <div className="mx-auto max-w-6xl px-6">
+              <SectionHeading eyebrow="GitHub" title="Open-source work" />
+            </div>
+            <Suspense fallback={<div aria-hidden className="min-h-80" />}>
+              <GithubStats githubUrl={profile.contact.github} />
+            </Suspense>
+            <Suspense fallback={<div aria-label="GitHub gallery loading" className="min-h-[40rem]"><p className="mx-auto mt-16 max-w-6xl px-6 text-text-secondary">Loading public repositories…</p></div>}>
+              <GithubExhibitionSection githubUrl={profile.contact.github} />
+            </Suspense>
+          </section>
         )}
         <HackathonGallery hackathonPhotos={hackathonPhotos} />
-        <Testimonials testimonials={testimonials} />
         <Contact profile={profile} />
         <div aria-hidden className="h-16 sm:hidden" />
       </main>

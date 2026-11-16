@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Reveal from "@/components/Reveal";
-import SectionHeading from "@/components/SectionHeading";
+import PartHeading from "@/components/PartHeading";
 import AnimatedArrow from "@/components/AnimatedArrow";
 import type { GithubRepository } from "@/lib/github";
 
@@ -93,21 +93,20 @@ export default function GithubExhibition({
   }
 
   return (
-    <section id="github-exhibition" className="relative isolate overflow-hidden py-24 sm:py-32">
+    <div id="github-exhibition" className="relative isolate mt-16 scroll-mt-24">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute left-1/2 top-44 h-96 w-[min(90vw,60rem)] -translate-x-1/2 glow glow-fuchsia opacity-[0.08]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/40 to-transparent" />
       </div>
 
       <div className="mx-auto max-w-6xl px-6">
-        <SectionHeading eyebrow="GitHub exhibition" title="A portfolio, baked in layers">
-          <p className="mt-4 max-w-2xl text-text-secondary">
+        <PartHeading number="02" title="Exhibition: a portfolio, baked in layers">
+          <p className="mt-3 max-w-2xl text-sm text-text-secondary sm:text-base">
             Pick a slice from the project cake. Each layer opens a different build; explore its ingredients, story, and GitHub activity.
           </p>
-        </SectionHeading>
+        </PartHeading>
 
         <Reveal delay={120}>
-          <div className="mt-12 overflow-hidden rounded-[2rem] border border-border bg-surface/85 shadow-2xl shadow-indigo-950/10 backdrop-blur">
+          <div className="mt-8 overflow-hidden rounded-[2rem] border border-border bg-surface/85 shadow-2xl shadow-indigo-950/10 backdrop-blur">
             <div className="border-b border-border bg-surface-hover/50 px-5 py-5 sm:px-8">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
@@ -308,6 +307,6 @@ export default function GithubExhibition({
           </div>
         </Reveal>
       </div>
-    </section>
+    </div>
   );
 }

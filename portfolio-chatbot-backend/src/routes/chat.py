@@ -11,11 +11,11 @@ from pydantic import BaseModel, StringConstraints
 from src.config import Config
 from src.services import retrieval
 from src.services.chat_logging import log_chat, log_feedback
-from src.services.groq_service import BusyError, detect_meeting_intent, generate_answer, generate_answer_stream
+from src.services.groq_service import BusyError, detect_meeting_intent, generate_answer_formatted, generate_answer_stream
 from src.services.kb_sync import source_url
 from src.services.rate_limit import limiter
 from src.services.small_talk import small_talk_reply
-from src.services.text_utils import highlight, strip_markdown
+from src.services.text_utils import highlight, strip_markdown, tidy_markdown
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/chat", tags=["chat"])
@@ -197,10 +197,11 @@ def chat(payload: ChatRequest, background_tasks: BackgroundTasks) -> ChatRespons
     matches = _retrieve(clean_question)
     context = _build_context(matches)
     try:
-        plain = generate_answer(clean_question, context)
+        formatted = generate_answer_formatted(clean_question, context)
     except BusyError:
         raise HTTPException(status_code=503, detail=BUSY_MESSAGE)
-    answer = highlight(plain, _highlight_terms(matches))
+    plain = strip_markdown(formatted)  # what gets logged
+    answer = highlight(formatted, _highlight_terms(matches))
     sources = _sources_from_matches(matches)
 
     _cache[cache_key] = {"answer": answer, "plain": plain, "sources": sources}
@@ -212,7 +213,7 @@ def chat(payload: ChatRequest, background_tasks: BackgroundTasks) -> ChatRespons
 
 def _stream_chat(question: str) -> Iterator[str]:
     # Stage events describe completed/started backend operations, not model reasoning.
-    # "chunk" lines stream text; "done" contains the canonical, markdown-stripped answer.
+    # "chunk" lines stream text; "done" contains the canonical answer, tidied to the markdown the widget renders.
     # Plain def, not async: the Gemini call blocks, so Starlette runs this in a worker thread.
     start = time.monotonic()
     cache_key = question.lower()
@@ -266,8 +267,9 @@ def _stream_chat(question: str) -> Iterator[str]:
             pieces.append(piece)
             yield json.dumps({"type": "chunk", "text": piece}) + "\n"
 
-        plain = strip_markdown("".join(pieces).strip())
-        answer = highlight(plain, _highlight_terms(matches))
+        formatted = tidy_markdown("".join(pieces).strip())
+        plain = strip_markdown(formatted)  # what gets logged
+        answer = highlight(formatted, _highlight_terms(matches))
         _cache[cache_key] = {"answer": answer, "plain": plain, "sources": sources}
         latency_ms = int((time.monotonic() - start) * 1000)
         yield json.dumps(
