@@ -21,8 +21,8 @@ const allArticles: EngineeringArticle[] = [
     slug: "supabase-rag-knowledge-sync",
     title: "Keeping a RAG portfolio assistant in sync with Supabase",
     description: "How this portfolio connects Supabase, Gemini embeddings, Pinecone, and Groq, including content updates, stale vectors, and cache limitations.",
-    published: "2026-10-26",
-    updated: "2026-10-26",
+    published: "2026-03-03",
+    updated: "2026-03-03",
     sections: [
       { id: "shared-content", title: "Start with the same content source", paragraphs: [
         "This portfolio has two ways to explore the same background: a website and an AI assistant. Maintaining a separate copy of the content for each creates a freshness problem. A project can appear on the website while the assistant continues to answer from an older description.",
@@ -48,8 +48,8 @@ const allArticles: EngineeringArticle[] = [
     slug: "evaluating-portfolio-rag-retrieval",
     title: "Evaluating RAG retrieval with hit rate and reciprocal rank",
     description: "A practical explanation of this portfolio's 20-question retrieval check, what hit@1 and MRR measure, and why answer quality needs separate evaluation.",
-    published: "2026-10-26",
-    updated: "2026-10-26",
+    published: "2026-03-05",
+    updated: "2026-03-05",
     sections: [
       { id: "questions", title: "Define what should be retrieved", paragraphs: [
         "The repository includes a retrieval evaluation script with 20 questions about awards, research, education, tools, work experience, and individual projects. Each question has an expected substring in a metadata field, such as a project name or the Research category.",
@@ -75,8 +75,8 @@ const allArticles: EngineeringArticle[] = [
     slug: "forecasting-rapid-kl-ridership",
     title: "I built a forecast for how crowded the LRT and MRT will be",
     description: "How I used Malaysia's open ridership data and XGBoost to forecast Rapid KL passenger numbers 28 days ahead, what worked, what did not, and how it updates itself every night.",
-    published: "2026-11-13",
-    updated: "2026-11-13",
+    published: "2026-06-17",
+    updated: "2026-06-17",
     related: { href: "/projects/rapid-kl-ridership-forecast", label: "Rapid KL forecast case study" },
     sections: [
       { id: "why", title: "Why I wanted this", paragraphs: [
@@ -124,8 +124,8 @@ const allArticles: EngineeringArticle[] = [
     slug: "reading-malaysian-receipts-without-ai",
     title: "Teaching my expense app to read Malaysian receipts, mostly without AI",
     description: "How VinExpenses finds the total, merchant and date on a Malaysian receipt with a scoring parser instead of a language model, and why it would rather ask than guess.",
-    published: "2026-11-13",
-    updated: "2026-11-13",
+    published: "2026-07-15",
+    updated: "2026-07-15",
     related: { href: "/projects/vinexpenses", label: "VinExpenses case study" },
     sections: [
       { id: "why", title: "Where my money went", paragraphs: [
@@ -164,8 +164,8 @@ const allArticles: EngineeringArticle[] = [
     slug: "data-leak-traffic-forecast",
     title: "Our traffic model was looking at the answer",
     description: "A data leak in a group assignment on SCATS traffic data: how a feature that was secretly the target got in, how I found it when rebuilding the project, and what the honest numbers look like.",
-    published: "2026-11-13",
-    updated: "2026-11-13",
+    published: "2026-01-13",
+    updated: "2026-01-13",
     related: { href: "/projects/traffic-volume-forecasting", label: "Traffic forecasting case study" },
     sections: [
       { id: "assignment", title: "The assignment", paragraphs: [
@@ -206,8 +206,8 @@ const allArticles: EngineeringArticle[] = [
     slug: "telegram-bot-cloudflare-workers-free",
     title: "A haze and rain bot on Telegram that costs me nothing to run",
     description: "How SkyBrief sends each user a weather and air-quality report at their own local time using one Cloudflare Workers cron job, a small database and a backup data source, all on the free plan.",
-    published: "2026-11-13",
-    updated: "2026-11-13",
+    published: "2026-10-29",
+    updated: "2026-10-29",
     related: { href: "/projects/skybrief-telegram-bot", label: "SkyBrief case study" },
     sections: [
       { id: "why", title: "Haze season, then rain season", paragraphs: [
@@ -244,8 +244,8 @@ const allArticles: EngineeringArticle[] = [
     slug: "building-apmoodle-lms-team-of-five",
     title: "Five of us built a learning platform for an assignment. Here is what I learned",
     description: "Notes from building APMoodle, an ASP.NET learning management system with themed quizzes, chat and secure password recovery, as a team of five: what went well, the last-week merge, and what I would change.",
-    published: "2026-11-13",
-    updated: "2026-11-13",
+    published: "2026-05-14",
+    updated: "2026-05-14",
     related: { href: "/projects/apmoodle-lms", label: "APMoodle case study" },
     sections: [
       { id: "brief", title: "The brief", paragraphs: [
