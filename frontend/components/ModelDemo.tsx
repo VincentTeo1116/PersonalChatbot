@@ -72,7 +72,7 @@ export default function ModelDemo({ caseStudies = [] }: { caseStudies?: string[]
                         <Stat
                           value={percent(1 - network.model / network.usual)}
                           label="Less error than the usual-level baseline"
-                          detail={`The baseline (the median of the last six same weekdays) was off by ${percent(network.usual)}; "same day last week" by ${percent(network.lastWeek)}.`}
+                          detail={`The baseline (the usual level for that weekday over recent weeks) was off by ${percent(network.usual)}; "same day last week" by ${percent(network.lastWeek)}.`}
                         />
                         <Stat
                           value={percent(network.holidayModel)}

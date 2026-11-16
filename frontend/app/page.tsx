@@ -15,6 +15,7 @@ import FYP from "@/components/FYP";
 import HackathonGallery from "@/components/HackathonGallery";
 import Testimonials from "@/components/Testimonials";
 import Contact from "@/components/Contact";
+import LatestWriting from "@/components/LatestWriting";
 import ChatWidgetLoader from "@/components/ChatWidgetLoader";
 import CommandPalette from "@/components/CommandPalette";
 import TerminalEasterEgg from "@/components/TerminalEasterEgg";
@@ -49,6 +50,7 @@ export default async function Home() {
         <WorkExperience experience={workExperience} />
         <Research research={research} />
         <ModelDemo caseStudies={projects.map((p) => p.slug)} />
+        <LatestWriting />
         <FYP fyp={fyp} />
         <ExploreMore />
         <Suspense fallback={<div aria-hidden className="min-h-80" />}>

@@ -283,6 +283,11 @@ const allArticles: EngineeringArticle[] = [
 // The live site only shows published articles; drafts appear when the site runs locally so they can be read before publishing.
 export const articles: EngineeringArticle[] = allArticles.filter((article) => !article.draft || process.env.NODE_ENV !== "production");
 
+/** Newest first; articles published on the same day keep the order they are listed in above. */
+export function latestArticles(limit = articles.length) {
+  return [...articles].sort((a, b) => b.published.localeCompare(a.published)).slice(0, limit);
+}
+
 export function getArticle(slug: string) {
   return articles.find((article) => article.slug === slug);
 }
