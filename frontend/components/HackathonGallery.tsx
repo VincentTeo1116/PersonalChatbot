@@ -16,7 +16,7 @@ export default function HackathonGallery({ hackathonPhotos, count }: { hackathon
       <div className="mx-auto max-w-6xl px-6">
         <SectionHeading eyebrow="Hackathons" title="Building under pressure">
           <p className="mt-3 max-w-xl text-text-secondary">
-            {opening} GTD x APU (3rd place), KitaHack, UM Hackathon and AWS CendekiAwan. Each one is
+            {opening} Maybank Hackathon 2025 (2nd Runner-Up), KitaHack, UM Hackathon and AWS CendekiAwan. Each one is
             a fresh problem, a new team, and roughly 24-48 hours to ship something real. I keep
             coming back for the pace and the forced simplicity.
           </p>
@@ -39,6 +39,17 @@ export default function HackathonGallery({ hackathonPhotos, count }: { hackathon
                 />
                 <figcaption className="absolute inset-x-0 bottom-0 translate-y-1 bg-gradient-to-t from-black/80 to-transparent p-3 text-xs text-white opacity-90 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                   {photo.caption}
+                  {photo.linkUrl && (
+                    <a
+                      href={photo.linkUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`Read the news coverage: ${photo.caption}`}
+                      className="mt-1 flex min-h-8 items-center font-semibold text-indigo-200 underline underline-offset-2 hover:text-white"
+                    >
+                      Read the news coverage ↗
+                    </a>
+                  )}
                 </figcaption>
               </motion.figure>
             </Reveal>

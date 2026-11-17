@@ -113,6 +113,8 @@ export type HackathonPhoto = {
   id: string;
   src: string;
   caption: string;
+  /** Optional outside source for the photo (news coverage, results page). Empty when there is none. */
+  linkUrl: string;
 };
 
 export type TestimonialStatus = "pending" | "approved";

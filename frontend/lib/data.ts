@@ -203,6 +203,7 @@ export const getHackathonPhotos = cache(async (): Promise<HackathonPhoto[]> => {
     id: row.id,
     src: publicUrl(supabase, row.storage_path, "/hackathons/placeholder-1.svg"),
     caption: row.caption,
+    linkUrl: safeUrl(row.link_url),
   }));
 });
 

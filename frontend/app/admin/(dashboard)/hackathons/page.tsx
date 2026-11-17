@@ -18,6 +18,7 @@ export default async function HackathonsAdminPage() {
   const photos = (rows ?? []).map((row) => ({
     id: row.id,
     caption: row.caption,
+    linkUrl: row.link_url ?? "",
     storagePath: row.storage_path,
     src: supabase.storage.from(BUCKET).getPublicUrl(row.storage_path).data.publicUrl,
   }));
@@ -30,6 +31,10 @@ export default async function HackathonsAdminPage() {
         <div>
           <label className="admin-label" htmlFor="caption">Caption</label>
           <input id="caption" name="caption" placeholder="[Hackathon name] — [Year], [what happened]" className="admin-input sm:w-72" />
+        </div>
+        <div>
+          <label className="admin-label" htmlFor="linkUrl">News or results link (optional)</label>
+          <input id="linkUrl" name="linkUrl" type="url" placeholder="https://…" className="admin-input sm:w-72" />
         </div>
         <div>
           <label className="admin-label" htmlFor="file">Photo</label>
@@ -48,9 +53,10 @@ export default async function HackathonsAdminPage() {
                 <Image src={photo.src} alt={photo.caption} fill className="object-cover" />
               </div>
 
-              <AdminForm action={updateHackathonCaption} message="Caption saved" className="flex gap-2">
+              <AdminForm action={updateHackathonCaption} message="Photo details saved" className="flex flex-wrap gap-2">
                 <input type="hidden" name="id" value={photo.id} />
-                <input name="caption" defaultValue={photo.caption} className="admin-input flex-1 px-2 py-1 text-xs" />
+                <input name="caption" aria-label="Caption" defaultValue={photo.caption} className="admin-input w-full px-2 py-1 text-xs" />
+                <input name="linkUrl" type="url" aria-label="News or results link (optional)" placeholder="News or results link (optional)" defaultValue={photo.linkUrl} className="admin-input flex-1 px-2 py-1 text-xs" />
                 <button type="submit" className="admin-btn admin-btn-ghost px-2 py-1 text-xs">Save</button>
               </AdminForm>
 
