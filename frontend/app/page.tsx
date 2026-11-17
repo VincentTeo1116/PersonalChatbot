@@ -23,6 +23,7 @@ import MeetingRequestLauncher from "@/components/MeetingRequestLauncher";
 import TestimonialLauncher from "@/components/TestimonialLauncher";
 import ContactNudge from "@/components/ContactNudge";
 import { SITE_URL, absoluteUrl, jsonLdString } from "@/lib/seo";
+import { latestArticles } from "@/lib/writing";
 import { getProfile, getProjects, getResearch, getFyp, getHackathonPhotos, getWorkExperience, getTestimonials } from "@/lib/data";
 
 // Prerendered + cached; admin saves bust this instantly via revalidatePath("/"), this is just a safety-net refresh in case one of those is ever missed.
@@ -105,7 +106,15 @@ export default async function Home() {
       <MobileActionBar profile={profile} />
       <ChatWidgetLoader profile={profile} />
       <CommandPalette profile={profile} projects={projects} research={research} />
-      <TerminalEasterEgg profile={profile} projects={projects} hackathonPhotos={hackathonPhotos} />
+      <TerminalEasterEgg
+        profile={profile}
+        projects={projects}
+        hackathonPhotos={hackathonPhotos}
+        experience={workExperience}
+        research={research}
+        testimonials={testimonials}
+        articles={latestArticles().map(({ slug, title, description, published }) => ({ slug, title, description, published }))}
+      />
       <MeetingRequestLauncher />
       <TestimonialLauncher />
       <ContactNudge profile={profile} />
