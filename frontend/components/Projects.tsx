@@ -9,6 +9,7 @@ import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import TiltCard from "@/components/TiltCard";
 import AnimatedArrow from "@/components/AnimatedArrow";
+import { hasCaseStudy } from "@/lib/project-case-study";
 import type { Project } from "@/lib/types";
 
 // Loaded on first open: most visitors never open it, so it shouldn't be in the initial bundle.
@@ -116,13 +117,15 @@ export default function Projects({ projects }: { projects: Project[] }) {
                       ))}
                     </div>
                     <div className="mt-5 flex flex-wrap gap-4">
-                      <Link
-                        href={`/projects/${p.slug}`}
-                        className="group/link inline-flex items-center gap-1 text-sm font-medium text-indigo-600 dark:text-indigo-300 transition-colors hover:text-indigo-500 dark:hover:text-indigo-200"
-                      >
-                        Case study
-                        <AnimatedArrow />
-                      </Link>
+                      {hasCaseStudy(p.caseStudy) && (
+                        <Link
+                          href={`/projects/${p.slug}`}
+                          className="group/link inline-flex items-center gap-1 text-sm font-medium text-indigo-600 dark:text-indigo-300 transition-colors hover:text-indigo-500 dark:hover:text-indigo-200"
+                        >
+                          Case study
+                          <AnimatedArrow />
+                        </Link>
+                      )}
                       {p.links.map((l) => (
                         <a
                           key={l.label}
@@ -160,7 +163,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
       <AnimatePresence>
         {previewProject && (
           <ProjectModal
-            project={{ ...previewProject, caseStudyHref: `/projects/${previewProject.slug}` }}
+            project={{ ...previewProject, caseStudyHref: hasCaseStudy(previewProject.caseStudy) ? `/projects/${previewProject.slug}` : undefined }}
             onClose={() => setPreviewSlug(null)}
           />
         )}

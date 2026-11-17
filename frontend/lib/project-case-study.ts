@@ -11,6 +11,11 @@ export type CaseStudyKey = (typeof CASE_STUDY_SECTIONS)[number]["key"];
 export type ProjectCaseStudy = Partial<Record<CaseStudyKey, string>>;
 export const CASE_STUDY_MAX_LENGTH = 6000;
 
+/** True when at least one section has been written. Links labelled "Case study" are only shown when this holds, so they never lead to a page with nothing more to read. */
+export function hasCaseStudy(caseStudy: ProjectCaseStudy | undefined | null): boolean {
+  return !!caseStudy && CASE_STUDY_SECTIONS.some(({ key }) => !!caseStudy[key]?.trim());
+}
+
 /** Older databases and incomplete drafts remain valid; only known text fields are rendered. */
 export function normalizeCaseStudy(value: unknown): ProjectCaseStudy {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};

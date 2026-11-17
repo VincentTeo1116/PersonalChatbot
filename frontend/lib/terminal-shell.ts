@@ -1,3 +1,4 @@
+import { hasCaseStudy } from "@/lib/project-case-study";
 import type { HackathonPhoto, Profile, Project, Publication, Testimonial, WorkExperience } from "@/lib/types";
 
 /** Everything the terminal can print. It all comes from the same database rows and article list as the page, so the terminal can never show older facts than the site does. */
@@ -150,7 +151,7 @@ export function createShell(data: TerminalData, actions: TerminalActions) {
     "",
     ...field("page", `/projects/${p.slug}`, width),
     ...p.links.flatMap((l) => [...field("link", l.label, width), `${" ".repeat(LABEL_WIDTH)}${l.url}`]),
-    style.dim(`Type 'open ${p.slug}' to read the case study.`),
+    style.dim(hasCaseStudy(p.caseStudy) ? `Type 'open ${p.slug}' to read the case study.` : `Type 'open ${p.slug}' to open the project page.`),
   ];
 
   const experienceLines = (width: number) =>
@@ -234,7 +235,7 @@ export function createShell(data: TerminalData, actions: TerminalActions) {
     const project = findProject(target);
     if (project) {
       actions.navigate(`/projects/${project.slug}`);
-      return [`Opening the ${project.title} case study...`];
+      return [hasCaseStudy(project.caseStudy) ? `Opening the ${project.title} case study...` : `Opening the ${project.title} project page...`];
     }
     const article = articles.find((a) => a.slug === target || a.slug.includes(target));
     if (article) {

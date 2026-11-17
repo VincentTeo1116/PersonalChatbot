@@ -15,6 +15,17 @@ const SECTIONS = [
   { id: "contact", label: "Contact" },
 ];
 
+// cmdk's default matching is loose: any item whose text contains the typed letters in order counts, so "resume" used to list three projects above "View resume". Here every typed word must appear inside a word of the item; words that start with it rank higher, and a match on the item's name ranks first.
+function paletteFilter(value: string, search: string, keywords?: string[]): number {
+  const words = `${value} ${(keywords ?? []).join(" ")}`.toLowerCase().split(/[^a-z0-9+#.]+/).filter(Boolean);
+  const terms = search.toLowerCase().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return 1;
+  if (!terms.every((term) => words.some((word) => word.includes(term)))) return 0;
+  if (!terms.every((term) => words.some((word) => word.startsWith(term)))) return 0.3;
+  // words[0] is the item's kind ("navigate", "project", "action", ...), so the name starts at words[1].
+  return words[1]?.startsWith(terms[0]) || words[0]?.startsWith(terms[0]) ? 1 : 0.6;
+}
+
 export default function CommandPaletteDialog({
   open,
   onOpenChange,
@@ -63,6 +74,7 @@ export default function CommandPaletteDialog({
       label="Command palette"
       className="animate-fade-in fixed inset-0 z-[10000] flex items-start justify-center bg-black/60 backdrop-blur-sm px-4 pt-[12vh]"
       shouldFilter
+      filter={paletteFilter}
     >
       <div className="animate-fade-in-scale w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
         <div className="flex items-center gap-3 border-b border-border px-4">
@@ -135,7 +147,7 @@ export default function CommandPaletteDialog({
             </Command.Item>
             {profile.contact.resumeUrl && (
               <Command.Item
-                value="view resume cv download"
+                value="action resume view cv download"
                 onSelect={() => {
                   onOpenChange(false);
                   window.dispatchEvent(new CustomEvent("portfolio:open-resume"));

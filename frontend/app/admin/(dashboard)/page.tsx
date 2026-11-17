@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import PageHeader from "@/components/admin/PageHeader";
+import { AdminForm } from "@/components/admin/AdminFeedback";
+import { refreshSite } from "./actions";
 
 async function countOf(supabase: SupabaseClient, table: string) {
   const { count } = await supabase.from(table).select("*", { count: "exact", head: true });
@@ -44,6 +46,16 @@ export default async function AdminHome() {
           <Link href="/admin/profile" className="admin-btn admin-btn-primary">Edit profile</Link>
           <Link href="/admin/fyp" className="admin-btn admin-btn-ghost">Edit Final Year Project</Link>
         </div>
+      </div>
+
+      <div className="admin-card mt-6 p-5">
+        <p className="text-sm font-semibold text-foreground">Changed something outside this panel?</p>
+        <p className="mt-1 text-sm text-text-secondary">
+          Edits made here appear on the site straight away. Changes made directly in the database (for example a SQL migration) can take up to an hour to show. This rebuilds every public page now.
+        </p>
+        <AdminForm action={refreshSite} message="Site refreshed" detail="Public pages will show the latest content on their next visit." className="mt-4">
+          <button type="submit" className="admin-btn admin-btn-primary">Refresh site</button>
+        </AdminForm>
       </div>
     </div>
   );

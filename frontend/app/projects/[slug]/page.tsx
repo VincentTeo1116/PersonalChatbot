@@ -120,7 +120,7 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
           </div>
         )}
 
-        <p className="mt-8 text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">Engineering case study</p>
+        <p className="mt-8 text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">{sections.length > 0 ? "Engineering case study" : "Project"}</p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{project.seoTitle || project.title}</h1>
         {project.role && <p className="mt-1 text-sm text-text-subtle">{project.role}</p>}
 
