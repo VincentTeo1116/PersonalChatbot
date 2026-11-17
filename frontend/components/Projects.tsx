@@ -2,7 +2,7 @@
 
 import { useEffect, useState, ViewTransition } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
+import FitImage from "@/components/FitImage";
 import Link from "next/link";
 import { AnimatePresence } from "motion/react";
 import Reveal from "@/components/Reveal";
@@ -76,12 +76,11 @@ export default function Projects({ projects }: { projects: Project[] }) {
                     className={`relative aspect-[8/5] overflow-hidden ${previewable ? "cursor-pointer" : ""}`}
                     onClick={previewable ? () => setPreviewSlug(p.slug) : undefined}
                   >
-                    <Image
+                    <FitImage
                       src={p.image}
                       alt={p.title}
-                      fill
                       sizes="(min-width: 1152px) 536px, (min-width: 640px) calc(50vw - 40px), calc(100vw - 48px)"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="transition-transform duration-500 group-hover:scale-105"
                     />
                     {/* One wrapping row, so a project that is both featured and an award winner shows two badges side by side instead of one on top of the other. */}
                     {(p.featured || p.award) && (

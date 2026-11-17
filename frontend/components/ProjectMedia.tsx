@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import Image from "next/image";
+import FitImage from "@/components/FitImage";
 
 type Slide =
   | { kind: "youtube"; embedUrl: string }
@@ -99,7 +99,7 @@ export default function ProjectMedia({
         ) : slide.kind === "video-file" ? (
           <video key={i} src={slide.src} controls autoPlay muted className="absolute inset-0 h-full w-full object-contain" />
         ) : (
-          <Image key={i} src={slide.src} alt={`${title} screenshot ${i + 1}`} fill sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />
+          <FitImage key={i} src={slide.src} alt={`${title} screenshot ${i + 1}`} sizes="(min-width: 768px) 768px, 100vw" />
         )
       )}
 

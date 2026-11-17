@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import Image from "next/image";
+import FitImage from "@/components/FitImage";
 import Link from "next/link";
 import { AnimatePresence } from "motion/react";
 import Reveal from "@/components/Reveal";
@@ -40,12 +40,11 @@ export default function Research({ research, children }: { research: Publication
                   className="relative aspect-[8/5] cursor-pointer overflow-hidden"
                   onClick={() => setPreviewSlug(r.slug)}
                 >
-                  <Image
+                  <FitImage
                     src={r.image}
                     alt={r.title}
-                    fill
                     sizes="(min-width: 1152px) 536px, (min-width: 640px) calc(50vw - 40px), calc(100vw - 48px)"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
                 <div className="p-6">
