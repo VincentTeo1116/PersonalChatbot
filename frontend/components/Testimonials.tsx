@@ -21,7 +21,7 @@ export default function Testimonials({ testimonials }: { testimonials: Testimoni
       <div className="mx-auto max-w-6xl px-6">
         <SectionHeading eyebrow="Testimonials" title="What people say" />
 
-        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((t, i) => (
             <Reveal key={t.id} delay={i * 80} direction={i % 2 === 0 ? "left" : "right"}>
               <TiltCard className="h-full rounded-2xl border border-border bg-surface p-6">
@@ -37,8 +37,8 @@ export default function Testimonials({ testimonials }: { testimonials: Testimoni
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-foreground">{t.authorName}</p>
-                    {t.authorRole && <p className="truncate text-xs text-text-muted">{t.authorRole}</p>}
+                    <p className="break-words text-sm font-semibold text-foreground">{t.authorName}</p>
+                    {t.authorRole && <p className="break-words text-xs text-text-muted">{t.authorRole}</p>}
                   </div>
                 </div>
               </TiltCard>

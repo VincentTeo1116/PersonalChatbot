@@ -52,11 +52,18 @@ const securityHeaders = [
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
 ];
 
+// The resume viewer shows /resume.pdf inside a frame on this same site. With the site-wide "never framed" rule the browser blocks that and the viewer stays blank, so this one file may be framed by this site only.
+const resumeFrameHeaders = [
+  { key: "Content-Security-Policy", value: csp.replace("frame-ancestors 'none'", "frame-ancestors 'self'") },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+];
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
+      { source: "/resume.pdf", headers: resumeFrameHeaders },
       {
         // Signed-in pages must never be stored by a browser or shared cache.
         source: "/admin/:path*",

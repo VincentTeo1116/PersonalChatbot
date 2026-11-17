@@ -100,6 +100,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {/* Entrance animations start hidden and are revealed by JavaScript. Without it (script blocked, or a failed download) this shows everything instead of leaving blank sections. */}
+        <noscript>
+          <style>{`[style*="opacity:0"],[style*="opacity: 0"]{opacity:1!important;transform:none!important}[class*="enter-"]{animation:none!important;opacity:1!important;transform:none!important}`}</style>
+        </noscript>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }} />
       </head>
       <body

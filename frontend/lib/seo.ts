@@ -16,6 +16,12 @@ export function metaDescription(text: string, limit = 160) {
   return clean.length <= limit ? clean : `${clean.slice(0, limit - 1).replace(/\s+\S*$/, "")}…`;
 }
 
+/** "Page title | Name", unless that runs past what search results display, in which case the page title stands alone rather than being cut mid-word. */
+export function pageTitle(title: string, name: string, limit = 65) {
+  const full = `${title} | ${name}`;
+  return full.length <= limit ? full : title;
+}
+
 export function contentMetadata(title: string, description: string, path: string) {
   const url = absoluteUrl(path);
   return {

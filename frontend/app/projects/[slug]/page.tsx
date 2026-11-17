@@ -6,7 +6,7 @@ import ProjectMedia from "@/components/ProjectMedia";
 import ThemeToggle from "@/components/ThemeToggle";
 import AnimatedArrow from "@/components/AnimatedArrow";
 import { getProfile, getProjects } from "@/lib/data";
-import { SITE_URL, absoluteUrl, jsonLdString, metaDescription } from "@/lib/seo";
+import { SITE_URL, absoluteUrl, jsonLdString, metaDescription, pageTitle } from "@/lib/seo";
 import { CASE_STUDY_SECTIONS } from "@/lib/project-case-study";
 import { articles } from "@/lib/writing";
 
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const project = projects.find((p) => p.slug === slug);
   if (!project) notFound();
 
-  const title = `${project.seoTitle || project.title} | ${profile.name}`;
+  const title = pageTitle(project.seoTitle || project.title, profile.name);
   const description = metaDescription(project.seoDescription || project.description);
 
   return {

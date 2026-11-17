@@ -112,6 +112,21 @@ def _profile_rows(profile: dict[str, Any]) -> list[dict[str, str]]:
     return rows
 
 
+def _education_summary_rows(entries: list[dict[str, Any]], name: str) -> list[dict[str, str]]:
+    """One entry that answers "when does he graduate / what is he studying", which the per-degree entries rank poorly for."""
+    if not entries:
+        return []
+    timeline = "; ".join(f"{e['degree']} at {e['institution']} ({e['period']})" for e in entries)
+    return [
+        {
+            "category": "Education",
+            "question": f"When does {name} graduate, and what is {name} studying?",
+            "answer": f"{name}'s education and study periods: {timeline}.",
+            "tags": "graduation, graduate, graduating, study period, degree, university",
+        }
+    ]
+
+
 def _education_rows(entries: list[dict[str, Any]]) -> list[dict[str, str]]:
     return [
         {
@@ -263,7 +278,9 @@ def build_rows() -> list[dict[str, str]]:
         if not profiles:
             raise SupabaseFetchError("The 'profile' table has no row -- run supabase/seed.sql on the frontend first.")
         rows = _profile_rows(profiles[0])
-        rows += _education_rows(_get(client, "education"))
+        education = _get(client, "education")
+        rows += _education_rows(education)
+        rows += _education_summary_rows(education, profiles[0]["name"])
         rows += _experience_rows(_get(client, "work_experience"), profiles[0]["name"])
         rows += _project_rows(_get(client, "projects"))
         rows += _research_rows(_get(client, "research"))

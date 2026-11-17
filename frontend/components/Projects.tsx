@@ -14,14 +14,16 @@ import type { Project } from "@/lib/types";
 // Loaded on first open: most visitors never open it, so it shouldn't be in the initial bundle.
 const ProjectModal = dynamic(() => import("@/components/ProjectModal"));
 
-// Collapsed view shows the featured projects first, then fills up to this many (one fewer on phones).
+// Collapsed view shows this many on every screen size, so a project never appears on desktop but not on a phone.
 const COLLAPSED_COUNT = 4;
+// Award winners are picked first, then featured projects, then the rest in their admin order.
+const highlightRank = (p: Project) => (p.award ? 0 : p.featured ? 1 : 2);
 
 export default function Projects({ projects }: { projects: Project[] }) {
   const [previewSlug, setPreviewSlug] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const shownSlugs = [...projects]
-    .sort((a, b) => Number(!!b.featured) - Number(!!a.featured))
+    .sort((a, b) => highlightRank(a) - highlightRank(b))
     .slice(0, COLLAPSED_COUNT)
     .map((p) => p.slug);
   const hiddenCount = projects.length - shownSlugs.length;
@@ -58,14 +60,10 @@ export default function Projects({ projects }: { projects: Project[] }) {
           <p className="mt-4 max-w-2xl leading-relaxed text-text-secondary">Explore the problem, implementation, engineering decisions, and evidence behind each project.</p>
         </SectionHeading>
 
-        <div className="mt-12 grid gap-8 sm:grid-cols-2">
+        <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2">
           {projects.map((p, i) => {
             const previewable = (p.screenshots?.length ?? 0) > 0 || !!p.demoVideoUrl;
-            const rank = shownSlugs.indexOf(p.slug);
-            // Collapsed: the last shown card is desktop-only so phones see one fewer; the rest are hidden.
-            const visibility = expanded || (rank >= 0 && rank < COLLAPSED_COUNT - 1)
-              ? ""
-              : rank === COLLAPSED_COUNT - 1 ? "hidden sm:block" : "hidden";
+            const visibility = expanded || shownSlugs.includes(p.slug) ? "" : "hidden";
             return (
               <Reveal key={p.slug} className={visibility} delay={i * 80} direction={i % 2 === 0 ? "left" : "right"}>
                 <TiltCard
@@ -85,15 +83,16 @@ export default function Projects({ projects }: { projects: Project[] }) {
                       sizes="(min-width: 1152px) 536px, (min-width: 640px) calc(50vw - 40px), calc(100vw - 48px)"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    {p.featured && (
-                      <span className="absolute top-3 left-3 rounded-full bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white">
-                        Featured
-                      </span>
-                    )}
-                    {p.award && (
-                      <span className="absolute top-3 left-3 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-medium text-amber-950">
-                        {p.award}
-                      </span>
+                    {/* One wrapping row, so a project that is both featured and an award winner shows two badges side by side instead of one on top of the other. */}
+                    {(p.featured || p.award) && (
+                      <div className="absolute inset-x-3 top-3 flex flex-wrap gap-2">
+                        {p.award && (
+                          <span className="rounded-full bg-amber-400 px-2.5 py-1 text-xs font-medium text-amber-950">{p.award}</span>
+                        )}
+                        {p.featured && (
+                          <span className="rounded-full bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white">Featured</span>
+                        )}
+                      </div>
                     )}
                   </div>
                   </ViewTransition>

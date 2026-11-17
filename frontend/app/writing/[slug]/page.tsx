@@ -5,7 +5,7 @@ import AnimatedArrow from "@/components/AnimatedArrow";
 import ArticleFigure from "@/components/ArticleFigure";
 import { safeUrl } from "@/lib/safe-url";
 import { articles, getArticle } from "@/lib/writing";
-import { absoluteUrl, contentMetadata, jsonLdString, SITE_URL } from "@/lib/seo";
+import { absoluteUrl, contentMetadata, jsonLdString, pageTitle, SITE_URL } from "@/lib/seo";
 import { getProfile } from "@/lib/data";
 
 /** Turns [text](url) into links. Anything that is not an http(s) address or a path on this site stays as plain text. */
@@ -26,7 +26,7 @@ export function generateStaticParams() { return articles.map(({ slug }) => ({ sl
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const article = getArticle((await params).slug);
   if (!article) notFound();
-  const meta = contentMetadata(`${article.title} | Vincent Teo`, article.description, `/writing/${article.slug}`);
+  const meta = contentMetadata(pageTitle(article.title, "Vincent Teo"), article.description, `/writing/${article.slug}`);
   const images = [absoluteUrl(`/writing/${article.slug}/opengraph-image`)];
   return { ...meta, openGraph: { ...meta.openGraph, type: "article" as const, publishedTime: article.published, modifiedTime: article.updated, images }, twitter: { ...meta.twitter, images } };
 }
