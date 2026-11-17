@@ -1,7 +1,7 @@
 import Link from "next/link";
 import ContentShell from "@/components/ContentShell";
 import { getProfile, getResearch } from "@/lib/data";
-import { contentMetadata } from "@/lib/seo";
+import { SITE_URL, absoluteUrl, contentMetadata, jsonLdString } from "@/lib/seo";
 import AnimatedArrow from "@/components/AnimatedArrow";
 
 export const revalidate = 3600;
@@ -13,9 +13,41 @@ export async function generateMetadata() {
 
 export default async function ResearchIndex() {
   const papers = await getResearch();
+  const url = absoluteUrl("/research");
+  const data = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `${url}#collection`,
+        url,
+        name: "AI & Machine Learning Research",
+        inLanguage: "en",
+        author: { "@id": `${SITE_URL}/#person` },
+        mainEntity: {
+          "@type": "ItemList",
+          itemListElement: papers.map((paper, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: paper.title,
+            url: absoluteUrl(`/research/${paper.slug}`),
+          })),
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Portfolio", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Research", item: url },
+        ],
+      },
+    ],
+  };
   return (
     <ContentShell eyebrow="Research" title="Machine learning research, explained" intro="Explore the research questions, methods, and published work behind my AI projects.">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(data) }} />
       <div className="mt-12 space-y-8">
+        {papers.length === 0 && <p className="text-text-secondary">No research is published here yet. Please check back soon.</p>}
         {papers.map((paper) => (
           <section key={paper.slug} className="rounded-2xl border border-border bg-surface p-6">
             <p className="text-sm text-indigo-600 dark:text-indigo-300">{paper.venue}</p>

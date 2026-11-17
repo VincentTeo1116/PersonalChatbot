@@ -5,6 +5,7 @@ import { motion, useScroll, useSpring } from "motion/react";
 import type { Profile } from "@/lib/types";
 import ThemeToggle from "@/components/ThemeToggle";
 import MagneticButton from "@/components/MagneticButton";
+import ShortcutKey from "@/components/ShortcutKey";
 
 // In page order. "Contact" is left out of the desktop row because the "Get in touch" button beside it goes to the same place.
 const LINKS = [
@@ -52,6 +53,24 @@ export default function Nav({ profile }: { profile: Profile }) {
     return () => observer.disconnect();
   }, []);
 
+  // An open phone menu closes on Escape, and when the window grows into the desktop layout where the menu no longer exists.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const onDesktop = () => {
+      if (desktop.matches) setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    desktop.addEventListener("change", onDesktop);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      desktop.removeEventListener("change", onDesktop);
+    };
+  }, [open]);
+
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 8);
@@ -65,7 +84,7 @@ export default function Nav({ profile }: { profile: Profile }) {
     <header
       style={{ "--enter-delay": "0.1s" } as CSSProperties}
       className={`enter-drop fixed top-0 inset-x-0 z-40 transition-colors duration-300 ${
-        scrolled ? "bg-background/80 backdrop-blur border-b border-border" : "bg-transparent"
+        open ? "bg-background border-b border-border" : scrolled ? "bg-background/80 backdrop-blur border-b border-border" : "bg-transparent"
       }`}
     >
       <div className="absolute inset-x-0 top-0 h-0.5 bg-border">
@@ -114,7 +133,7 @@ export default function Nav({ profile }: { profile: Profile }) {
             className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-2 text-xs text-text-secondary transition-all duration-200 hover:border-indigo-400/40 hover:text-foreground hover:scale-105"
           >
             <span className="hidden xl:inline">Search</span>
-            <kbd className="rounded border border-border bg-surface px-1.5 py-0.5 text-[10px]">{"⌘K"}</kbd>
+            <kbd className="whitespace-nowrap rounded border border-border bg-surface px-1.5 py-0.5 text-[10px]"><ShortcutKey /></kbd>
           </button>
           {profile.contact.linkedin && (
             <a
@@ -128,6 +147,16 @@ export default function Nav({ profile }: { profile: Profile }) {
             </a>
           )}
           <ThemeToggle />
+          {profile.contact.resumeUrl && (
+            <button
+              type="button"
+              data-analytics-event="resume_open"
+              onClick={() => window.dispatchEvent(new CustomEvent("portfolio:open-resume"))}
+              className="hidden xl:inline-flex items-center whitespace-nowrap rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors duration-200 hover:border-indigo-400/40 hover:bg-foreground/5 active:scale-95"
+            >
+              Resume
+            </button>
+          )}
           <MagneticButton>
             <a
               href="#contact"
@@ -161,7 +190,7 @@ export default function Nav({ profile }: { profile: Profile }) {
         initial={false}
         animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
         transition={{ duration: 0.25, ease: "easeInOut" }}
-        className="lg:hidden max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain bg-background/95 backdrop-blur border-b border-border"
+        className="lg:hidden max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain bg-background"
         aria-hidden={!open}
       >
         <ul className="flex flex-col gap-1 px-6 py-3 text-text-secondary">
@@ -172,6 +201,22 @@ export default function Nav({ profile }: { profile: Profile }) {
               </a>
             </li>
           ))}
+          {profile.contact.resumeUrl && (
+            <li>
+              <button
+                type="button"
+                data-analytics-event="resume_open"
+                onClick={() => {
+                  setOpen(false);
+                  window.dispatchEvent(new CustomEvent("portfolio:open-resume"));
+                }}
+                tabIndex={open ? 0 : -1}
+                className="block min-h-11 w-full rounded-lg px-3 py-3 text-left transition hover:bg-surface-hover hover:text-foreground"
+              >
+                Resume
+              </button>
+            </li>
+          )}
           {profile.contact.linkedin && (
             <li>
               <a href={profile.contact.linkedin} target="_blank" rel="noreferrer" onClick={() => setOpen(false)} tabIndex={open ? 0 : -1} className="block min-h-11 rounded-lg px-3 py-3 transition hover:bg-surface-hover hover:text-foreground">

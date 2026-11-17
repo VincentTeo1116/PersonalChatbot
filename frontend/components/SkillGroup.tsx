@@ -73,7 +73,7 @@ export default function SkillGroup({ category, items }: { category: string; item
             {expanded ? "Show less" : (
               <>
                 <span className="sm:hidden">+{items.length - PHONE_COUNT} more</span>
-                <span className="hidden sm:inline">+{items.length - DESKTOP_COUNT} more</span>
+                {items.length > DESKTOP_COUNT && <span className="hidden sm:inline">+{items.length - DESKTOP_COUNT} more</span>}
               </>
             )}
           </button>

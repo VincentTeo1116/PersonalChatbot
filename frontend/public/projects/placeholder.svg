@@ -1,20 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img" aria-label="Project preview">
+  <!-- Shown to visitors whenever a project has no screenshot yet, so it carries no instructions: just a neutral cover in the site's colours. -->
   <defs>
     <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#64748b" />
-      <stop offset="100%" stop-color="#334155" />
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="55%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#312e81" />
     </linearGradient>
   </defs>
   <rect width="800" height="500" fill="url(#g)" />
-  <g opacity="0.15">
-    <circle cx="650" cy="80" r="140" fill="white" />
-    <circle cx="90" cy="440" r="100" fill="white" />
+  <g opacity="0.12" fill="white">
+    <circle cx="650" cy="80" r="140" />
+    <circle cx="90" cy="440" r="100" />
   </g>
-  
-  <g transform="translate(400,210)" stroke="white" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.9">
-    <line x1="0" y1="-60" x2="0" y2="60" />
-    <line x1="-60" y1="0" x2="60" y2="0" />
+  <g fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0.85">
+    <polyline points="340,205 290,250 340,295" />
+    <polyline points="460,205 510,250 460,295" />
+    <line x1="420" y1="185" x2="380" y2="315" />
   </g>
-
-  <text x="400" y="440" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="rgba(255,255,255,0.9)">Add your project screenshot</text>
 </svg>

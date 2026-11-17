@@ -22,6 +22,7 @@ import TerminalEasterEgg from "@/components/TerminalEasterEgg";
 import MeetingRequestLauncher from "@/components/MeetingRequestLauncher";
 import TestimonialLauncher from "@/components/TestimonialLauncher";
 import ContactNudge from "@/components/ContactNudge";
+import { SITE_URL, absoluteUrl, jsonLdString } from "@/lib/seo";
 import { getProfile, getProjects, getResearch, getFyp, getHackathonPhotos, getWorkExperience, getTestimonials } from "@/lib/data";
 
 // Prerendered + cached; admin saves bust this instantly via revalidatePath("/"), this is just a safety-net refresh in case one of those is ever missed.
@@ -39,8 +40,36 @@ export default async function Home() {
     getTestimonials(),
   ]);
 
+  // Tells search engines this page is the profile of the Person described in the root layout, and lists the work it links to.
+  const profilePageJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "ProfilePage",
+        "@id": `${SITE_URL}/#profile-page`,
+        url: SITE_URL,
+        name: `${profile.name}'s portfolio`,
+        inLanguage: "en",
+        dateModified: profile.updatedAt,
+        isPartOf: { "@id": `${SITE_URL}/#website` },
+        mainEntity: { "@id": `${SITE_URL}/#person` },
+      },
+      {
+        "@type": "ItemList",
+        name: "Projects",
+        itemListElement: projects.map((project, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: project.title,
+          url: absoluteUrl(`/projects/${project.slug}`),
+        })),
+      },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(profilePageJsonLd) }} />
       <Nav profile={profile} />
       <main className="flex-1 overflow-x-clip">
         <Hero profile={profile} />
@@ -69,7 +98,7 @@ export default async function Home() {
             </Suspense>
           </section>
         )}
-        <HackathonGallery hackathonPhotos={hackathonPhotos} />
+        <HackathonGallery hackathonPhotos={hackathonPhotos} count={profile.statHackathons} />
         <Contact profile={profile} />
         <div aria-hidden className="h-16 sm:hidden" />
       </main>

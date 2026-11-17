@@ -67,7 +67,7 @@ const allArticles: EngineeringArticle[] = [
       { id: "experiments", title: "Make comparisons reproducible", paragraphs: [
         "To compare an embedding or preprocessing change, hold the questions and knowledge-base snapshot constant. Record the embedding model, namespace, retrieval depth, cutoff, and evaluation date. The existing script can compare query name stripping with raw queries, but the indexed document preprocessing must also be documented for that comparison to be interpretable.",
         "A future report should include individual failures and a separate held-out set of paraphrases. Questions about missing experience, ambiguous project references, and multilingual input are useful additions. Latency should be measured independently, with cached and uncached requests identified.",
-        "This article explains the implemented evaluation method. A numerical benchmark has not been published here yet; any future score should be accompanied by its test set and configuration so readers can assess what it actually demonstrates.",
+        "This article explains the evaluation method as it was first built, with 20 questions. The test has grown since then, and it now also checks questions the assistant should decline. The current dated results, the question counts and a real ranking miss are published in the [AI evaluation lab](/ai-lab).",
       ] },
     ],
   },

@@ -6,6 +6,7 @@ import { motion, useMotionValue, useScroll, useSpring, useTransform } from "moti
 import MagneticButton from "@/components/MagneticButton";
 import SplitText from "@/components/SplitText";
 import AnimatedArrow, { FlowArrow } from "@/components/AnimatedArrow";
+import ShortcutKey from "@/components/ShortcutKey";
 import type { Profile } from "@/lib/types";
 
 // Entrance animations are CSS (.enter-*, see globals.css) so they start at first paint instead of waiting for the JS bundle to hydrate; this just sets each element's start delay.
@@ -108,31 +109,37 @@ export default function Hero({ profile }: { profile: Profile }) {
                   Chat with my AI assistant <AnimatedArrow direction="down" />
                 </button>
               </MagneticButton>
-              {profile.contact.github && (
-                <div className="hidden sm:block">
+              {/* The resume is what a recruiter looks for first, so it sits here rather than only at the bottom of the page. Contact owns the one modal and listens for this event. */}
+              {profile.contact.resumeUrl && (
                 <MagneticButton>
-                  <a
-                    href={profile.contact.github}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    data-analytics-event="resume_open"
+                    onClick={() => window.dispatchEvent(new CustomEvent("portfolio:open-resume"))}
                     className="rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-foreground/5 active:scale-95 inline-block"
                   >
-                    View GitHub
-                  </a>
+                    View resume
+                  </button>
                 </MagneticButton>
-                </div>
               )}
             </div>
 
+            {profile.availability && (
+              <p style={delay(0.6)} className="enter-rise mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                {profile.availability}
+              </p>
+            )}
+
             <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-text-secondary">
               <a href="#contact" className="font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-300">Contact me <AnimatedArrow /></a>
-              {profile.contact.github && <a href={profile.contact.github} target="_blank" rel="noreferrer" className="font-medium text-indigo-600 underline-offset-4 hover:underline sm:hidden dark:text-indigo-300">GitHub <AnimatedArrow direction="up-right" /></a>}
+              {profile.contact.github && <a href={profile.contact.github} target="_blank" rel="noreferrer" className="font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-300">GitHub <AnimatedArrow direction="up-right" /></a>}
               <span className="inline-flex items-center font-mono text-xs tracking-wide">Data <FlowArrow /> Models <FlowArrow /> Software</span>
             </div>
 
             <p style={delay(0.65)} className="enter-rise mt-6 hidden text-xs text-text-subtle sm:block">
               Press{" "}
-              <kbd className="rounded border border-border bg-surface px-1.5 py-0.5 text-text-secondary">{"⌘K"}</kbd>{" "}
+              <kbd className="whitespace-nowrap rounded border border-border bg-surface px-1.5 py-0.5 text-text-secondary"><ShortcutKey /></kbd>{" "}
               to search, or open the terminal in the corner {"↙"}
             </p>
           </div>

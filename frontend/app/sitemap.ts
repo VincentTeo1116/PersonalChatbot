@@ -14,7 +14,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: SITE_URL },
     { url: `${SITE_URL}/research` },
     { url: `${SITE_URL}/ai-lab` },
-    { url: `${SITE_URL}/writing` },
+    // The list changes exactly when an article is added or revised.
+    { url: `${SITE_URL}/writing`, lastModified: articles.map((article) => article.updated).sort().at(-1) },
     { url: `${SITE_URL}/services` },
     { url: `${SITE_URL}/privacy` },
     ...projects.map((p) => ({

@@ -1,6 +1,7 @@
 "use client";
 
 import { Command } from "cmdk";
+import ShortcutKey from "@/components/ShortcutKey";
 import type { Profile, Project, Publication } from "@/lib/types";
 
 const SECTIONS = [
@@ -65,7 +66,7 @@ export default function CommandPaletteDialog({
     >
       <div className="animate-fade-in-scale w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
         <div className="flex items-center gap-3 border-b border-border px-4">
-          <span className="hidden text-text-subtle sm:inline">{"⌘K"}</span>
+          <span className="hidden whitespace-nowrap text-xs text-text-subtle sm:inline"><ShortcutKey /></span>
           <Command.Input
             autoFocus
             placeholder="Jump to a section, project, or action…"
@@ -132,6 +133,18 @@ export default function CommandPaletteDialog({
             >
               Ask my AI assistant
             </Command.Item>
+            {profile.contact.resumeUrl && (
+              <Command.Item
+                value="view resume cv download"
+                onSelect={() => {
+                  onOpenChange(false);
+                  window.dispatchEvent(new CustomEvent("portfolio:open-resume"));
+                }}
+                className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-text-secondary data-[selected=true]:bg-indigo-500/15 data-[selected=true]:text-foreground"
+              >
+                View resume
+              </Command.Item>
+            )}
             <Command.Item
               value="open terminal easter egg"
               onSelect={openTerminal}

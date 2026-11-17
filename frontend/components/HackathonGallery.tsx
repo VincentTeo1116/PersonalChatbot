@@ -6,15 +6,19 @@ import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import type { HackathonPhoto } from "@/lib/types";
 
-export default function HackathonGallery({ hackathonPhotos }: { hackathonPhotos: HackathonPhoto[] }) {
+const NUMBER_WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
+
+/** `count` is the same admin-set figure as the "Hackathons" counter in About, so the two can never disagree. */
+export default function HackathonGallery({ hackathonPhotos, count }: { hackathonPhotos: HackathonPhoto[]; count: number | null }) {
+  const opening = count && count > 0 ? `${NUMBER_WORDS[count] ?? count} ${count === 1 ? "hackathon" : "hackathons"} so far, including` : "Hackathons so far include";
   return (
     <section id="hackathons" className="py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <SectionHeading eyebrow="Hackathons" title="Building under pressure">
           <p className="mt-3 max-w-xl text-text-secondary">
-            Four hackathons in under a year — GTD x APU (3rd place), KitaHack, UM Hackathon, and AWS
-            CendekiAwan — each one a fresh problem, a new team, and roughly 24-48 hours to ship
-            something real. I keep coming back for the pace and the forced simplicity.
+            {opening} GTD x APU (3rd place), KitaHack, UM Hackathon and AWS CendekiAwan. Each one is
+            a fresh problem, a new team, and roughly 24-48 hours to ship something real. I keep
+            coming back for the pace and the forced simplicity.
           </p>
         </SectionHeading>
 

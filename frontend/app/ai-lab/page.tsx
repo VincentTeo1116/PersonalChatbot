@@ -9,7 +9,7 @@ import { contentMetadata } from "@/lib/seo";
 
 export const metadata = contentMetadata(
   "AI Evaluation Lab: Testing a Portfolio RAG Assistant | Vincent Teo",
-  "Try Vincent Teo's RAG portfolio assistant and inspect a dated retrieval evaluation, its ranking miss, and the limits of the 20-question test.",
+  "Try Vincent Teo's RAG portfolio assistant and inspect a dated retrieval evaluation, its ranking miss, and what its fixed question set can and cannot prove.",
   "/ai-lab",
 );
 

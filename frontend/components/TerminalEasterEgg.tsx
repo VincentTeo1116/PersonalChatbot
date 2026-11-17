@@ -229,7 +229,7 @@ export default function TerminalEasterEgg({
         type="button"
         aria-label="Open terminal"
         onClick={() => setIsOpen((v) => !v)}
-        className="fixed left-5 bottom-20 sm:bottom-5 z-[9999] flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-indigo-300 shadow-2xl hover:bg-slate-700 transition-colors"
+        className="fixed left-5 bottom-5 z-[9999] hidden h-14 w-14 items-center sm:flex justify-center rounded-full border border-white/10 bg-slate-800 text-indigo-300 shadow-2xl hover:bg-slate-700 transition-colors"
       >
         <span className="font-mono text-lg">{">_"}</span>
       </button>
