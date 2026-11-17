@@ -7,6 +7,7 @@ import MagneticButton from "@/components/MagneticButton";
 import SplitText from "@/components/SplitText";
 import AnimatedArrow, { FlowArrow } from "@/components/AnimatedArrow";
 import ShortcutKey from "@/components/ShortcutKey";
+import { openChat } from "@/lib/chat-widget";
 import type { Profile } from "@/lib/types";
 
 // Entrance animations are CSS (.enter-*, see globals.css) so they start at first paint instead of waiting for the JS bundle to hydrate; this just sets each element's start delay.
@@ -100,10 +101,7 @@ export default function Hero({ profile }: { profile: Profile }) {
               <MagneticButton>
                 <button
                   type="button"
-                  // The widget script attaches itself to window.portfolioChatbot once loaded.
-                  onClick={() =>
-                    (window as unknown as { portfolioChatbot?: { open?: () => void } }).portfolioChatbot?.open?.()
-                  }
+                  onClick={openChat}
                   className="rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-foreground/5 active:scale-95 inline-block"
                 >
                   Chat with my AI assistant <AnimatedArrow direction="down" />

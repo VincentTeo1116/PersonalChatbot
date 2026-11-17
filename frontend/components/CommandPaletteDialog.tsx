@@ -2,6 +2,7 @@
 
 import { Command } from "cmdk";
 import ShortcutKey from "@/components/ShortcutKey";
+import { openChat } from "@/lib/chat-widget";
 import type { Profile, Project, Publication } from "@/lib/types";
 
 const SECTIONS = [
@@ -58,8 +59,7 @@ export default function CommandPaletteDialog({
   const openAssistant = () => {
     close();
     navigateToHash("contact");
-    // The widget script attaches itself to window.portfolioChatbot once loaded.
-    (window as unknown as { portfolioChatbot?: { open?: () => void } }).portfolioChatbot?.open?.();
+    openChat();
   };
 
   const openTerminal = () => {

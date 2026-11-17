@@ -75,9 +75,13 @@ export default function Nav({ profile }: { profile: Profile }) {
     const onScroll = () => {
       setScrolled(window.scrollY > 8);
     };
-    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    // The first check waits a moment: reading the scroll position during start-up forces an early layout of the whole page. It only matters when a reload restores a scrolled position.
+    const settle = window.setTimeout(onScroll, 1200);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(settle);
+    };
   }, []);
 
   return (

@@ -22,13 +22,22 @@ export default function StatCounter({
     if (!node) return;
     setDisplay(value);
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // Already on screen when the page became interactive (a deep link to this section): leave the figure alone instead of flashing it back to 0.
-    if (node.getBoundingClientRect().top < window.innerHeight) return;
 
     let frame = 0;
-    setDisplay(0);
+    let first = true;
+    // The observer reports where the counter is without forcing the browser to lay out the whole page first, which measuring it directly here did (about half a second on a slow phone, during start-up).
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (first) {
+          first = false;
+          // Already on screen when the page became interactive (a deep link to this section): leave the figure alone instead of flashing it back to 0.
+          if (entry.isIntersecting) {
+            observer.disconnect();
+            return;
+          }
+          setDisplay(0);
+          return;
+        }
         if (!entry.isIntersecting) return;
         observer.disconnect();
         const duration = 1200;

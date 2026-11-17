@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
+import { openChat } from "@/lib/chat-widget";
 import type { Profile } from "@/lib/types";
 
 const SHOW_AFTER_PX = 240;
@@ -40,13 +41,21 @@ export default function MobileActionBar({ profile }: { profile: Profile }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    let interval: number | undefined;
     const update = () => setVisible(window.scrollY > SHOW_AFTER_PX && !shouldHide());
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    const interval = window.setInterval(update, 500);
+    // The bar never shows at the top of the page, so nothing is measured until the visitor scrolls. Reading the scroll position while the page is still starting up makes the browser lay everything out early, which delayed the first tap on slow phones.
+    const onScroll = () => {
+      update();
+      // Other layers (a dialog, the chat) open and close without a scroll, so keep checking once the bar can be on screen.
+      if (interval === undefined) interval = window.setInterval(update, 500);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    // A reload can restore a scrolled position before this listener exists; look once after the page has settled.
+    const settle = window.setTimeout(onScroll, 2500);
     return () => {
-      window.removeEventListener("scroll", update);
-      window.clearInterval(interval);
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(settle);
+      if (interval !== undefined) window.clearInterval(interval);
     };
   }, []);
 
@@ -71,9 +80,7 @@ export default function MobileActionBar({ profile }: { profile: Profile }) {
       <BarButton
         label="Chat"
         avatar
-        onClick={() =>
-          (window as unknown as { portfolioChatbot?: { open?: () => void } }).portfolioChatbot?.open?.()
-        }
+        onClick={openChat}
       />
     </nav>
   );

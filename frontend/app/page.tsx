@@ -74,17 +74,32 @@ export default async function Home() {
       <Nav profile={profile} />
       <main className="flex-1 overflow-x-clip">
         <Hero profile={profile} />
-        <About profile={profile} research={research} />
-        <TechMarquee items={profile.skills.flatMap((s) => s.items.map((i) => i.name))} />
-        <Projects projects={projects} />
+        {/* Each section below is its own <Suspense> unit. Nothing here waits on data (there is no fallback to show); the boundaries are for the browser: React then makes the page interactive one section at a time, pausing between them, instead of in a single long pass that froze slow phones for seconds. Hero, navigation and Contact (which owns the resume viewer) stay outside so they are ready first. */}
+        <Suspense>
+          <About profile={profile} research={research} />
+        </Suspense>
+        <Suspense>
+          <TechMarquee items={profile.skills.flatMap((s) => s.items.map((i) => i.name))} />
+        </Suspense>
+        <Suspense>
+          <Projects projects={projects} />
+        </Suspense>
         {/* Proof first: something a visitor can use, then the story behind it, then who has worked with me. */}
-        <ModelDemo caseStudies={projects.map((p) => p.slug)} />
+        <Suspense>
+          <ModelDemo caseStudies={projects.map((p) => p.slug)} />
+        </Suspense>
         <LatestWriting />
-        <WorkExperience experience={workExperience} />
-        <Testimonials testimonials={testimonials} />
-        <Research research={research}>
-          <FYP fyp={fyp} />
-        </Research>
+        <Suspense>
+          <WorkExperience experience={workExperience} />
+        </Suspense>
+        <Suspense>
+          <Testimonials testimonials={testimonials} />
+        </Suspense>
+        <Suspense>
+          <Research research={research}>
+            <FYP fyp={fyp} />
+          </Research>
+        </Suspense>
         {profile.contact.github && (
           <section id="github" className="relative isolate overflow-hidden py-24 sm:py-32">
             <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-indigo-400/40 to-transparent" />
@@ -99,7 +114,9 @@ export default async function Home() {
             </Suspense>
           </section>
         )}
-        <HackathonGallery hackathonPhotos={hackathonPhotos} count={profile.statHackathons} />
+        <Suspense>
+          <HackathonGallery hackathonPhotos={hackathonPhotos} count={profile.statHackathons} />
+        </Suspense>
         <Contact profile={profile} />
         <div aria-hidden className="h-16 sm:hidden" />
       </main>

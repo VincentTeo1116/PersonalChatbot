@@ -407,6 +407,7 @@
     this.panel.inert = false;
     this.panel.classList.add("pcw-panel--open");
     this.launcher.setAttribute("aria-expanded", "true");
+    this._scrollToBottom();
     this.inputEl.focus();
   };
 
@@ -692,6 +693,9 @@
   };
 
   ChatbotWidget.prototype._scrollToBottom = function () {
+    // While the panel is closed nothing is visible to scroll, and reading the list's height would make the browser
+    // lay out the whole host page (a long pause at page load on slow phones). open() catches up instead.
+    if (!this.isOpen) return;
     this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
   };
 
