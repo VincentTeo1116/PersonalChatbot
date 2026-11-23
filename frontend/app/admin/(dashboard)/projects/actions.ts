@@ -7,12 +7,20 @@ import { deleteImage, uploadNextImage } from "@/lib/storage";
 import { CASE_STUDY_MAX_LENGTH, CASE_STUDY_SECTIONS, normalizeCaseStudy } from "@/lib/project-case-study";
 import { editorialSeoFields } from "@/lib/editorial-seo";
 import { requireAdmin } from "@/lib/auth";
+import { statusFromForm } from "@/lib/project-status";
 
 function refresh() {
   revalidatePath("/");
   revalidatePath("/admin/projects");
   revalidatePath("/projects/[slug]", "page");
+  revalidatePath("/services"); // it features two projects by name
   revalidatePath("/sitemap.xml");
+}
+
+/** { status } when the form carries a valid one. The field is absent until migration 024 has been run, and then nothing is sent, so saving still works. */
+function statusField(formData: FormData) {
+  const status = statusFromForm(formData.get("status"));
+  return status ? { status } : {};
 }
 
 function caseStudyFields(formData: FormData) {
@@ -60,6 +68,7 @@ export async function createProject(formData: FormData) {
       role: String(formData.get("role") ?? "") || null,
       impact: String(formData.get("impact") ?? "") || null,
       sort_order: count ?? 0,
+      ...statusField(formData),
       ...caseStudyFields(formData),
       ...editorialSeoFields(formData),
     })
@@ -93,6 +102,7 @@ export async function updateProject(formData: FormData) {
       role: String(formData.get("role") ?? "") || null,
       impact: String(formData.get("impact") ?? "") || null,
       updated_at: new Date().toISOString(),
+      ...statusField(formData),
       ...caseStudyFields(formData),
       ...editorialSeoFields(formData),
     })
@@ -103,6 +113,21 @@ export async function updateProject(formData: FormData) {
   queueChatbotSync();
   refresh();
   revalidatePath(`/admin/projects/${id}`);
+  return { ok: true };
+}
+
+/** Hides or publishes a project from the list. sort_order is not touched, so a project that is published again goes back to its old place. */
+export async function setProjectStatus(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  const status = statusFromForm(formData.get("status"));
+  if (!id || !status) return { error: "Choose Published or Hidden." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("projects").update({ status }).eq("id", id);
+  if (error) return { error: error.message.includes("status") ? "Run supabase/024_project_status.sql in the Supabase SQL editor first." : error.message };
+
+  queueChatbotSync();
+  refresh();
   return { ok: true };
 }
 

@@ -43,6 +43,15 @@ class CaseStudySourceTests(unittest.TestCase):
         self.assertTrue(rows[1]["answer"].endswith("Evaluation is still pending."))
         self.assertNotIn("private_notes", str(rows))
 
+    def test_hidden_projects_are_not_indexed_but_published_and_legacy_ones_are(self):
+        rows = _project_rows([
+            self.project(slug="hidden-one", title="Hidden One", status="hidden", case_study={"approach": "Secret approach."}),
+            self.project(slug="published-one", title="Published One", status="published"),
+            self.project(slug="legacy-one", title="Legacy One"),
+        ])
+        self.assertEqual([row["url"] for row in rows], ["/projects/published-one", "/projects/legacy-one"])
+        self.assertNotIn("Secret", str(rows))
+
     def test_malformed_legacy_values_do_not_break_sync(self):
         for value in (None, [], "draft", 42):
             with self.subTest(value=value):

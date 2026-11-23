@@ -48,6 +48,7 @@ create table public.projects (
   featured boolean not null default false,
   award text,
   sort_order int not null default 0,
+  status text not null default 'published' check (status in ('published', 'hidden')), -- hidden projects keep their sort_order (see 024_project_status.sql)
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -123,8 +124,10 @@ alter table public.work_experience_images enable row level security;
 create policy "public read" on public.profile for select using (true);
 create policy "public read" on public.education for select using (true);
 create policy "public read" on public.education_images for select using (true);
-create policy "public read" on public.projects for select using (true);
-create policy "public read" on public.project_images for select using (true);
+create policy "public read published" on public.projects for select using (status = 'published');
+create policy "public read published" on public.project_images for select using (
+  exists (select 1 from public.projects p where p.id = project_id and p.status = 'published')
+);
 create policy "public read" on public.research for select using (true);
 create policy "public read" on public.hackathon_photos for select using (true);
 create policy "public read" on public.work_experience for select using (true);

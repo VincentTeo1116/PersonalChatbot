@@ -89,6 +89,8 @@ export type Project = {
   caseStudy?: ProjectCaseStudy;
   seoTitle?: string;
   seoDescription?: string;
+  /** "hidden" projects are only ever loaded for the admin. The public site never receives one. */
+  status?: "published" | "hidden";
   updatedAt: string;
 };
 

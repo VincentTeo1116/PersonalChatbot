@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { normalizeCaseStudy } from "@/lib/project-case-study";
+import { normalizeProjectStatus, publishedOnly } from "@/lib/project-status";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/public";
 import { safeLinks, safeUrl } from "@/lib/safe-url";
@@ -137,14 +138,19 @@ export const getEducation = cache(async (): Promise<EducationEntry[]> => {
   }));
 });
 
-export const getProjects = cache(async (): Promise<Project[]> => {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("projects")
-    .select("*, project_images(*)")
-    .order("sort_order");
+async function loadProjects(includeHidden: boolean): Promise<Project[]> {
+  // Hidden projects are readable only with an admin session (RLS, see 024_project_status.sql), so the admin view uses that client and the public view
+  // uses the anonymous one, which cannot see them even if this code were wrong.
+  const supabase = includeHidden ? await createAdminClient() : createClient();
+  const query = () => supabase.from("projects").select("*, project_images(*)").order("sort_order");
+  let result = includeHidden ? await query() : await query().eq("status", "published");
+  // Before migration 024 there is no status column and the filtered query fails: every project is then public, as it always was.
+  if (result.error && !includeHidden) result = await query();
+  // Hidden projects keep their sort_order and are simply left out here, so the next one moves up without anything being re-sorted.
+  // The filter is repeated in code so the public list is right even when the database filter was skipped by the fallback above.
+  const rows = includeHidden ? (result.data ?? []) : publishedOnly(result.data ?? []);
 
-  return (data ?? []).map((row) => {
+  return rows.map((row) => {
     const images = [...(row.project_images ?? [])].sort((a, b) => a.sort_order - b.sort_order);
     const cover = images.find((img) => img.is_cover) ?? images[0];
     const rest = images.filter((img) => img.id !== cover?.id);
@@ -168,10 +174,17 @@ export const getProjects = cache(async (): Promise<Project[]> => {
       caseStudy: normalizeCaseStudy(row.case_study),
       seoTitle: row.seo_title || undefined,
       seoDescription: row.seo_description || undefined,
+      status: normalizeProjectStatus(row.status),
       updatedAt: row.updated_at,
     };
   });
-});
+}
+
+/** Published projects only, in sort order: what every public page, the sitemap and the search palette use. */
+export const getProjects = cache(() => loadProjects(false));
+
+/** Every project including hidden ones. Admin screens only. */
+export const getAllProjects = cache(() => loadProjects(true));
 
 export const getResearch = cache(async (): Promise<Publication[]> => {
   const supabase = await createClient();

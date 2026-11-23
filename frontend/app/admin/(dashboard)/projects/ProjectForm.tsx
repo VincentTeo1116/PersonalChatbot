@@ -18,6 +18,7 @@ export default function ProjectForm({
   redirectTo,
   caseStudyEnabled = false,
   seoEnabled = false,
+  statusEnabled = false,
 }: {
   project?: Project;
   action: (formData: FormData) => Promise<ActionResult>;
@@ -26,6 +27,8 @@ export default function ProjectForm({
   redirectTo?: string;
   caseStudyEnabled?: boolean;
   seoEnabled?: boolean;
+  /** False until migration 024 has been run: the Visibility field is then left out and saving works as before. */
+  statusEnabled?: boolean;
 }) {
   // "Live site" gets its own field below, auto-saved as the first links entry, so it's not typed twice.
   const [liveSiteUrl, setLiveSiteUrl] = useState(
@@ -98,6 +101,16 @@ export default function ProjectForm({
         <input type="checkbox" name="featured" defaultChecked={project?.featured} />
         Featured
       </label>
+      {statusEnabled && (
+        <div>
+          <label className={labelClass} htmlFor="status">Visibility</label>
+          <select id="status" name="status" defaultValue={project?.status ?? "published"} className={inputClass}>
+            <option value="published">Published: shown on the site and known to the chatbot</option>
+            <option value="hidden">Hidden: not shown anywhere public</option>
+          </select>
+          <p className="mt-1 text-xs text-text-secondary">A hidden project keeps its place in the order. The ones after it move up while it is hidden, and it returns to the same spot when published again.</p>
+        </div>
+      )}
 
       {caseStudyEnabled ? (
         <fieldset className="space-y-4 border-t border-border pt-5">

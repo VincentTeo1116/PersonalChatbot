@@ -163,6 +163,10 @@ def _project_keywords(p: dict[str, Any]) -> str:
 def _project_rows(projects: list[dict[str, Any]]) -> list[dict[str, str]]:
     rows = []
     for p in projects:
+        # A hidden project must not be known to the chatbot either. The database already withholds it from this read; this keeps it out
+        # even if that ever changes. Rows from before the status column existed have no status and count as published.
+        if p.get("status") == "hidden":
+            continue
         links = [f"{link['label']}: {link['url']}" for link in (p.get("links") or []) if link.get("url")]
         tags = p.get("tags") or []
         rows.append(
