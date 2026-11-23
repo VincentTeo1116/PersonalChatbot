@@ -122,6 +122,8 @@ def score_previous(previous: dict, entries: pd.DataFrame, track: list[dict]) -> 
         actual = int(actual_all[date])
         entry = {"date": day["date"], "madeOn": previous["dataThrough"], "daysAhead": day["horizon"], "forecast": int(network["forecast"][k]),
                  "rawForecast": int(raw[k]), "actual": actual, "adjActual": max(actual - sum(e["extra"] for e in events), 1)}
+        if len(network.get("low", [])) > k and len(network.get("high", [])) > k:  # the range it came with, so the site can show whether the real figure fell inside
+            entry["low"], entry["high"] = int(network["low"][k]), int(network["high"][k])
         if events:
             entry["events"] = events[:3]
         track.append(entry)

@@ -40,6 +40,7 @@ export default function RapidKlForecastChart() {
   const [hover, setHover] = useState<number | null>(null);
   const [allRows, setAllRows] = useState(false);
   const [stale, setStale] = useState(false);
+  const [recent, setRecent] = useState<3 | 7>(7);
 
   useEffect(() => {
     const box = boxRef.current;
@@ -93,6 +94,21 @@ export default function RapidKlForecastChart() {
     const accuracy = data.backtest[series.kind];
     return { series, history, days, forecast, low: take(series.low), high: take(series.high), usual: take(series.usual), max: niceMax(peak), first, busiest, quietest, accuracy };
   }, [data, seriesId, span]);
+
+  // Forecasts made the day before, now checked against the real figure. Only the whole network is scored, so lines and stations show none.
+  const scored = useMemo(() => (data ? data.track.filter((t) => t.daysAhead === 1).slice(-7).reverse() : []), [data]);
+  const past = useMemo(() => {
+    if (!data || !view || seriesId !== "ALL") return [];
+    return data.track
+      .filter((t) => t.daysAhead === 1)
+      .map((t) => ({ index: view.history.length - 1 - Math.round((utc(data.dataThrough).getTime() - utc(t.date).getTime()) / 86400000), entry: t }))
+      .filter((p) => p.index >= 0 && p.index < view.history.length);
+  }, [data, view, seriesId]);
+  const pastAt = (i: number) => past.find((p) => p.index === i)?.entry;
+  const gap = (forecast: number, actual: number) => {
+    const pct = ((forecast - actual) / actual) * 100;
+    return Math.abs(pct) < 0.5 ? "spot on" : `${Math.abs(pct).toFixed(1)}% ${pct < 0 ? "too low" : "too high"}`;
+  };
 
   const height = width < 480 ? 230 : 300;
   const innerW = Math.max(0, width - M.left - M.right);
@@ -163,9 +179,13 @@ export default function RapidKlForecastChart() {
       </div>
 
       <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-text-secondary" aria-label="Chart legend">
-        {LEGEND.map((item) => (
+        {[...LEGEND, ...(past.length > 0 ? [{ label: "Forecast made the day before", color: "var(--viz-model)", height: 8, opacity: 1, ring: true }] : [])].map((item) => (
           <li key={item.label} className="flex items-center gap-2">
-            <span aria-hidden className="inline-block w-5 rounded-sm" style={{ background: item.color, height: item.height, opacity: item.opacity ?? 1 }} />
+            {"ring" in item ? (
+              <span aria-hidden className="inline-block size-2.5 rounded-full border-2 bg-surface" style={{ borderColor: item.color }} />
+            ) : (
+              <span aria-hidden className="inline-block w-5 rounded-sm" style={{ background: item.color, height: item.height, opacity: item.opacity ?? 1 }} />
+            )}
             {item.label}
           </li>
         ))}
@@ -215,6 +235,9 @@ export default function RapidKlForecastChart() {
               <path d={line(view.usual, split)} fill="none" stroke="var(--viz-baseline)" strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
               <path d={line(view.history, 0)} fill="none" stroke="var(--viz-actual)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
               <path d={line(view.forecast, split)} fill="none" stroke="var(--viz-model)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+              {past.map((p) => (
+                <circle key={p.entry.date} aria-hidden cx={x(p.index)} cy={y(p.entry.forecast)} r={3.5} fill="var(--surface)" stroke="var(--viz-model)" strokeWidth={2} />
+              ))}
               {hover !== null && (
                 <g pointerEvents="none">
                   <line x1={x(hover)} x2={x(hover)} y1={M.top} y2={M.top + innerH} stroke="var(--text-subtle)" strokeWidth={1} />
@@ -232,10 +255,20 @@ export default function RapidKlForecastChart() {
               >
                 <p className="font-semibold text-foreground">{short(dateAt(hover))}</p>
                 {hover < split ? (
-                  <p className="mt-1 flex justify-between gap-3 text-text-secondary">
-                    Actual entries
-                    <span className="tabular-nums font-medium text-foreground">{view.history[hover] === null ? "no data" : number.format(view.history[hover] as number)}</span>
-                  </p>
+                  <>
+                    <p className="mt-1 flex justify-between gap-3 text-text-secondary">
+                      Actual entries
+                      <span className="tabular-nums font-medium text-foreground">{view.history[hover] === null ? "no data" : number.format(view.history[hover] as number)}</span>
+                    </p>
+                    {pastAt(hover) && (
+                      <p className="mt-1 flex justify-between gap-3 text-text-secondary">
+                        Forecast the day before
+                        <span className="tabular-nums text-foreground">
+                          {number.format(pastAt(hover)!.forecast)} ({gap(pastAt(hover)!.forecast, pastAt(hover)!.actual)})
+                        </span>
+                      </p>
+                    )}
+                  </>
                 ) : (
                   <>
                     <p className="mt-1 flex justify-between gap-3 text-text-secondary">
@@ -319,6 +352,57 @@ export default function RapidKlForecastChart() {
                 real figures, with an average error of{" "}
                 {((data.track.reduce((sum, t) => sum + Math.abs(t.forecast - t.actual), 0) / data.track.reduce((sum, t) => sum + t.actual, 0)) * 100).toFixed(1)}%.
               </p>
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-medium text-foreground">Whole network: the forecast made the day before, against what happened</p>
+                  <div role="group" aria-label="How many days to show" className="flex gap-1">
+                    {([3, 7] as const).map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        aria-pressed={recent === n}
+                        onClick={() => setRecent(n)}
+                        className={`min-h-8 rounded-md border px-2.5 text-xs font-medium ${recent === n ? "border-indigo-500 text-indigo-600 dark:text-indigo-300" : "border-border text-text-muted"}`}
+                      >
+                        Last {n} days
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-2 overflow-x-auto">
+                  <table className="w-full text-left text-sm tabular-nums">
+                    <caption className="sr-only">Network forecast against the real figure for the most recent days</caption>
+                    <thead className="text-xs uppercase tracking-wider text-text-muted">
+                      <tr>
+                        <th className="py-1.5 pr-4 font-medium">Date</th>
+                        <th className="py-1.5 pr-4 font-medium">Forecast</th>
+                        <th className="py-1.5 pr-4 font-medium">Actual</th>
+                        <th className="py-1.5 pr-4 font-medium">Off by</th>
+                        <th className="hidden py-1.5 font-medium sm:table-cell">Note</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {scored.slice(0, recent).map((t) => (
+                        <tr key={t.date} className="border-t border-border">
+                          <td className="py-1.5 pr-4 text-foreground">{short(utc(t.date))}</td>
+                          <td className="py-1.5 pr-4 text-foreground">{number.format(t.forecast)}</td>
+                          <td className="py-1.5 pr-4 font-medium text-foreground">{number.format(t.actual)}</td>
+                          <td className="py-1.5 pr-4">{gap(t.forecast, t.actual)}</td>
+                          <td className="hidden py-1.5 sm:table-cell">
+                            {t.events?.length
+                              ? `Event near ${t.events[0].station.replace(/ \(.*\)$/, "")}: about ${number.format(Math.round(t.events[0].extra / 100) * 100)} extra entries`
+                              : t.low !== undefined && t.high !== undefined
+                                ? t.actual >= t.low && t.actual <= t.high
+                                  ? "Inside the likely range"
+                                  : "Outside the likely range"
+                                : ""}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
               {data.live && data.live.length > 1 && (
                 <p>
                   By how far ahead the forecast was made:{" "}

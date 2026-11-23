@@ -97,7 +97,7 @@ class Tracking(unittest.TestCase):
     def previous(self):
         station = lambda sid, label, values: {"id": sid, "label": label, "kind": "stations", "forecast": values}
         return {"dataThrough": "2026-11-12", "days": [{"date": "2026-11-13", "horizon": 1}, {"date": "2026-11-14", "horizon": 2}],
-                "series": [{"id": "ALL", "label": "Whole network", "kind": "network", "forecast": [1000, 1000], "rawForecast": [990, 990]},
+                "series": [{"id": "ALL", "label": "Whole network", "kind": "network", "forecast": [1000, 1000], "rawForecast": [990, 990], "low": [900, 900], "high": [1100, 1100]},
                            station("A: Quiet", "Quiet (A)", [100, 100]), station("B: Venue", "Venue (B)", [50, 50])]}
 
     def test_scores_only_days_that_have_arrived_and_names_the_event(self):
@@ -106,6 +106,7 @@ class Tracking(unittest.TestCase):
         t = track[0]
         self.assertEqual((t["forecast"], t["rawForecast"], t["actual"]), (1000, 990, 1200))
         self.assertEqual(t["events"][0]["station"], "Venue (B)")
+        self.assertEqual((t["low"], t["high"]), (900, 1100))  # the range it was published with, so the site can say whether the real figure fell inside
         self.assertEqual(t["events"][0]["extra"], 5950)
         self.assertEqual(t["adjActual"], 1)  # the event is larger than this toy network, so the adjusted actual is floored at 1, never negative
 
