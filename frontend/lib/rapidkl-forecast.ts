@@ -12,7 +12,21 @@ export type RapidKlSeries = {
   usual: number[];
 };
 
-type Accuracy = { model: number; usual: number; lastWeek: number; holidayModel: number; holidayUsual: number };
+type Accuracy = { model: number; usual: number; lastWeek: number; lastYear?: number; holidayModel: number; holidayUsual: number };
+
+/** One forecast that has since been checked against the real figure. Fields after `actual` only exist in files written by the newer pipeline. */
+export type TrackEntry = {
+  date: string;
+  madeOn: string;
+  daysAhead: number;
+  forecast: number;
+  actual: number;
+  rawForecast?: number;
+  adjActual?: number;
+  low?: number;
+  high?: number;
+  events?: { station: string; extra: number }[];
+};
 
 export type RapidKlForecast = {
   generatedAt: string;
@@ -20,7 +34,14 @@ export type RapidKlForecast = {
   historyStart: string;
   days: { date: string; horizon: number; holiday: string | null; ramadan: boolean }[];
   series: RapidKlSeries[];
-  track: { date: string; madeOn: string; daysAhead: number; forecast: number; actual: number }[];
+  track: TrackEntry[];
+  trackLong?: TrackEntry[];
+  /** How the checked forecasts did, by how many days ahead they were made. `bias` is forecast / actual - 1 (negative = too low). */
+  live?: { daysAhead: number; days: number; wape: number; bias: number; inRange: number | null }[];
+  /** The small shift applied to the first days of the network forecast, from the last week's misses. */
+  adjustment?: { applied: boolean; reason?: string; medianMiss?: number; daysUsed?: number };
+  design?: string;
+  modelOrigin?: string;
   backtest: { period: string[]; trees: number; testRows: number; network: Accuracy; lines: Accuracy; stations: Accuracy; networkByHorizon: { days: number; model: number; usual: number }[] };
   source: string;
 };

@@ -1,12 +1,13 @@
 {
-  "trainedOn": "2026-11-13",
+  "design": "v3",
+  "trainedOn": "2026-11-23",
   "data": {
     "source": "Daily Origin-Destination Ridership: Rapid Rail (KV), data.gov.my, CC BY 4.0",
     "series": 174,
     "stations": 166,
     "period": [
       "2023-01-01",
-      "2026-11-11"
+      "2026-11-21"
     ],
     "train": [
       "2023-04-01",
@@ -51,7 +52,9 @@
       "clean_usual": true,
       "rich_holidays": false,
       "holiday_weight": 1.0,
-      "rain": false
+      "rain": false,
+      "clip_dev": null,
+      "drop_spikes": null
     },
     "horizons": [
       1,
@@ -99,6 +102,13 @@
         "rmse": 91458.1,
         "rows": 3285
       },
+      "last_year": {
+        "mae": 55971.0,
+        "wape": 0.0925,
+        "rmse": 88423.8,
+        "rows": 3285,
+        "modelOnSameRows": 0.0419
+      },
       "improvementOverUsual": 0.3322,
       "improvementOverLastWeek": 0.5281
     },
@@ -120,6 +130,13 @@
         "wape": 0.0943,
         "rmse": 19491.9,
         "rows": 20525
+      },
+      "last_year": {
+        "mae": 9538.9,
+        "wape": 0.0959,
+        "rmse": 18863.7,
+        "rows": 19710,
+        "modelOnSameRows": 0.0444
       },
       "improvementOverUsual": 0.3442,
       "improvementOverLastWeek": 0.526
@@ -143,6 +160,13 @@
         "rmse": 1169.7,
         "rows": 495910
       },
+      "last_year": {
+        "mae": 528.3,
+        "wape": 0.1293,
+        "rmse": 1164.0,
+        "rows": 479610,
+        "modelOnSameRows": 0.0663
+      },
       "improvementOverUsual": 0.2585,
       "improvementOverLastWeek": 0.4328
     }
@@ -153,7 +177,7 @@
         "model": {
           "mae": 22365.0,
           "wape": 0.037,
-          "rmse": 34040.1,
+          "rmse": 34040.2,
           "rows": 365
         },
         "usual": {
@@ -165,8 +189,15 @@
         "last_week": {
           "mae": 50906.1,
           "wape": 0.0841,
-          "rmse": 90592.0,
+          "rmse": 90591.9,
           "rows": 365
+        },
+        "last_year": {
+          "mae": 55971.0,
+          "wape": 0.0925,
+          "rmse": 88423.8,
+          "rows": 365,
+          "modelOnSameRows": 0.037
         },
         "improvementOverUsual": 0.4061,
         "improvementOverLastWeek": 0.5607
@@ -187,8 +218,15 @@
         "last_week": {
           "mae": 50906.1,
           "wape": 0.0841,
-          "rmse": 90592.0,
+          "rmse": 90591.9,
           "rows": 365
+        },
+        "last_year": {
+          "mae": 55971.0,
+          "wape": 0.0925,
+          "rmse": 88423.8,
+          "rows": 365,
+          "modelOnSameRows": 0.04
         },
         "improvementOverUsual": 0.3577,
         "improvementOverLastWeek": 0.5249
@@ -209,8 +247,15 @@
         "last_week": {
           "mae": 50906.1,
           "wape": 0.0841,
-          "rmse": 90592.0,
+          "rmse": 90591.9,
           "rows": 365
+        },
+        "last_year": {
+          "mae": 55971.0,
+          "wape": 0.0925,
+          "rmse": 88423.8,
+          "rows": 365,
+          "modelOnSameRows": 0.0405
         },
         "improvementOverUsual": 0.3491,
         "improvementOverLastWeek": 0.5185
@@ -231,8 +276,15 @@
         "last_week": {
           "mae": 50906.1,
           "wape": 0.0841,
-          "rmse": 90592.0,
+          "rmse": 90591.9,
           "rows": 365
+        },
+        "last_year": {
+          "mae": 55971.0,
+          "wape": 0.0925,
+          "rmse": 88423.8,
+          "rows": 365,
+          "modelOnSameRows": 0.0415
         },
         "improvementOverUsual": 0.3326,
         "improvementOverLastWeek": 0.5063
@@ -253,8 +305,15 @@
         "last_week": {
           "mae": 50906.1,
           "wape": 0.0841,
-          "rmse": 90592.0,
+          "rmse": 90591.9,
           "rows": 365
+        },
+        "last_year": {
+          "mae": 55971.0,
+          "wape": 0.0925,
+          "rmse": 88423.8,
+          "rows": 365,
+          "modelOnSameRows": 0.0406
         },
         "improvementOverUsual": 0.348,
         "improvementOverLastWeek": 0.5177
@@ -278,6 +337,13 @@
           "rmse": 92876.8,
           "rows": 365
         },
+        "last_year": {
+          "mae": 55971.0,
+          "wape": 0.0925,
+          "rmse": 88423.8,
+          "rows": 365,
+          "modelOnSameRows": 0.0427
+        },
         "improvementOverUsual": 0.322,
         "improvementOverLastWeek": 0.539
       },
@@ -300,12 +366,19 @@
           "rmse": 92876.8,
           "rows": 365
         },
+        "last_year": {
+          "mae": 55971.0,
+          "wape": 0.0925,
+          "rmse": 88423.8,
+          "rows": 365,
+          "modelOnSameRows": 0.0433
+        },
         "improvementOverUsual": 0.3136,
         "improvementOverLastWeek": 0.5333
       },
       "21": {
         "model": {
-          "mae": 26366.6,
+          "mae": 26366.7,
           "wape": 0.0436,
           "rmse": 39077.5,
           "rows": 365
@@ -321,6 +394,13 @@
           "wape": 0.0967,
           "rmse": 92959.1,
           "rows": 365
+        },
+        "last_year": {
+          "mae": 55971.0,
+          "wape": 0.0925,
+          "rmse": 88423.8,
+          "rows": 365,
+          "modelOnSameRows": 0.0436
         },
         "improvementOverUsual": 0.3117,
         "improvementOverLastWeek": 0.5492
@@ -343,6 +423,13 @@
           "wape": 0.0959,
           "rmse": 91395.7,
           "rows": 365
+        },
+        "last_year": {
+          "mae": 55971.0,
+          "wape": 0.0925,
+          "rmse": 88423.8,
+          "rows": 365,
+          "modelOnSameRows": 0.0477
         },
         "improvementOverUsual": 0.2521,
         "improvementOverLastWeek": 0.5025
@@ -368,6 +455,13 @@
           "rmse": 19265.2,
           "rows": 2286
         },
+        "last_year": {
+          "mae": 9538.9,
+          "wape": 0.0959,
+          "rmse": 18863.7,
+          "rows": 2190,
+          "modelOnSameRows": 0.0398
+        },
         "improvementOverUsual": 0.4029,
         "improvementOverLastWeek": 0.5516
       },
@@ -389,6 +483,13 @@
           "wape": 0.0897,
           "rmse": 19265.2,
           "rows": 2286
+        },
+        "last_year": {
+          "mae": 9538.9,
+          "wape": 0.0959,
+          "rmse": 18863.7,
+          "rows": 2190,
+          "modelOnSameRows": 0.0422
         },
         "improvementOverUsual": 0.3675,
         "improvementOverLastWeek": 0.525
@@ -412,6 +513,13 @@
           "rmse": 19265.2,
           "rows": 2286
         },
+        "last_year": {
+          "mae": 9538.9,
+          "wape": 0.0959,
+          "rmse": 18863.7,
+          "rows": 2190,
+          "modelOnSameRows": 0.0427
+        },
         "improvementOverUsual": 0.3594,
         "improvementOverLastWeek": 0.519
       },
@@ -433,6 +541,13 @@
           "wape": 0.0897,
           "rmse": 19265.2,
           "rows": 2286
+        },
+        "last_year": {
+          "mae": 9538.9,
+          "wape": 0.0959,
+          "rmse": 18863.7,
+          "rows": 2190,
+          "modelOnSameRows": 0.0438
         },
         "improvementOverUsual": 0.3432,
         "improvementOverLastWeek": 0.5068
@@ -456,6 +571,13 @@
           "rmse": 19265.2,
           "rows": 2286
         },
+        "last_year": {
+          "mae": 9538.9,
+          "wape": 0.0959,
+          "rmse": 18863.7,
+          "rows": 2190,
+          "modelOnSameRows": 0.0435
+        },
         "improvementOverUsual": 0.3472,
         "improvementOverLastWeek": 0.5098
       },
@@ -477,6 +599,13 @@
           "wape": 0.0981,
           "rmse": 19715.7,
           "rows": 2279
+        },
+        "last_year": {
+          "mae": 9538.9,
+          "wape": 0.0959,
+          "rmse": 18863.7,
+          "rows": 2190,
+          "modelOnSameRows": 0.0455
         },
         "improvementOverUsual": 0.3319,
         "improvementOverLastWeek": 0.5329
@@ -500,6 +629,13 @@
           "rmse": 19715.7,
           "rows": 2279
         },
+        "last_year": {
+          "mae": 9538.9,
+          "wape": 0.0959,
+          "rmse": 18863.7,
+          "rows": 2190,
+          "modelOnSameRows": 0.046
+        },
         "improvementOverUsual": 0.3257,
         "improvementOverLastWeek": 0.5286
       },
@@ -522,6 +658,13 @@
           "rmse": 19899.3,
           "rows": 2272
         },
+        "last_year": {
+          "mae": 9538.9,
+          "wape": 0.0959,
+          "rmse": 18863.7,
+          "rows": 2190,
+          "modelOnSameRows": 0.0462
+        },
         "improvementOverUsual": 0.3311,
         "improvementOverLastWeek": 0.5464
       },
@@ -543,6 +686,13 @@
           "wape": 0.1017,
           "rmse": 19761.9,
           "rows": 2265
+        },
+        "last_year": {
+          "mae": 9538.9,
+          "wape": 0.0959,
+          "rmse": 18863.7,
+          "rows": 2190,
+          "modelOnSameRows": 0.0494
         },
         "improvementOverUsual": 0.2914,
         "improvementOverLastWeek": 0.5117
@@ -568,6 +718,13 @@
           "rmse": 1145.8,
           "rows": 55210
         },
+        "last_year": {
+          "mae": 528.3,
+          "wape": 0.1293,
+          "rmse": 1164.0,
+          "rows": 53290,
+          "modelOnSameRows": 0.0584
+        },
         "improvementOverUsual": 0.3355,
         "improvementOverLastWeek": 0.4716
       },
@@ -589,6 +746,13 @@
           "wape": 0.1112,
           "rmse": 1145.8,
           "rows": 55210
+        },
+        "last_year": {
+          "mae": 528.3,
+          "wape": 0.1293,
+          "rmse": 1164.0,
+          "rows": 53290,
+          "modelOnSameRows": 0.062
         },
         "improvementOverUsual": 0.295,
         "improvementOverLastWeek": 0.4394
@@ -612,6 +776,13 @@
           "rmse": 1145.8,
           "rows": 55210
         },
+        "last_year": {
+          "mae": 528.3,
+          "wape": 0.1293,
+          "rmse": 1164.0,
+          "rows": 53290,
+          "modelOnSameRows": 0.0635
+        },
         "improvementOverUsual": 0.278,
         "improvementOverLastWeek": 0.4259
       },
@@ -633,6 +804,13 @@
           "wape": 0.1112,
           "rmse": 1145.8,
           "rows": 55210
+        },
+        "last_year": {
+          "mae": 528.3,
+          "wape": 0.1293,
+          "rmse": 1164.0,
+          "rows": 53290,
+          "modelOnSameRows": 0.0648
         },
         "improvementOverUsual": 0.263,
         "improvementOverLastWeek": 0.414
@@ -656,6 +834,13 @@
           "rmse": 1145.8,
           "rows": 55210
         },
+        "last_year": {
+          "mae": 528.3,
+          "wape": 0.1293,
+          "rmse": 1164.0,
+          "rows": 53290,
+          "modelOnSameRows": 0.0653
+        },
         "improvementOverUsual": 0.2579,
         "improvementOverLastWeek": 0.41
       },
@@ -677,6 +862,13 @@
           "wape": 0.1225,
           "rmse": 1178.5,
           "rows": 55070
+        },
+        "last_year": {
+          "mae": 528.3,
+          "wape": 0.1293,
+          "rmse": 1164.0,
+          "rows": 53290,
+          "modelOnSameRows": 0.0692
         },
         "improvementOverUsual": 0.2348,
         "improvementOverLastWeek": 0.4327
@@ -700,6 +892,13 @@
           "rmse": 1178.5,
           "rows": 55070
         },
+        "last_year": {
+          "mae": 528.3,
+          "wape": 0.1293,
+          "rmse": 1164.0,
+          "rows": 53290,
+          "modelOnSameRows": 0.0691
+        },
         "improvementOverUsual": 0.2359,
         "improvementOverLastWeek": 0.4335
       },
@@ -722,6 +921,13 @@
           "rmse": 1214.1,
           "rows": 54930
         },
+        "last_year": {
+          "mae": 528.3,
+          "wape": 0.1293,
+          "rmse": 1164.0,
+          "rows": 53290,
+          "modelOnSameRows": 0.0708
+        },
         "improvementOverUsual": 0.2304,
         "improvementOverLastWeek": 0.4444
       },
@@ -743,6 +949,13 @@
           "wape": 0.1292,
           "rmse": 1224.5,
           "rows": 54790
+        },
+        "last_year": {
+          "mae": 528.3,
+          "wape": 0.1293,
+          "rmse": 1164.0,
+          "rows": 53290,
+          "modelOnSameRows": 0.0741
         },
         "improvementOverUsual": 0.2032,
         "improvementOverLastWeek": 0.4237
@@ -770,12 +983,19 @@
           "rmse": 177374.2,
           "rows": 405
         },
+        "last_year": {
+          "mae": 121673.2,
+          "wape": 0.2446,
+          "rmse": 153124.6,
+          "rows": 405,
+          "modelOnSameRows": 0.0975
+        },
         "improvementOverUsual": 0.653,
         "improvementOverLastWeek": 0.66
       },
       "ordinaryDays": {
         "model": {
-          "mae": 22078.8,
+          "mae": 22078.9,
           "wape": 0.0356,
           "rmse": 32206.0,
           "rows": 2880
@@ -791,6 +1011,13 @@
           "wape": 0.0664,
           "rmse": 71530.2,
           "rows": 2880
+        },
+        "last_year": {
+          "mae": 46731.7,
+          "wape": 0.0754,
+          "rmse": 74973.5,
+          "rows": 2880,
+          "modelOnSameRows": 0.0356
         },
         "improvementOverUsual": 0.0654,
         "improvementOverLastWeek": 0.4639
@@ -816,6 +1043,13 @@
           "rmse": 38099.8,
           "rows": 2482
         },
+        "last_year": {
+          "mae": 21437.5,
+          "wape": 0.2601,
+          "rmse": 34569.7,
+          "rows": 2430,
+          "modelOnSameRows": 0.1042
+        },
         "improvementOverUsual": 0.6439,
         "improvementOverLastWeek": 0.6477
       },
@@ -837,6 +1071,13 @@
           "wape": 0.0713,
           "rmse": 15248.5,
           "rows": 18043
+        },
+        "last_year": {
+          "mae": 7865.7,
+          "wape": 0.0772,
+          "rmse": 15421.5,
+          "rows": 17280,
+          "modelOnSameRows": 0.0376
         },
         "improvementOverUsual": 0.109,
         "improvementOverLastWeek": 0.4684
@@ -862,6 +1103,13 @@
           "rmse": 2000.6,
           "rows": 60170
         },
+        "last_year": {
+          "mae": 1024.1,
+          "wape": 0.3023,
+          "rmse": 1854.4,
+          "rows": 59130,
+          "modelOnSameRows": 0.1584
+        },
         "improvementOverUsual": 0.534,
         "improvementOverLastWeek": 0.5347
       },
@@ -883,6 +1131,13 @@
           "wape": 0.0923,
           "rmse": 1002.2,
           "rows": 435740
+        },
+        "last_year": {
+          "mae": 458.6,
+          "wape": 0.1096,
+          "rmse": 1030.4,
+          "rows": 420480,
+          "modelOnSameRows": 0.0559
         },
         "improvementOverUsual": 0.0865,
         "improvementOverLastWeek": 0.3903
@@ -935,24 +1190,42 @@
   },
   "rangeCorrection": {
     "network": {
-      "holidayPeriods": 0.11294,
-      "ordinaryDays": 0.01341
+      "holidayPeriods": {
+        "1-7": 0.11294,
+        "8-28": 0.11294
+      },
+      "ordinaryDays": {
+        "1-7": 0.01159,
+        "8-28": 0.01749
+      }
     },
     "lines": {
-      "holidayPeriods": 0.06198,
-      "ordinaryDays": 0.00932
+      "holidayPeriods": {
+        "1-7": 0.06331,
+        "8-28": 0.05636
+      },
+      "ordinaryDays": {
+        "1-7": 0.00702,
+        "8-28": 0.01222
+      }
     },
     "stations": {
-      "holidayPeriods": 0.02892,
-      "ordinaryDays": 0.00346
+      "holidayPeriods": {
+        "1-7": 0.02727,
+        "8-28": 0.02954
+      },
+      "ordinaryDays": {
+        "1-7": 0.00194,
+        "8-28": 0.00555
+      }
     }
   },
   "rangeCoverage": {
     "network": {
       "all": {
-        "quantile": 0.772,
+        "quantile": 0.7738,
         "fixed": 0.7991,
-        "quantileWidth": 0.0942,
+        "quantileWidth": 0.0981,
         "fixedWidth": 0.1296
       },
       "holidayPeriods": {
@@ -962,50 +1235,280 @@
         "fixedWidth": 0.1296
       },
       "ordinaryDays": {
-        "quantile": 0.7639,
+        "quantile": 0.766,
         "fixed": 0.8431,
-        "quantileWidth": 0.0845,
+        "quantileWidth": 0.0886,
         "fixedWidth": 0.1296
+      },
+      "byHorizon": {
+        "1-7": {
+          "quantile": 0.7551
+        },
+        "8-28": {
+          "quantile": 0.7973
+        }
       }
     },
     "lines": {
       "all": {
-        "quantile": 0.7942,
+        "quantile": 0.7926,
         "fixed": 0.7998,
-        "quantileWidth": 0.1163,
+        "quantileWidth": 0.1165,
         "fixedWidth": 0.1366
       },
       "holidayPeriods": {
-        "quantile": 0.728,
+        "quantile": 0.7236,
         "fixed": 0.4847,
-        "quantileWidth": 0.3369,
+        "quantileWidth": 0.3342,
         "fixedWidth": 0.1366
       },
       "ordinaryDays": {
-        "quantile": 0.8033,
+        "quantile": 0.8021,
         "fixed": 0.8432,
-        "quantileWidth": 0.1054,
+        "quantileWidth": 0.1063,
         "fixedWidth": 0.1366
+      },
+      "byHorizon": {
+        "1-7": {
+          "quantile": 0.7851
+        },
+        "8-28": {
+          "quantile": 0.8021
+        }
       }
     },
     "stations": {
       "all": {
-        "quantile": 0.7879,
+        "quantile": 0.7874,
         "fixed": 0.7998,
-        "quantileWidth": 0.1542,
+        "quantileWidth": 0.1545,
         "fixedWidth": 0.1898
       },
       "holidayPeriods": {
-        "quantile": 0.7414,
+        "quantile": 0.7403,
         "fixed": 0.4738,
-        "quantileWidth": 0.4302,
+        "quantileWidth": 0.4288,
         "fixedWidth": 0.1898
       },
       "ordinaryDays": {
-        "quantile": 0.7943,
+        "quantile": 0.7939,
         "fixed": 0.8448,
-        "quantileWidth": 0.1433,
+        "quantileWidth": 0.1437,
         "fixedWidth": 0.1898
+      },
+      "byHorizon": {
+        "1-7": {
+          "quantile": 0.7855
+        },
+        "8-28": {
+          "quantile": 0.7897
+        }
+      }
+    }
+  },
+  "recentMiss": {
+    "window": 7,
+    "minDays": 4,
+    "cap": 0.12,
+    "weights": {
+      "1": 0.5,
+      "2": 0.0,
+      "3": 0.0,
+      "5": 0.0,
+      "7": 0.0,
+      "10": 0.0
+    },
+    "validation": {
+      "1": {
+        "before": 0.0292,
+        "after": 0.0285,
+        "weight": 0.5
+      },
+      "2": {
+        "before": 0.0302,
+        "after": 0.0302,
+        "weight": 0.0
+      },
+      "3": {
+        "before": 0.0312,
+        "after": 0.0312,
+        "weight": 0.0
+      },
+      "5": {
+        "before": 0.0301,
+        "after": 0.0301,
+        "weight": 0.0
+      },
+      "7": {
+        "before": 0.0309,
+        "after": 0.0309,
+        "weight": 0.0
+      },
+      "10": {
+        "before": 0.0346,
+        "after": 0.0346,
+        "weight": 0.0
+      }
+    },
+    "test": {
+      "1": {
+        "before": 0.037,
+        "after": 0.0337
+      },
+      "2": {
+        "before": 0.04,
+        "after": 0.04
+      },
+      "3": {
+        "before": 0.0405,
+        "after": 0.0405
+      },
+      "5": {
+        "before": 0.0415,
+        "after": 0.0415
+      },
+      "7": {
+        "before": 0.0406,
+        "after": 0.0406
+      },
+      "10": {
+        "before": 0.0427,
+        "after": 0.0427
+      }
+    },
+    "appliesTo": "network only; lines and stations did not improve"
+  },
+  "bootstrap95": {
+    "network": {
+      "all": {
+        "model": [
+          0.0342,
+          0.0504
+        ],
+        "usual": [
+          0.0471,
+          0.0801
+        ],
+        "gainOverUsual": [
+          0.2026,
+          0.4251
+        ]
+      },
+      "holidayPeriods": {
+        "model": [
+          0.066,
+          0.1442
+        ],
+        "usual": [
+          0.2111,
+          0.365
+        ],
+        "gainOverUsual": [
+          0.5436,
+          0.7649
+        ]
+      },
+      "ordinaryDays": {
+        "model": [
+          0.03,
+          0.0419
+        ],
+        "usual": [
+          0.0309,
+          0.0461
+        ],
+        "gainOverUsual": [
+          -0.085,
+          0.1806
+        ]
+      }
+    },
+    "lines": {
+      "all": {
+        "model": [
+          0.0377,
+          0.0529
+        ],
+        "usual": [
+          0.0523,
+          0.0865
+        ],
+        "gainOverUsual": [
+          0.242,
+          0.4231
+        ]
+      },
+      "holidayPeriods": {
+        "model": [
+          0.0763,
+          0.1494
+        ],
+        "usual": [
+          0.226,
+          0.3807
+        ],
+        "gainOverUsual": [
+          0.5498,
+          0.7363
+        ]
+      },
+      "ordinaryDays": {
+        "model": [
+          0.0331,
+          0.0435
+        ],
+        "usual": [
+          0.0365,
+          0.0494
+        ],
+        "gainOverUsual": [
+          0.0083,
+          0.1928
+        ]
+      }
+    },
+    "stations": {
+      "all": {
+        "model": [
+          0.0579,
+          0.0765
+        ],
+        "usual": [
+          0.0729,
+          0.1097
+        ],
+        "gainOverUsual": [
+          0.1766,
+          0.3253
+        ]
+      },
+      "holidayPeriods": {
+        "model": [
+          0.1241,
+          0.2074
+        ],
+        "usual": [
+          0.2676,
+          0.4366
+        ],
+        "gainOverUsual": [
+          0.4639,
+          0.6114
+        ]
+      },
+      "ordinaryDays": {
+        "model": [
+          0.0509,
+          0.0626
+        ],
+        "usual": [
+          0.0554,
+          0.069
+        ],
+        "gainOverUsual": [
+          0.0204,
+          0.142
+        ]
       }
     }
   },

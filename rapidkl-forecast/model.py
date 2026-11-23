@@ -36,6 +36,7 @@ SEED = 42
 HORIZONS = [1, 2, 3, 5, 7, 10, 14, 21, 28]
 MAX_HORIZON = 28
 TRAIN_START, VALID_START, TEST_START = pd.Timestamp("2023-04-01"), pd.Timestamp("2025-05-12"), pd.Timestamp("2025-11-12")
+TEST_END = pd.Timestamp("2026-11-11")  # fixed, so the test year stays the same year when newer data arrives (it is only used for production fits)
 MIN_USUAL = 30  # series-days with a usual level below this are too small and noisy to score as percentages
 LINE_CODES = ["KJ", "AG", "SP", "KG", "PYL", "MR", "SA"]
 KIND_WEIGHT = {0: 20.0, 1: 5.0, 2: 1.0}  # network, line, station: there are 166 stations but one network, so balance them
@@ -54,7 +55,14 @@ CONFIG = {
     "rich_holidays": False,  # school holidays, the kind of holiday, and how long the break is (did not help consistently)
     "holiday_weight": 1.0,   # extra training weight for days in holiday periods
     "rain": False,           # same-day rainfall (tested as an upper bound; see experiments.py)
+    # The next two were tried after the 19-20 Nov 2026 concert at Bukit Jalil and are OFF. They helped slightly on both validation windows, but on the test year
+    # they were neutral overall (stations 6.7% -> 6.8%) and worse on the day after a Bukit Jalil spike: events there run on consecutive nights, so a spike
+    # yesterday really does predict one today, and capping it throws that signal away. See results/experiments.json.
+    "clip_dev": None,        # cap on how far (log scale) a past day may sit from its usual level when used as a model input
+    "drop_spikes": None,     # leave station days more than this far (log scale) above usual out of training
 }
+# Bump when the design changes in a way that makes older saved models unsuitable. Saved models carry it, and a model with another value is not used.
+DESIGN = "v3"
 
 
 def features() -> list[str]:
@@ -186,6 +194,9 @@ def build(values: np.ndarray, cal: pd.DataFrame, meta: pd.DataFrame, targets: np
     same_weekdays = np.stack([at(holiday, targets - 7 * (weeks_back + k)) for k in range(6)])
     mean_dev = lambda lo, hi: np.stack([np.nanmean(dev[max(0, c + lo): c + hi + 1], axis=0) if c + hi >= 0 else np.full(n_series, np.nan) for c in cutoff])
     level = lambda lo, hi: np.stack([np.nanmean(values[max(0, c + lo): c + hi + 1], axis=0) if c + hi >= 0 else np.full(n_series, np.nan) for c in cutoff])
+    cap = CONFIG["clip_dev"]
+    if cap:  # inputs only: the target `y` below keeps the real value
+        dev = np.clip(dev, -cap, cap)
     with np.errstate(all="ignore"):
         recent_dev = mean_dev(-6, 0)
         trend = np.log1p(level(-27, 0)) - np.log1p(level(-55, -28))
@@ -199,7 +210,7 @@ def build(values: np.ndarray, cal: pd.DataFrame, meta: pd.DataFrame, targets: np
         "last_year_school_holiday": np.broadcast_to(at(cal["school_holiday"].to_numpy(), targets - 364)[:, None], shape),
         "kind": per_series(meta["kind"]), "line": per_series(meta["line"]), "scale": np.log1p(base),
         "holidays_in_usual": np.broadcast_to(np.nansum(same_weekdays, axis=0)[:, None], shape),
-        "last_week_dev": np.log1p(at(values, targets - 7 * weeks_back)) - np.log1p(base),
+        "last_week_dev": np.clip(np.log1p(at(values, targets - 7 * weeks_back)) - np.log1p(base), -cap, cap) if cap else np.log1p(at(values, targets - 7 * weeks_back)) - np.log1p(base),
         "last_week_holiday": np.broadcast_to(at(holiday, targets - 7 * weeks_back)[:, None], shape),
         "last_known_dev": at(dev, cutoff), "recent_dev": recent_dev, "trend": trend,
         "last_year_dev": last_year, "last_year_holiday": np.broadcast_to(at(holiday, targets - 364)[:, None], shape),
@@ -209,6 +220,7 @@ def build(values: np.ndarray, cal: pd.DataFrame, meta: pd.DataFrame, targets: np
     frame["series_idx"] = np.broadcast_to(np.arange(n_series)[None, :], shape).ravel()
     frame["usual"] = base.ravel()
     frame["last_week"] = at(values, targets - 7 * weeks_back).ravel()
+    frame["last_year"] = at(values, targets - 364).ravel()  # the same weekday a year earlier, a baseline that knows nothing else
     frame["actual"] = at(values, targets).ravel()
     frame["y"] = np.log1p(frame["actual"]) - np.log1p(frame["usual"])
     special = (frame["public_holiday"] > 0) | (frame["bridge_day"] > 0) | (frame["raya_offset"].abs() <= 7) | (frame["cny_offset"].abs() <= 5)
@@ -234,18 +246,31 @@ def range_offsets(model: xgb.Booster, frame: pd.DataFrame) -> np.ndarray:
     return model.predict(xgb.DMatrix(frame[features()], feature_names=features()))
 
 
+HORIZON_BUCKETS = (("1-7", 1, 7), ("8-28", 8, 28))  # the range is calibrated separately for near and far forecasts
+
+
 def calibrate_range(model: xgb.Booster, held_out: pd.DataFrame) -> dict:
     """Conformal correction: how much each end of the raw range must move so that 80% of held-out outcomes fall inside it,
-    separately for the network, lines and stations and for holiday periods and ordinary days. The raw quantile model is
-    too narrow, because it has seen the training days and is overconfident about new ones."""
+    separately for the network, lines and stations, for holiday periods and ordinary days, and for near (1-7 days) and far
+    (8-28 days) forecasts. The raw quantile model is too narrow, because it has seen the training days and is overconfident
+    about new ones. A group with fewer than 50 rows borrows the figure for all horizons."""
     offsets = range_offsets(model, held_out)
     y = held_out["y"].to_numpy()
     miss = np.maximum(offsets[:, 0] - y, y - offsets[:, 1])  # how far outside the raw range the outcome fell (negative = inside)
     special = special_days(held_out).to_numpy()
+    horizon = held_out["horizon"].to_numpy()
+    quantile = lambda rows: round(float(np.quantile(miss[rows], 0.8)), 5) if rows.sum() >= 50 else None
     out = {}
     for k, name in KIND_NAMES.items():
         rows = (held_out["kind"] == k).to_numpy()
-        out[name] = {"holidayPeriods": round(float(np.quantile(miss[rows & special], 0.8)), 5), "ordinaryDays": round(float(np.quantile(miss[rows & ~special], 0.8)), 5)}
+        out[name] = {}
+        for day, mask in (("holidayPeriods", special), ("ordinaryDays", ~special)):
+            pooled = quantile(rows & mask)
+            pooled = 0.0 if pooled is None else pooled
+            out[name][day] = {}
+            for label, lo, hi in HORIZON_BUCKETS:
+                value = quantile(rows & mask & (horizon >= lo) & (horizon <= hi))
+                out[name][day][label] = pooled if value is None else value
     return out
 
 
@@ -255,9 +280,16 @@ def predict_range(model: xgb.Booster, frame: pd.DataFrame, centre: np.ndarray, c
     widen = np.zeros(len(frame))
     if correction:
         special = special_days(frame).to_numpy()
+        horizon = frame["horizon"].to_numpy()
         for k, name in KIND_NAMES.items():
             rows = (frame["kind"] == k).to_numpy()
-            widen[rows & special], widen[rows & ~special] = correction[name]["holidayPeriods"], correction[name]["ordinaryDays"]
+            for day, mask in (("holidayPeriods", special), ("ordinaryDays", ~special)):
+                entry = correction[name][day]
+                if isinstance(entry, dict):
+                    for label, lo, hi in HORIZON_BUCKETS:
+                        widen[rows & mask & (horizon >= lo) & (horizon <= hi)] = entry[label]
+                else:  # a file written before the correction depended on the horizon
+                    widen[rows & mask] = entry
     base = np.log1p(frame["usual"].to_numpy())
     low = np.maximum(np.expm1(base + offsets[:, 0] - widen), 0)
     high = np.maximum(np.expm1(base + offsets[:, 1] + widen), 0)
@@ -277,7 +309,18 @@ PARAMS = dict(objective="reg:squarederror", tree_method="hist", max_depth=7, lea
               min_child_weight=30, reg_lambda=2.0, seed=SEED, nthread=4)
 
 
+def training_rows(frame: pd.DataFrame) -> pd.DataFrame:
+    """Rows the model learns from. With CONFIG["drop_spikes"], station days far above their usual level (an event next to the station)
+    are left out: nothing in the calendar can explain them, and they would pull ordinary days up. Public holidays are kept."""
+    limit = CONFIG["drop_spikes"]
+    if not limit:
+        return frame
+    spike = (frame["kind"] == 2) & (frame["public_holiday"] == 0) & (frame["y"] > limit)
+    return frame[~spike]
+
+
 def fit(frame: pd.DataFrame, rounds: int, valid: pd.DataFrame | None = None, quantiles: bool = False) -> xgb.Booster:
+    frame = training_rows(frame)
     if quantiles:  # one model that predicts both ends of the range, so the range can widen where outcomes are less certain
         matrix = xgb.QuantileDMatrix(frame[features()], label=frame["y"], weight=frame["weight"], feature_names=features())
         return xgb.train({**PARAMS, "objective": "reg:quantileerror", "quantile_alpha": QUANTILES}, matrix, num_boost_round=rounds)
@@ -291,6 +334,93 @@ def frames_for(values, cal, meta, days: np.ndarray) -> pd.DataFrame:
     return pd.concat([build(values, cal, meta, days, h) for h in HORIZONS], ignore_index=True)
 
 
+# --- Recent-miss nudge for the network forecast ---------------------------------------------------------------------------
+# The model's one-day-ahead errors for the whole network carry over for a day or two (lag-1 autocorrelation 0.47 on the test year):
+# demand sits a little above or below what the calendar and the six-week usual level imply. Shifting the first few days of the
+# network forecast by a share of the last week's median miss reduced their error on the test year; it did nothing for lines or
+# stations and hurt beyond about five days, so it is used for the network only. The weights are chosen on the validation period
+# (choose_weights), and the live site switches the nudge off when there are fewer than MISS_MIN_DAYS scored days to learn from.
+SPIKE_RATIO, SPIKE_MIN = 1.8, 1500  # a station day this far above its forecast is an event (concert, match), not demand
+MISS_WINDOW, MISS_MIN_DAYS, MISS_CAP = 7, 4, 0.12
+MISS_HORIZONS = [1, 2, 3, 5, 7, 10]
+MISS_STEPS = [0.25, 0.5, 0.75, 1.0]
+MISS_MIN_GAIN = 0.02  # a weight is kept only if it cuts the validation error by at least this share
+
+
+def is_spike(actual, forecast):
+    """True where a station's real figure is far above its forecast (works on numbers and on arrays)."""
+    return (actual > SPIKE_RATIO * forecast) & (actual - forecast >= SPIKE_MIN)
+
+
+def recent_median(misses: dict, cutoff: pd.Timestamp, window: int, min_days: int) -> float | None:
+    """Median of the misses on the `window` days up to and including `cutoff`; None when fewer than `min_days` of them are known."""
+    known = [v for d, v in misses.items() if cutoff - pd.Timedelta(days=window) < d <= cutoff and np.isfinite(v)]
+    return float(np.median(known)) if len(known) >= min_days else None
+
+
+def correction_weight(horizon: int, weights: dict) -> float:
+    """Weight for any horizon from the ones that were calibrated: straight lines between them, falling to zero four days after the last."""
+    keys = sorted(int(k) for k in weights)
+    return float(np.interp(horizon, keys + [keys[-1] + 4], [float(weights[str(k)]) for k in keys] + [0.0]))
+
+
+def network_misses(frame: pd.DataFrame) -> pd.Series:
+    """log(actual / forecast) of the network on each day from the one-day-ahead rows, with station events taken out of the actual."""
+    h1 = frame[frame["horizon"] == 1]
+    net, stations = h1[h1["kind"] == 0].set_index("day_idx"), h1[h1["kind"] == 2]
+    excess = (stations["actual"] - stations["model"]).where(is_spike(stations["actual"], stations["model"]), 0.0).groupby(stations["day_idx"]).sum()
+    adjusted = (net["actual"] - excess.reindex(net.index).fillna(0.0)).clip(lower=1.0)
+    return np.log(adjusted) - np.log(net["model"])
+
+
+def known_miss(miss: pd.Series, rows: pd.DataFrame) -> np.ndarray:
+    """For each forecast row, the median recent miss that was known when it was made (NaN when there was too little to go on)."""
+    full = miss.reindex(range(int(miss.index.min()) - MISS_WINDOW, int(miss.index.max()) + 1))
+    median = full.rolling(MISS_WINDOW, min_periods=MISS_MIN_DAYS).median().clip(-MISS_CAP, MISS_CAP)
+    return median.reindex((rows["day_idx"] - rows["horizon"]).to_numpy()).to_numpy()
+
+
+def choose_weights(held_out: pd.DataFrame) -> tuple[dict, dict]:
+    """Per-horizon weight of the recent miss, chosen on `held_out` (which must carry the model's forecast in `model`)."""
+    miss = network_misses(held_out)
+    network = held_out[held_out["kind"] == 0]
+    weights, detail = {}, {}
+    for h in MISS_HORIZONS:
+        rows = network[network["horizon"] == h]
+        known = np.nan_to_num(known_miss(miss, rows))
+        wape = lambda pred: float(np.abs(pred - rows["actual"].to_numpy()).sum() / rows["actual"].sum())
+        base, best, best_k = wape(rows["model"].to_numpy()), None, 0.0
+        for k in MISS_STEPS:
+            error = wape(rows["model"].to_numpy() * np.exp(k * known))
+            if error < base * (1 - MISS_MIN_GAIN) and (best is None or error < best):
+                best, best_k = error, k
+        weights[str(h)] = best_k
+        detail[str(h)] = {"before": round(base, 4), "after": round(best if best is not None else base, 4), "weight": best_k}
+    return (weights if any(weights.values()) else {}), detail
+
+
+def week_bootstrap(fair: pd.DataFrame, special: pd.Series, reps: int = 2000) -> dict:
+    """95% ranges for the error figures, by resampling whole calendar weeks (days in one week share weather, holidays and events, so
+    they are not independent). Shows how much of a gap between the model and a baseline could be luck of the draw."""
+    rng = np.random.default_rng(SEED)
+    weeks, inverse = np.unique((fair["day_idx"] // 7).to_numpy(), return_inverse=True)
+    draws = rng.integers(0, len(weeks), size=(reps, len(weeks)))
+    actual, err_model, err_usual = fair["actual"].to_numpy(), (fair["model"] - fair["actual"]).abs().to_numpy(), (fair["usual"] - fair["actual"]).abs().to_numpy()
+    sp = special.to_numpy()
+    interval = lambda x: [round(float(v), 4) for v in np.nanpercentile(x, [2.5, 97.5])]
+    out = {}
+    for name, k in {"network": 0, "lines": 1, "stations": 2}.items():
+        rows = (fair["kind"] == k).to_numpy()
+        out[name] = {}
+        for day, sel in (("all", rows), ("holidayPeriods", rows & sp), ("ordinaryDays", rows & ~sp)):
+            total = lambda col: np.bincount(inverse[sel], weights=col[sel], minlength=len(weeks))[draws].sum(axis=1)
+            a, mm, uu = total(actual), total(err_model), total(err_usual)
+            with np.errstate(all="ignore"):
+                model_wape, usual_wape = np.where(a > 0, mm / a, np.nan), np.where(a > 0, uu / a, np.nan)
+                out[name][day] = {"model": interval(model_wape), "usual": interval(usual_wape), "gainOverUsual": interval(1 - model_wape / usual_wape)}
+    return out
+
+
 def evaluate() -> None:
     OUT.mkdir(exist_ok=True)
     entries, meta = load()
@@ -299,15 +429,19 @@ def evaluate() -> None:
     idx = lambda ts: int((ts - days[0]).days)
     train = frames_for(values, cal, meta, np.arange(idx(TRAIN_START), idx(VALID_START)))
     valid = frames_for(values, cal, meta, np.arange(idx(VALID_START), idx(TEST_START)))
-    test = frames_for(values, cal, meta, np.arange(idx(TEST_START), len(days)))
+    test = frames_for(values, cal, meta, np.arange(idx(TEST_START), idx(TEST_END) + 1))
     print({"train": len(train), "valid": len(valid), "test": len(test)})
 
     probe = fit(train, 3000, valid)
     rounds = probe.best_iteration + 1
-    valid_scores = {"model": scores(valid["actual"].to_numpy(), predict(probe, valid)), "usual": scores(valid["actual"].to_numpy(), valid["usual"].to_numpy())}
+    valid = valid.assign(model=predict(probe, valid))
+    valid_scores = {"model": scores(valid["actual"].to_numpy(), valid["model"].to_numpy()), "usual": scores(valid["actual"].to_numpy(), valid["usual"].to_numpy())}
+    miss_weights, miss_detail = choose_weights(valid)  # the recent-miss nudge is tuned here, before the test year is looked at
+    print("recent-miss weights (chosen on validation):", miss_weights)
     print("validation:", valid_scores, "trees:", rounds)
 
     model = fit(pd.concat([train, valid], ignore_index=True), rounds)
+    model.set_attr(design=DESIGN)
     model.save_model(OUT / "model.json")
     # The range model is calibrated on the validation period, which a model fitted on the training period alone has not seen.
     correction = calibrate_range(fit(train, rounds, quantiles=True), valid)
@@ -320,6 +454,9 @@ def evaluate() -> None:
     def block(frame: pd.DataFrame) -> dict:
         actual = frame["actual"].to_numpy()
         out = {name: scores(actual, frame[name].to_numpy()) for name in ("model", "usual", "last_week")}
+        has_year = frame[np.isfinite(frame["last_year"])]  # a series with under a year of history has no last-year figure
+        out["last_year"] = scores(has_year["actual"].to_numpy(), has_year["last_year"].to_numpy())
+        out["last_year"]["modelOnSameRows"] = round(float(scores(has_year["actual"].to_numpy(), has_year["model"].to_numpy())["wape"]), 4)
         out["improvementOverUsual"] = round(1 - out["model"]["mae"] / out["usual"]["mae"], 4)
         out["improvementOverLastWeek"] = round(1 - out["model"]["mae"] / out["last_week"]["mae"], 4)
         return out
@@ -327,10 +464,11 @@ def evaluate() -> None:
     kinds = {"network": 0, "lines": 1, "stations": 2}
     special = (fair["public_holiday"] > 0) | (fair["bridge_day"] > 0) | (fair["raya_offset"].abs() <= 7) | (fair["cny_offset"].abs() <= 5)
     metrics = {
+        "design": DESIGN,
         "trainedOn": dt.date.today().isoformat(),
         "data": {"source": "Daily Origin-Destination Ridership: Rapid Rail (KV), data.gov.my, CC BY 4.0", "series": int(len(meta)),
                  "stations": int((meta["kind"] == 2).sum()), "period": [str(days[0].date()), str(days[-1].date())],
-                 "train": [str(TRAIN_START.date()), str((TEST_START - pd.Timedelta(days=1)).date())], "test": [str(TEST_START.date()), str(days[-1].date())],
+                 "train": [str(TRAIN_START.date()), str((TEST_START - pd.Timedelta(days=1)).date())], "test": [str(TEST_START.date()), str(TEST_END.date())],
                  "trainRows": int(len(train) + len(valid)), "testRows": int(len(fair))},
         "model": {"type": "XGBoost regression on the log deviation from the usual level", "trees": int(rounds), "features": features(), "config": CONFIG, "horizons": HORIZONS},
         "validation": valid_scores,
@@ -356,6 +494,22 @@ def evaluate() -> None:
                      "quantileWidth": width(fair["low"], fair["high"], rows), "fixedWidth": width(fixed["lo"], fixed["hi"], rows)}
                for day, rows in (("all", fair["kind"] == k), ("holidayPeriods", (fair["kind"] == k) & special), ("ordinaryDays", (fair["kind"] == k) & ~special))}
         for name, k in kinds.items()}
+    # Recent-miss nudge on the untouched test year: the miss series comes from the model's own one-day-ahead forecasts, as on the live site.
+    test_miss = network_misses(test)
+    net_rows = fair[fair["kind"] == 0]
+    test_detail = {}
+    for h in MISS_HORIZONS:
+        rows = net_rows[net_rows["horizon"] == h]
+        adjusted = rows["model"].to_numpy() * np.exp(float(miss_weights.get(str(h), 0.0)) * np.nan_to_num(known_miss(test_miss, rows)))
+        test_detail[str(h)] = {"before": round(float((rows["model"] - rows["actual"]).abs().sum() / rows["actual"].sum()), 4),
+                               "after": round(float(np.abs(adjusted - rows["actual"].to_numpy()).sum() / rows["actual"].sum()), 4)}
+    metrics["recentMiss"] = {"window": MISS_WINDOW, "minDays": MISS_MIN_DAYS, "cap": MISS_CAP, "weights": miss_weights, "validation": miss_detail, "test": test_detail,
+                             "appliesTo": "network only; lines and stations did not improve"}
+    for name, k in kinds.items():
+        rows = fair["kind"] == k
+        covered = (fair["actual"] >= fair["low"]) & (fair["actual"] <= fair["high"])
+        metrics["rangeCoverage"][name]["byHorizon"] = {label: {"quantile": round(float(covered[rows & fair["horizon"].between(lo, hi)].mean()), 4)} for label, lo, hi in HORIZON_BUCKETS}
+    metrics["bootstrap95"] = week_bootstrap(fair, special)
     sample = fair.sample(min(30000, len(fair)), random_state=SEED)
     contributions = np.abs(model.predict(xgb.DMatrix(sample[features()], feature_names=features()), pred_contribs=True)[:, :-1]).mean(axis=0)
     metrics["featureImportance"] = [{"feature": f, "share": round(float(s), 4)} for f, s in sorted(zip(features(), contributions / contributions.sum()), key=lambda x: -x[1])]
@@ -382,8 +536,10 @@ def production() -> None:
     entries, meta = load()
     values, days = entries.to_numpy(dtype=np.float32), entries.index
     everything = frames_for(values, calendar(days), meta, np.arange(int((TRAIN_START - days[0]).days), len(days)))
-    fit(everything, rounds).save_model(OUT / "model_production.json")
-    fit(everything, rounds, quantiles=True).save_model(OUT / "model_production_range.json")
+    for name, quantiles in (("model_production.json", False), ("model_production_range.json", True)):
+        booster = fit(everything, rounds, quantiles=quantiles)
+        booster.set_attr(design=DESIGN)
+        booster.save_model(OUT / name)
     print(f"production model: {len(everything):,} rows through {days[-1].date()}, {rounds} trees")
 
 

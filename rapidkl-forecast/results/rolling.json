@@ -1,0 +1,208 @@
+{
+  "design": "v3",
+  "trees": 374,
+  "foldDays": 91,
+  "folds": [
+    {
+      "start": "2025-08-12",
+      "end": "2025-11-10",
+      "trainRows": 1188492,
+      "network": {
+        "model": 0.0349,
+        "usual": 0.058,
+        "lastYear": 0.0867,
+        "holidayModel": 0.0994,
+        "holidayUsual": 0.4852,
+        "ordinaryModel": 0.0315,
+        "ordinaryUsual": 0.0358,
+        "holidayDays": 6
+      },
+      "lines": {
+        "model": 0.0421,
+        "usual": 0.0637,
+        "lastYear": 0.0919,
+        "holidayModel": 0.1004,
+        "holidayUsual": 0.4896,
+        "ordinaryModel": 0.039,
+        "ordinaryUsual": 0.0416,
+        "holidayDays": 6
+      },
+      "stations": {
+        "model": 0.0615,
+        "usual": 0.0817,
+        "lastYear": 0.1117,
+        "holidayModel": 0.1917,
+        "holidayUsual": 0.545,
+        "ordinaryModel": 0.0547,
+        "ordinaryUsual": 0.0577,
+        "holidayDays": 6
+      }
+    },
+    {
+      "start": "2025-11-12",
+      "end": "2026-02-10",
+      "trainRows": 1315176,
+      "network": {
+        "model": 0.0344,
+        "usual": 0.0526,
+        "lastYear": 0.0905,
+        "holidayModel": 0.0486,
+        "holidayUsual": 0.2826,
+        "ordinaryModel": 0.0335,
+        "ordinaryUsual": 0.0392,
+        "holidayDays": 6
+      },
+      "lines": {
+        "model": 0.0402,
+        "usual": 0.0604,
+        "lastYear": 0.098,
+        "holidayModel": 0.0703,
+        "holidayUsual": 0.3041,
+        "ordinaryModel": 0.0385,
+        "ordinaryUsual": 0.0461,
+        "holidayDays": 6
+      },
+      "stations": {
+        "model": 0.0605,
+        "usual": 0.0849,
+        "lastYear": 0.1278,
+        "holidayModel": 0.1304,
+        "holidayUsual": 0.3658,
+        "ordinaryModel": 0.0564,
+        "ordinaryUsual": 0.0685,
+        "holidayDays": 6
+      }
+    },
+    {
+      "start": "2026-02-12",
+      "end": "2026-05-13",
+      "trainRows": 1441860,
+      "network": {
+        "model": 0.0618,
+        "usual": 0.0807,
+        "lastYear": 0.1212,
+        "holidayModel": 0.1129,
+        "holidayUsual": 0.2313,
+        "ordinaryModel": 0.043,
+        "ordinaryUsual": 0.0252,
+        "holidayDays": 28
+      },
+      "lines": {
+        "model": 0.0626,
+        "usual": 0.0887,
+        "lastYear": 0.1303,
+        "holidayModel": 0.1123,
+        "holidayUsual": 0.2401,
+        "ordinaryModel": 0.0443,
+        "ordinaryUsual": 0.033,
+        "holidayDays": 28
+      },
+      "stations": {
+        "model": 0.0893,
+        "usual": 0.1122,
+        "lastYear": 0.1567,
+        "holidayModel": 0.1576,
+        "holidayUsual": 0.2753,
+        "ordinaryModel": 0.0642,
+        "ordinaryUsual": 0.0522,
+        "holidayDays": 28
+      }
+    },
+    {
+      "start": "2026-05-12",
+      "end": "2026-08-10",
+      "trainRows": 1564413,
+      "network": {
+        "model": 0.0318,
+        "usual": 0.0603,
+        "lastYear": 0.0636,
+        "holidayModel": 0.0898,
+        "holidayUsual": 0.5303,
+        "ordinaryModel": 0.0295,
+        "ordinaryUsual": 0.0417,
+        "holidayDays": 5
+      },
+      "lines": {
+        "model": 0.0333,
+        "usual": 0.0599,
+        "lastYear": 0.0699,
+        "holidayModel": 0.1028,
+        "holidayUsual": 0.5339,
+        "ordinaryModel": 0.0306,
+        "ordinaryUsual": 0.041,
+        "holidayDays": 5
+      },
+      "stations": {
+        "model": 0.0563,
+        "usual": 0.0794,
+        "lastYear": 0.1041,
+        "holidayModel": 0.1817,
+        "holidayUsual": 0.6004,
+        "ordinaryModel": 0.0513,
+        "ordinaryUsual": 0.0587,
+        "holidayDays": 5
+      }
+    },
+    {
+      "start": "2026-08-12",
+      "end": "2026-11-10",
+      "trainRows": 1691517,
+      "network": {
+        "model": 0.0376,
+        "usual": 0.0573,
+        "lastYear": 0.0955,
+        "holidayModel": 0.0514,
+        "holidayUsual": 0.3395,
+        "ordinaryModel": 0.0368,
+        "ordinaryUsual": 0.0413,
+        "holidayDays": 6
+      },
+      "lines": {
+        "model": 0.0411,
+        "usual": 0.0621,
+        "lastYear": 0.0867,
+        "holidayModel": 0.0789,
+        "holidayUsual": 0.3741,
+        "ordinaryModel": 0.0389,
+        "ordinaryUsual": 0.0444,
+        "holidayDays": 6
+      },
+      "stations": {
+        "model": 0.0616,
+        "usual": 0.0823,
+        "lastYear": 0.1292,
+        "holidayModel": 0.1625,
+        "holidayUsual": 0.4404,
+        "ordinaryModel": 0.0559,
+        "ordinaryUsual": 0.0619,
+        "holidayDays": 6
+      }
+    }
+  ],
+  "summary": {
+    "network": {
+      "modelMean": 0.0401,
+      "modelMin": 0.0318,
+      "modelMax": 0.0618,
+      "usualMean": 0.0618,
+      "foldsBeatingUsual": 5,
+      "folds": 5
+    },
+    "lines": {
+      "modelMean": 0.0439,
+      "modelMin": 0.0333,
+      "modelMax": 0.0626,
+      "usualMean": 0.067,
+      "foldsBeatingUsual": 5,
+      "folds": 5
+    },
+    "stations": {
+      "modelMean": 0.0658,
+      "modelMin": 0.0563,
+      "modelMax": 0.0893,
+      "usualMean": 0.0881,
+      "foldsBeatingUsual": 5,
+      "folds": 5
+    }
+  }
+}

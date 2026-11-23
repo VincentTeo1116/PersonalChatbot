@@ -32,6 +32,8 @@ jobs:
           cache: pip
           cache-dependency-path: rapidkl-forecast/requirements.txt
       - run: pip install -r requirements.txt
+      - name: Tests
+        run: python -m unittest discover -s tests
       - name: Refresh the data
         run: python prepare.py
       - name: Keep the model that is in use now, for comparison
@@ -41,7 +43,7 @@ jobs:
           python forecast.py --models current --previous none.json --out before.json
       - name: Retrain on all data
         run: |
-          python model.py --production
+          python model.py --production  # saves the models with this code's design version, which forecast.py checks before using them
           cp results/model_production.json results/model_production_range.json retrained/
           python forecast.py --models retrained --previous none.json --out after.json
       - name: Check the new model before publishing it

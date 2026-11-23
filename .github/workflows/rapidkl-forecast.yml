@@ -17,6 +17,7 @@ concurrency:
 jobs:
   forecast:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: rapidkl-forecast
@@ -30,15 +31,32 @@ jobs:
           cache: pip
           cache-dependency-path: rapidkl-forecast/requirements.txt
       - run: pip install -r requirements.txt
-      - name: Fetch yesterday's forecast (for the track record)
+      - name: Fetch yesterday's forecast (for the track record and the recent-miss nudge)
+        # A missing or damaged file is not fatal: forecast.py then starts the track record again and switches the nudge off.
         run: gh release download forecast-data --pattern rapidkl-forecast.json --dir . --clobber || echo "no previous forecast yet"
       - name: Fetch the newest retrained model (published monthly by the retrain workflow)
+        # forecast.py skips a retrained model whose feature list or design version differs from this code and uses the repository copy instead.
         run: gh release download forecast-data --pattern "model_production*.json" --dir retrained --clobber || echo "no retrained model yet, using the repository copy"
       - name: Refresh the data
         run: python prepare.py
+      - name: Keep a copy of yesterday's file, in case today's turns out to be wrong
+        run: if [ -f rapidkl-forecast.json ]; then cp rapidkl-forecast.json rapidkl-forecast-backup.json; fi
       - name: Forecast the next 28 days
+        # forecast.py checks its own output (28 days, no gaps or negatives, forecast inside its range, current data) and stops without writing if it fails,
+        # so a bad run leaves the last good file on the release and the site keeps serving it.
         run: python forecast.py --models retrained --previous rapidkl-forecast.json --out rapidkl-forecast.json
+      - name: Check the file that will be published
+        run: |
+          python - <<'EOF'
+          import json
+          d = json.load(open("rapidkl-forecast.json"))
+          assert d["design"] and len(d["days"]) == 28 and any(s["id"] == "ALL" for s in d["series"]), "file is incomplete"
+          print("design", d["design"], "| model", d["modelOrigin"], "| data through", d["dataThrough"], "| nudge", d["adjustment"])
+          for row in d["live"]:
+              print("live", row)
+          EOF
       - name: Publish
         run: |
           gh release view forecast-data >/dev/null 2>&1 || gh release create forecast-data --title "Forecast data" --notes "Machine-generated forecast files read by the portfolio site. Updated daily by the Rapid KL forecast workflow."
+          if [ -f rapidkl-forecast-backup.json ]; then gh release upload forecast-data rapidkl-forecast-backup.json --clobber; fi
           gh release upload forecast-data rapidkl-forecast.json --clobber

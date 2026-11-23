@@ -131,6 +131,69 @@
             "ordinaryDays": 0.0514,
             "usual": 0.075
           }
+        },
+        "+ cap past deviations at +-0.7": {
+          "trees": 314,
+          "network": {
+            "all": 0.0318,
+            "holidayPeriods": 0.0839,
+            "ordinaryDays": 0.0297,
+            "usual": 0.0525
+          },
+          "lines": {
+            "all": 0.0374,
+            "holidayPeriods": 0.093,
+            "ordinaryDays": 0.0351,
+            "usual": 0.0575
+          },
+          "stations": {
+            "all": 0.0561,
+            "holidayPeriods": 0.1882,
+            "ordinaryDays": 0.0506,
+            "usual": 0.0747
+          }
+        },
+        "+ cap deviations, drop station spikes": {
+          "trees": 472,
+          "network": {
+            "all": 0.0312,
+            "holidayPeriods": 0.0903,
+            "ordinaryDays": 0.0288,
+            "usual": 0.0525
+          },
+          "lines": {
+            "all": 0.0369,
+            "holidayPeriods": 0.0915,
+            "ordinaryDays": 0.0347,
+            "usual": 0.0575
+          },
+          "stations": {
+            "all": 0.0554,
+            "holidayPeriods": 0.1847,
+            "ordinaryDays": 0.0501,
+            "usual": 0.0747
+          }
+        },
+        "+ drop station spikes only": {
+          "trees": 173,
+          "network": {
+            "all": 0.0322,
+            "holidayPeriods": 0.0776,
+            "ordinaryDays": 0.0303,
+            "usual": 0.0525
+          },
+          "lines": {
+            "all": 0.0383,
+            "holidayPeriods": 0.0982,
+            "ordinaryDays": 0.0359,
+            "usual": 0.0575
+          },
+          "stations": {
+            "all": 0.0567,
+            "holidayPeriods": 0.1868,
+            "ordinaryDays": 0.0513,
+            "usual": 0.0747
+          }
         }
       }
     },
@@ -221,6 +284,69 @@
             "all": 0.0772,
             "holidayPeriods": 0.1491,
             "ordinaryDays": 0.0629,
+            "usual": 0.0964
+          }
+        },
+        "+ cap past deviations at +-0.7": {
+          "trees": 221,
+          "network": {
+            "all": 0.0421,
+            "holidayPeriods": 0.0792,
+            "ordinaryDays": 0.0347,
+            "usual": 0.0644
+          },
+          "lines": {
+            "all": 0.0494,
+            "holidayPeriods": 0.0941,
+            "ordinaryDays": 0.0405,
+            "usual": 0.0719
+          },
+          "stations": {
+            "all": 0.0764,
+            "holidayPeriods": 0.1481,
+            "ordinaryDays": 0.0621,
+            "usual": 0.0964
+          }
+        },
+        "+ cap deviations, drop station spikes": {
+          "trees": 332,
+          "network": {
+            "all": 0.0414,
+            "holidayPeriods": 0.0816,
+            "ordinaryDays": 0.0333,
+            "usual": 0.0644
+          },
+          "lines": {
+            "all": 0.0489,
+            "holidayPeriods": 0.0946,
+            "ordinaryDays": 0.0397,
+            "usual": 0.0719
+          },
+          "stations": {
+            "all": 0.0748,
+            "holidayPeriods": 0.1481,
+            "ordinaryDays": 0.0602,
+            "usual": 0.0964
+          }
+        },
+        "+ drop station spikes only": {
+          "trees": 450,
+          "network": {
+            "all": 0.0442,
+            "holidayPeriods": 0.0813,
+            "ordinaryDays": 0.0368,
+            "usual": 0.0644
+          },
+          "lines": {
+            "all": 0.0504,
+            "holidayPeriods": 0.0915,
+            "ordinaryDays": 0.0422,
+            "usual": 0.0719
+          },
+          "stations": {
+            "all": 0.0752,
+            "holidayPeriods": 0.1452,
+            "ordinaryDays": 0.0612,
             "usual": 0.0964
           }
         }

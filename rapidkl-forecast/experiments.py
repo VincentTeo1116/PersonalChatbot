@@ -3,7 +3,8 @@
 Two validation windows are used, each with a model trained only on the days before it:
   A  12 May - 11 Nov 2025   few public holidays
   B  12 Nov 2024 - 11 May 2025   includes Chinese New Year and Hari Raya Puasa
-A change is kept in model.py's CONFIG only if it lowers the error in both. Results are written to results/experiments.json.
+A change is kept in model.py's CONFIG only if it lowers the error in both (the capped-deviation and spike-dropping variants are a second round, added after the 19-20 Nov 2026 concert at Bukit Jalil. They passed here by a small margin but were neutral on the
+test year and worse the day after a station spike, so they stay off in model.py.) Results are written to results/experiments.json.
 
 Usage : python experiments.py [A|B]
 """
@@ -20,6 +21,9 @@ VARIANTS = {
     "+ school holidays and holiday detail only": {"clean_usual": False, "rich_holidays": True, "holiday_weight": 1.0, "rain": False},
     "+ clean usual + school holidays and detail": {"clean_usual": True, "rich_holidays": True, "holiday_weight": 1.0, "rain": False},
     "+ holiday days weighted x3": {"clean_usual": True, "rich_holidays": True, "holiday_weight": 3.0, "rain": False},
+    "+ cap past deviations at +-0.7": {"clean_usual": True, "rich_holidays": False, "holiday_weight": 1.0, "rain": False, "clip_dev": 0.7},
+    "+ cap deviations, drop station spikes": {"clean_usual": True, "rich_holidays": False, "holiday_weight": 1.0, "rain": False, "clip_dev": 0.7, "drop_spikes": 0.9},
+    "+ drop station spikes only": {"clean_usual": True, "rich_holidays": False, "holiday_weight": 1.0, "rain": False, "drop_spikes": 0.9},
     "+ same-day rainfall (perfect foresight)": {"clean_usual": True, "rich_holidays": True, "holiday_weight": 1.0, "rain": True},
 }
 
@@ -28,7 +32,7 @@ WINDOWS = {"A": (m.VALID_START, m.TEST_START), "B": (m.pd.Timestamp("2024-11-12"
 
 
 def run(config: dict, window: str = "A") -> dict:
-    m.CONFIG.update(config)
+    m.CONFIG.update({"clip_dev": None, "drop_spikes": None, **config})
     entries, meta = m.load()
     values, days = entries.to_numpy(dtype=np.float32), entries.index
     cal = m.calendar(days)

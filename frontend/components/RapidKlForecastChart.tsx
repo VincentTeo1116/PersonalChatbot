@@ -313,11 +313,39 @@ export default function RapidKlForecastChart() {
           )}
 
           {data && data.track.length > 0 && (
-            <p className="mt-5 border-t border-border pt-4 text-sm leading-relaxed text-text-secondary">
-              <strong className="text-foreground">Track record:</strong> {data.track.length} network forecasts published here have since been checked against the
-              real figures, with an average error of{" "}
-              {((data.track.reduce((sum, t) => sum + Math.abs(t.forecast - t.actual), 0) / data.track.reduce((sum, t) => sum + t.actual, 0)) * 100).toFixed(1)}%.
-            </p>
+            <div className="mt-5 space-y-2 border-t border-border pt-4 text-sm leading-relaxed text-text-secondary">
+              <p>
+                <strong className="text-foreground">Track record:</strong> {data.track.length} network forecasts published here have since been checked against the
+                real figures, with an average error of{" "}
+                {((data.track.reduce((sum, t) => sum + Math.abs(t.forecast - t.actual), 0) / data.track.reduce((sum, t) => sum + t.actual, 0)) * 100).toFixed(1)}%.
+              </p>
+              {data.live && data.live.length > 1 && (
+                <p>
+                  By how far ahead the forecast was made:{" "}
+                  {data.live.map((row) => `${row.daysAhead} day${row.daysAhead === 1 ? "" : "s"}: ${(row.wape * 100).toFixed(1)}% error over ${row.days} days`).join("; ")}. A negative
+                  bias means the real figure came in higher than forecast, which is what a one-off event such as a concert does.
+                </p>
+              )}
+              {(() => {
+                const events = data.track.filter((t) => t.events?.length).slice(-3);
+                return events.length > 0 ? (
+                  <p>
+                    Recent misses that one station explains:{" "}
+                    {events
+                      .map((t) => `${new Date(`${t.date}T00:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}, about ${(Math.round((t.events?.[0].extra ?? 0) / 100) * 100).toLocaleString("en-GB")} extra entries at ${t.events?.[0].station}`)
+                      .join("; ")}
+                    . These look like events near the station and are left out when the model learns from its recent misses.
+                  </p>
+                ) : null;
+              })()}
+              {data.adjustment?.applied && typeof data.adjustment.medianMiss === "number" && Math.abs(data.adjustment.medianMiss) >= 0.005 && (
+                <p>
+                  Tomorrow&apos;s network forecast is nudged {data.adjustment.medianMiss > 0 ? "up" : "down"} because over the last week the real figures ran{" "}
+                  {Math.abs(data.adjustment.medianMiss * 100).toFixed(1)}% {data.adjustment.medianMiss > 0 ? "above" : "below"} the model. Tested on a year the model had not seen, this
+                  helped the next-day network forecast and nothing else, so it is not applied to later days, lines or stations.
+                </p>
+              )}
+            </div>
           )}
         </>
       )}
