@@ -4,10 +4,8 @@ A RAG chatbot for a software engineer portfolio website, adapted from the node-b
 architecture used in the Companies Act chatbot but simplified for portfolio scale:
 
 - **Embeddings**: Google Gemini (`gemini-embedding-001`, truncated to 768 dims)
-- **Answer generation**: Groq (`qwen/qwen3.8-27b` by default) — split out from Gemini for
-  its free tier's throughput (observed ~8,000 tokens/min, refilling in well under a second,
-  plenty for a portfolio site's traffic even if it's not dramatically higher in absolute
-  numbers than Gemini's). Groq has no embeddings endpoint, so that half of the pipeline
+- **Answer generation**: Groq (`qwen/qwen3.8-27b` by default), split out from Gemini for
+  its free tier's throughput. Groq has no embeddings endpoint, so that half of the pipeline
   stays on Gemini. **Groq's model lineup changes often** — if `GROQ_CHAT_MODEL` ever 404s,
   check what your key currently has access to with `client.models.list()` (see
   `.env.example`) rather than assuming the configured name still exists.
@@ -15,17 +13,17 @@ architecture used in the Companies Act chatbot but simplified for portfolio scal
   at this scale)
 - **Knowledge base**: the portfolio's own Supabase tables (profile, education, experience,
   projects, research) — the same content the site renders, so there is one place to edit
-- **Auto-sync**: saving content in the site's `/admin` pings a `/api/admin/sync-kb` webhook,
-  which reads Supabase, re-embeds, and upserts into Pinecone. No spreadsheet, no manual export.
+- **Auto-sync**: saving content in the site's `/admin` notifies this backend, which reads
+  Supabase, re-embeds, and upserts into Pinecone. No spreadsheet, no manual export.
 
 ```
 Visitor asks question
         │
         ▼
-POST /api/chat ──► embed question (Gemini) ──► Pinecone query ──► build context ──► generate (Groq) ──► answer + sources
+chat request   ──► embed question (Gemini) ──► Pinecone query ──► build context ──► generate (Groq) ──► answer + sources
                                                                                               ▲
                                                                                               │
-Site /admin ──save──► POST /api/admin/sync-kb ──► read Supabase ──► embed entries (Gemini) ──► Pinecone upsert
+Site /admin ──save──► sync signal (secret) ──► read Supabase ──► embed entries (Gemini) ──► Pinecone upsert
 ```
 
 ## 1. Provision Pinecone
@@ -51,7 +49,7 @@ pip install -r requirements.txt
 python app.py   # serves on http://localhost:8080
 ```
 
-`GET /health` should return `{"status": "ok"}`.
+The log shows `Portfolio chatbot API ready` once it is up.
 
 ## 4. Connect the knowledge base (Supabase)
 
@@ -66,13 +64,10 @@ update what the chatbot knows.
    as the frontend's `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Only the
    public anon key is needed — the content tables allow public reads via Row Level Security.
 3. Set `SYNC_WEBHOOK_SECRET` to any long random string.
-4. In the frontend's `.env.local`, set (then restart `npm run dev`):
-   ```
-   CHATBOT_SYNC_URL=http://localhost:8080/api/admin/sync-kb   # your deployed backend URL in production
-   CHATBOT_SYNC_SECRET=<the same value as SYNC_WEBHOOK_SECRET>
-   ```
-5. Run the first sync: log into the site's `/admin` → **Chatbot** → **Sync chatbot now**
-   (or `curl -X POST -H "X-Sync-Secret: <secret>" http://localhost:8080/api/admin/sync-kb`).
+4. In the frontend's `.env.local`, set `CHATBOT_SYNC_URL` (the format is in
+   `../frontend/.env.local.example`; use your deployed backend in production) and
+   `CHATBOT_SYNC_SECRET` (the same value as `SYNC_WEBHOOK_SECRET`), then restart `npm run dev`.
+5. Run the first sync: log into the site's `/admin` → **Chatbot** → **Sync chatbot now**.
 
 From then on, saving (create / edit / delete) in the Profile, Education, Experience,
 Projects, or Research sections of `/admin` re-syncs the chatbot automatically in the
@@ -87,13 +82,13 @@ skill category…) is short, so it's embedded whole as a single vector — there
 document-splitting step to reason about. If you outgrow that, see
 [Adding chunking](#adding-chunking-if-you-need-it) below.
 
-**1. Trigger** — the site's admin server actions (`frontend/lib/chatbot-sync.ts`) `POST` to
-`/api/admin/sync-kb` with the shared secret in an `X-Sync-Secret` header. The request has no
-body: it's only a "resync now" signal. It runs via Next.js `after()`, i.e. after the save's
-response has already gone out, so a slow or offline backend never delays or breaks a save.
+**1. Trigger** — the site's admin server actions (`frontend/lib/chatbot-sync.ts`) send the
+backend a "resync now" signal, signed with the shared secret. It runs via Next.js `after()`,
+i.e. after the save's response has already gone out, so a slow or offline backend never
+delays or breaks a save.
 
-**2. Webhook** (`src/routes/webhook.py`) — rejects anything without the right secret (`401`;
-treat the secret like a password), then reads Supabase and syncs.
+**2. Webhook** (`src/routes/webhook.py`) — accepts the signal only with the right secret
+(treat it like a password), then reads Supabase and syncs.
 
 **3. Reading Supabase** (`src/services/supabase_source.py`) — one `GET` per table through
 Supabase's REST API with `httpx`, then each row is turned into a FAQ-style entry:
@@ -125,30 +120,25 @@ the kind of thing a visitor asks the chatbot about.
   from the chatbot's knowledge, not just from the page.
 
 **5. Safety and freshness**
-- If Supabase can't be read, or returns no content at all, the sync aborts with `502` and
-  leaves Pinecone untouched — because the cleanup step would otherwise delete *everything*.
+- If Supabase can't be read, or returns no content at all, the sync stops and leaves
+  Pinecone untouched — because the cleanup step would otherwise delete *everything*.
 - After a successful sync the in-memory answer cache is cleared, so visitors never receive a
   cached answer built from the old content.
-- The response is `{status, upserted, removed, skipped, total_received}`, which the admin's
-  **Chatbot** page displays.
+- The result (how many entries were added, removed and skipped) is shown on the admin's
+  **Chatbot** page.
 
-**Retrieval side** (for context — this doesn't run during sync): `POST /api/chat` embeds the
-visitor's question with Gemini (`task_type="retrieval_query"`), queries Pinecone for the
-`TOP_K` (default 4) nearest vectors above `MIN_SCORE` (default 0.58) cosine similarity,
-concatenates their `answer` metadata into a context block, and feeds that to Groq's
-`GROQ_CHAT_MODEL` (default `qwen/qwen3.8-27b`) to generate the final grounded answer.
-`POST /api/chat/stream` does the same retrieval and sends newline-delimited JSON. It emits
-`{"type":"status","stage":...}` when work starts, then `{"type":"chunk","text":...}` as
-the answer arrives, followed by one terminal `done` or `error` event. The widget shows
-actual request, search, preparation, and writing stages in a collapsible timeline. Cached
-answers and meeting requests have their own stages and skip search/generation. These stages
-describe backend actions, not a model reasoning trace. The widget falls back to the plain
-`/api/chat` call if streaming is unavailable.
+**Retrieval side** (for context — this doesn't run during sync): the visitor's question is
+embedded with Gemini, the nearest entries above a similarity threshold are fetched from
+Pinecone, and their text is given to Groq as context for a grounded answer. A streaming
+variant reports real progress (request, search, preparation, writing) while the reply is
+prepared; the widget shows those stages in a collapsible timeline and falls back to a plain
+request if streaming is unavailable. Cached answers and meeting requests take their own
+shorter paths. These stages describe backend actions, not a model reasoning trace.
 Each reply keeps a compact **Inspect answer** control with selected source snippets,
 similarity values, server time, and a link to the public `/ai-lab` page. The values are
 retrieval evidence and timing, not a probability that every claim is correct.
 
-Every answered question (on either endpoint) is also logged to Supabase's `chat_logs` table
+Every answered question is also logged to Supabase's `chat_logs` table
 in the background — see `src/services/chat_logging.py` and
 `frontend/supabase/004_chat_logs.sql` — so `/admin/chatbot` can show what visitors actually
 ask. This is best-effort: if the migration hasn't been run yet, logging silently no-ops and
@@ -171,25 +161,31 @@ capture it well — chunking solves a problem that doesn't exist at this content
 
 ## 5. Test the chatbot
 
-```bash
-curl -X POST http://localhost:8080/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"question": "What is your educational background?"}'
-```
+With the backend running, open `widget/demo.html` (see section 7) and ask a question about
+your portfolio. `python -m unittest discover -s tests` runs the automated tests.
 
 ## 6. Deploy
 
 Any container host works (Cloud Run, Fly.io, Render, a small VM). Requirements:
 - Expose port `8080` (or set `$PORT` and adjust `app.py`)
 - Set the same env vars as `.env`
-- Set the frontend's `CHATBOT_SYNC_URL` (`https://<deployed-backend>/api/admin/sync-kb`) and
-  `CHATBOT_SYNC_SECRET` so `/admin` saves reach the deployed backend
+- Set the frontend's `CHATBOT_SYNC_URL` and `CHATBOT_SYNC_SECRET` so `/admin` saves reach the
+  deployed backend
 - Set `ALLOWED_ORIGINS` to your actual portfolio domain (not `*`) once deployed
+- Run a single worker process
+
+### Usage limits
+
+The chat API limits how much any one visitor, and all visitors together, can use it, so the
+free model quota cannot be used up by one source. A visitor who reaches a limit gets a polite
+message instead of an answer. The limits are settings in the environment (the names are in
+`.env.example`); set your own values in your host's environment rather than relying on the
+defaults in this repository.
 
 ## 7. Embed the chat widget on your portfolio site
 
 `widget/` has a framework-agnostic drop-in widget (vanilla JS + CSS, no build step, no
-dependencies) that calls `/api/chat` and renders a floating chat bubble.
+dependencies) that calls the chat API and renders a floating chat bubble.
 
 **Try it locally first:** with the backend running (`python app.py`), open
 `widget/demo.html` directly in a browser (double-click it, or `start widget/demo.html`
@@ -201,7 +197,7 @@ Next.js, whatever the portfolio ends up being built with:
 ```html
 <script
   src="https://your-cdn-or-site.com/chatbot-widget.js"
-  data-api-url="https://your-deployed-backend.com/api/chat"
+  data-api-url="YOUR_CHAT_API_URL"
   data-owner-name="Vincent"
   data-primary-color="#4f46e5"
   data-greeting="Hi! Ask me anything about Vincent's background, skills, or projects."
@@ -214,6 +210,9 @@ contain one) — clickable suggestion chips shown before the visitor's first mes
 once they send anything. Omit it to use the built-in defaults, or pass `starterQuestions: []`
 via `PortfolioChatbotConfig` below to turn them off entirely.
 
+`YOUR_CHAT_API_URL` is your deployed backend's chat address; the format is shown for
+`NEXT_PUBLIC_CHATBOT_API_URL` in `../frontend/.env.local.example`.
+
 Host `chatbot-widget.js` and `chatbot-widget.css` alongside your site's static assets (the
 script auto-loads the CSS from the same folder it was served from). The widget has no
 build step — copy both files as-is.
@@ -223,7 +222,7 @@ the script (equivalent to the data-attributes above):
 
 ```jsx
 <script dangerouslySetInnerHTML={{ __html: `window.PortfolioChatbotConfig = {
-  apiUrl: "https://your-deployed-backend.com/api/chat",
+  apiUrl: "YOUR_CHAT_API_URL",
   ownerName: "Vincent",
 }; ` }} />
 <script src="/chatbot-widget.js" />
@@ -240,7 +239,6 @@ Deliberately dropped (portfolio scale doesn't need the complexity):
 - Multi-namespace retrieval / Reciprocal Rank Fusion — one namespace is enough for one person's KB
 - Cross-encoder reranking, HyDE query expansion, BM25 hybrid search
 - Firebase auth / conversation history — a portfolio chatbot is stateless and anonymous
-- Circuit breaker — traffic volume doesn't warrant it; add back if this gets hammered
 
 Added (not in the original):
 - The portfolio's Supabase tables as the knowledge base, with a push-on-save webhook from the

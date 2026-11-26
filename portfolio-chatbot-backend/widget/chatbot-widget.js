@@ -300,10 +300,28 @@
     }
   }
 
-  function rateLimitedError() {
+  function rateLimitedError(message) {
     var err = new Error("Rate limited");
     err.rateLimited = true;
+    // The server explains which limit was reached (per minute, hour or day). Kept only when it is plain, reasonably short text.
+    err.politeMessage = typeof message === "string" && message && message.length <= 400 ? message : null;
     return err;
+  }
+
+  // Turns a 429 response into a rejected promise carrying the server's explanation, or none if the body cannot be read.
+  function rejectRateLimited(res) {
+    var detail;
+    try {
+      detail = res.json().then(function (body) { return body && body.detail; }, function () { return null; });
+    } catch (e) {
+      detail = Promise.resolve(null);
+    }
+    return detail.then(function (text) { throw rateLimitedError(text); });
+  }
+
+  // "smalltalk" (a greeting) and "limit" (a polite refusal when a daily limit is reached) have nothing to inspect or rate.
+  function isRealAnswer(data) {
+    return !data || (data.kind !== "smalltalk" && data.kind !== "limit");
   }
 
   function ChatbotWidget(config) {
@@ -587,7 +605,9 @@
           fetch(feedbackUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question: question, answer: answer, rating: rating, matched: hasSources }),
+            // The token is the one-time ticket that came with this answer; the server stores its own copy of the question and
+            // answer from it. The other fields are only for a backend that predates tickets.
+            body: JSON.stringify({ token: data.feedback_token || undefined, question: question, answer: answer, rating: rating, matched: hasSources }),
           }).catch(function () {});
         } catch (e) {}
         if (rating === "down") showCta();
@@ -793,7 +813,7 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: question }),
     }).then(function (res) {
-      if (res.status === 429) throw rateLimitedError();
+      if (res.status === 429) return rejectRateLimited(res);
       if (!res.ok || !res.body || !res.body.getReader) {
         throw new Error("Streaming not available (" + (res && res.status) + ")");
       }
@@ -840,8 +860,8 @@
           // Snap to the server's canonical answer (tidied, with key names in bold), even if the
           // raw streamed chunks briefly differed from it.
           renderRich(bubble, msg.answer || text || "Sorry, I couldn't find an answer to that.");
-          // A greeting has nothing to inspect or rate, so it gets no sources panel or feedback row.
-          if (msg.kind !== "smalltalk") {
+          // A greeting or a limit notice has nothing to inspect or rate, so it gets no sources panel or feedback row.
+          if (isRealAnswer(msg)) {
             self._addSources(msg.sources, msg);
             self._addFollowUps(question, msg);
           }
@@ -906,14 +926,14 @@
       body: JSON.stringify({ question: question }),
     })
       .then(function (res) {
-        if (res.status === 429) throw rateLimitedError();
+        if (res.status === 429) return rejectRateLimited(res);
         if (!res.ok) throw new Error("Request failed (" + res.status + ")");
         return res.json();
       })
       .then(function (data) {
         self._hideTyping();
         self._addMessage("bot", data.answer || "Sorry, I couldn't find an answer to that.");
-        if (data.kind !== "smalltalk") {
+        if (isRealAnswer(data)) {
           self._addSources(data.sources, data);
           self._addFollowUps(question, data);
         }
@@ -956,7 +976,7 @@
         self._addMessage(
           "error",
           err && err.rateLimited
-            ? "You're asking quite quickly. Please wait a minute and try again."
+            ? err.politeMessage || "You're asking quite quickly. Please wait a minute and try again."
             : "Something went wrong reaching the assistant. Please try again in a moment."
         );
       })

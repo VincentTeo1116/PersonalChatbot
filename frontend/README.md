@@ -113,7 +113,7 @@ Every variable is documented inline in `.env.local.example` — copy them in, re
 
 ```bash
 # already in .env.local from step 2 — just add/confirm this var too
-NEXT_PUBLIC_CHATBOT_API_URL=http://localhost:8080/api/chat
+NEXT_PUBLIC_CHATBOT_API_URL=<your backend's chat address; the format is in .env.local.example>
 ```
 
 The widget itself (`public/widget/chatbot-widget.js` + `.css`) is a copy of
@@ -144,7 +144,7 @@ keep it in sync, add these **server-only** vars to `.env.local` (values explaine
 `../portfolio-chatbot-backend/README.md`, section 4):
 
 ```bash
-CHATBOT_SYNC_URL=http://localhost:8080/api/admin/sync-kb
+CHATBOT_SYNC_URL=<your backend's sync address; the format is in .env.local.example>
 CHATBOT_SYNC_SECRET=<same value as the backend's SYNC_WEBHOOK_SECRET>
 ```
 

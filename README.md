@@ -16,7 +16,7 @@ their source of truth:
 │                         │◄─────────────────────────── │  Storage,    │
 └───────────┬─────────────┘        content              │  Auth)       │
             │ embeds widget                             └──────┬───────┘
-            │ POST /api/chat                                   │ reads on sync
+            │ chat requests                                    │ reads on sync
             ▼                                                  ▼
 ┌─────────────────────────┐   embed (Gemini) + retrieve   ┌──────────────┐
 │portfolio-chatbot-backend│ ─────────────────────────────►│   Pinecone   │
@@ -34,7 +34,7 @@ their source of truth:
   renders, embeds them with Gemini, stores them in Pinecone, and answers visitor
   questions with Groq — grounded in that content, nothing made up. Saving in `/admin`
   automatically re-syncs it. Deployed separately (currently on Render); the frontend
-  just calls its `/api/chat` endpoint.
+  just calls its chat API.
 
 Each has its own full setup guide — **start there**, not here, to actually run anything:
 
@@ -75,7 +75,7 @@ frontend/  # Next.js site + /admin CMS
   supabase/ #  SQL migrations + seed data
 
 portfolio-chatbot-backend/ # FastAPI RAG chatbot
-  src/routes/   # /api/chat, /api/admin/sync-kb
+  src/routes/   # chat and knowledge-base sync routes
   src/services/  #Gemini, Groq, Pinecone, Supabase-reading, prompt building
   widget/  # framework-agnostic drop-in chat widget (vanilla JS/CSS)
 ```
