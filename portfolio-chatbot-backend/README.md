@@ -62,7 +62,10 @@ update what the chatbot knows.
    SQL). The chatbot reads what's in it.
 2. In this backend's `.env`, set `SUPABASE_URL` and `SUPABASE_ANON_KEY` to the same values
    as the frontend's `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Only the
-   public anon key is needed — the content tables allow public reads via Row Level Security.
+   public anon key is needed to read — the content tables allow public reads via Row Level
+   Security. Optionally set `SUPABASE_SERVICE_ROLE_KEY` (private, in your host's environment
+   only) so chat logs and feedback are saved with it, then run
+   `frontend/supabase/025_close_public_chat_inserts.sql` to stop anyone else writing to them.
 3. Set `SYNC_WEBHOOK_SECRET` to any long random string.
 4. In the frontend's `.env.local`, set `CHATBOT_SYNC_URL` (the format is in
    `../frontend/.env.local.example`; use your deployed backend in production) and

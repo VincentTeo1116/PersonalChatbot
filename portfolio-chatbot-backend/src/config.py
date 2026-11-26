@@ -54,6 +54,9 @@ class Config:
     # --- Supabase (the knowledge base source: the same tables the portfolio site renders) ---
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "").rstrip("/")
     SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
+    # Optional and private (it bypasses Row Level Security): used only to write chat_logs and chat_feedback, so those tables
+    # need no public insert rule. Set it in the host's environment only. Blank means those writes use the public key.
+    SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
 
     # --- Sync webhook (called by the portfolio site's /admin after content changes) ---
     SYNC_WEBHOOK_SECRET: str = os.getenv("SYNC_WEBHOOK_SECRET", "")
