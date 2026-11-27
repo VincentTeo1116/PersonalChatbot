@@ -5,7 +5,7 @@ calendar facts about the target day, and that site's own history up to the cutof
 or after it is used, and the test month comes strictly after the training period.
 
 The model predicts how far each hour will deviate from that site's typical day, not the volume itself. A first version
-predicted the volume directly and lost to the "typical day" baseline on the test month (results/metrics_v1_direct.json);
+predicted the volume directly and lost to the "typical day" baseline on the test month;
 the typical day is already a strong forecast, so the model's job is to correct it using recent drift and the calendar.
 
 Train : targets from 22 Aug to 30 Sep 2026. The design and number of trees were chosen on 10-30 Sep (trained on 22 Aug-9 Sep).

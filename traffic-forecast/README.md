@@ -36,8 +36,7 @@ python train.py            # writes results/metrics.json, results/model.json, re
 ## Results
 
 See `results/metrics.json` for the current numbers, by forecast horizon and day type.
-`results/metrics_v1_direct.json` keeps the first version, which predicted volume directly and did not beat the
-typical-day baseline.
+The first version predicted volume directly and did not beat the typical-day baseline.
 
 ## Known limits
 

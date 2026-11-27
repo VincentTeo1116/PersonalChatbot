@@ -82,13 +82,13 @@ Where the gain comes from, and how sure it is (`bootstrap95` in `metrics.json` r
 
 The likely range comes from quantile models for the 10th and 90th percentiles, widened by a correction measured on the
 validation period (`calibrate_range`), separately for near (1 to 7 days) and far (8 to 28 days) forecasts. It held the real figure 77% to 79% of
-the time on the test year against a target of 80%; without the correction it was 59% for the network (`results/metrics_v2_uncalibrated.json`).
+the time on the test year against a target of 80%; without the correction it was 59% for the network.
 It is weakest in holiday periods for lines (72%) and stations (74%) and on ordinary network days (77%); coverage by horizon is in `rangeCoverage`.
 
 `results/experiments.json` records the ideas that were tried on earlier data. Kept: a usual level that skips public
 holidays and disrupted days. Dropped: school holidays, holiday type and holiday weighting (no consistent gain), and
-same-day rainfall (about 5% better for the network, but only with rainfall known in advance). `results/metrics_v1.json`
-is the first version for comparison (network 4.1%).
+same-day rainfall (about 5% better for the network, but only with rainfall known in advance). The first version
+scored 4.1% for the network.
 
 Tried after the 19 and 20 Nov 2026 concert at Bukit Jalil, and dropped: capping how far a past day may sit from its usual level when used as an
 input, and leaving station spikes out of training. Both helped a little on the two validation windows, but on the test year they were neutral

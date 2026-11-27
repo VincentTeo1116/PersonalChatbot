@@ -38,7 +38,9 @@ export async function checkUpload(file: File, allow: "image" | "pdf"): Promise<s
   return EXTENSIONS[type];
 }
 
-// Uploads to {folder}/image-{n}.{ext}, n = highest existing + 1. Doesn't fill gaps from deleted images.
+// Uploads to {folder}/image-{n}-{random}.{ext}, n = highest existing + 1. Doesn't fill gaps from deleted images.
+// The random part gives every upload an address that was never used before. Without it, deleting an image and uploading a new
+// one reused the old address, and browsers, the file host and the image resizer kept showing the old picture for hours.
 export async function uploadNextImage(
   supabase: SupabaseClient,
   folder: string,
@@ -49,12 +51,12 @@ export async function uploadNextImage(
 
   const nextIndex =
     (existing ?? []).reduce((max, entry) => {
-      const match = /^image-(\d+)\./.exec(entry.name);
+      const match = /^image-(\d+)[.-]/.exec(entry.name); // both the old "image-3.png" and the new "image-3-ab12cd34.png"
       return match ? Math.max(max, Number(match[1])) : max;
     }, 0) + 1;
 
   const ext = await checkUpload(file, "image");
-  const path = `${folder}/image-${nextIndex}${ext}`;
+  const path = `${folder}/image-${nextIndex}-${crypto.randomUUID().slice(0, 8)}${ext}`;
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)
     .upload(path, file, { upsert: false, contentType: file.type });
