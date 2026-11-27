@@ -123,14 +123,14 @@ const allArticles: EngineeringArticle[] = [
   {
     slug: "reading-malaysian-receipts-without-ai",
     title: "Teaching my expense app to read Malaysian receipts, mostly without AI",
-    description: "How VinExpenses finds the total, merchant and date on a Malaysian receipt with a scoring parser instead of a language model, and why it would rather ask than guess.",
+    description: "How ManaDuit finds the total, merchant and date on a Malaysian receipt with a scoring parser instead of a language model, and why it would rather ask than guess.",
     published: "2026-07-15",
-    updated: "2026-07-15",
-    related: { href: "/projects/vinexpenses", label: "VinExpenses case study" },
+    updated: "2026-11-27",
+    related: { href: "/projects/manaduit", label: "ManaDuit case study" },
     sections: [
       { id: "why", title: "Where my money went", paragraphs: [
         "When I started my part-time job I finally had money coming in, and almost immediately I had no idea where it was going. Some of it was cash. Some went through TnG eWallet, some through the bank app, some through other wallets. Every one of them has a transaction history, but nobody opens five apps to add up a month.",
-        "There are plenty of expense trackers out there. I built my own anyway, partly to see if I could, and partly because I wanted my own dashboard, my own categories and my own rules. That became [VinExpenses](https://vincentteo1116.github.io/VinExpenses/).",
+        "There are plenty of expense trackers out there. I built my own anyway, partly to see if I could, and partly because I wanted my own dashboard, my own categories and my own rules. That became [ManaDuit](https://manaduit.com/), which was called VinExpenses at first.",
         "The feature I spent the longest on is receipt scanning: take a photo or drop in a PDF, and the app fills in the merchant, the total and the date.",
       ] },
       { id: "hard", title: "Why a receipt is harder than it looks", paragraphs: [
@@ -146,17 +146,17 @@ const allArticles: EngineeringArticle[] = [
       { id: "ask", title: "When it is not sure, it asks", paragraphs: [
         "Every result is marked high, medium or low confidence, based on how strong the winning score is and how far ahead it is of the runner-up. On low confidence the app fills in nothing. It shows the top few amounts as buttons and you tap the right one.",
         "That was a deliberate choice. In a money app, a wrong number that looks right is worse than a question. You will not notice RM12.50 saved as RM125.00 until your month looks strange.",
-        "There is an AI step, but it is the backup. It is switched off unless you tick the box, it only runs when the rules are unsure, and it is sent the text, never the photo. Its answer is checked before use: the amount has to be sensible, the date has to be real, and the category has to be one of yours. PDFs that already contain text never leave your phone at all.",
+        "The first version had an optional AI backup for the receipts the rules could not settle. When I rebuilt the app I left it out, so today the rules do all the work and the app asks you when they are unsure. PDFs that already contain text never leave your phone at all.",
       ] },
       { id: "works", title: "Does it actually work?", paragraphs: [
-        "I keep 8 real receipts, with the personal details removed, as tests. For each one the parser has to return the exact amount, merchant and date with high confidence, and all 8 pass. The whole project has 368 automated tests, and a failing one blocks the deploy.",
+        "I keep 8 real receipts, with the personal details removed, as tests. For each one the parser has to return the exact amount, merchant and date with high confidence, and all 8 pass. The whole project has about 950 automated tests, and a failing one blocks the deploy.",
         "I should be straight about what that proves. Eight receipts tell me the parser keeps working on formats it has already seen. They do not tell me how often it is right on a receipt from a shop it has never met. I do not have that number yet, and I am not going to make one up.",
         "And a small confession: I mostly still type my own expenses in by hand. Old habit. It was my siblings and friends who started using the scanner properly, and they are the ones who told me it is useful and usually right. I am taking that as a sign I should use my own feature more.",
       ] },
       { id: "next", title: "What I would do next", paragraphs: [
         "Collect 30 to 50 labelled receipts and publish a real hit rate for amount, merchant and date. Add a demo account, because nobody wants to sign up just to look around. And the app only handles ringgit for now.",
         "The idea and the backend are my own work, and I drafted the screens myself. I used an AI assistant to tighten things up: proper fallbacks, hunting down bugs, checking the endpoints, and making my rough UI look better.",
-        "The code, including the parser and its tests, is on [GitHub](https://github.com/VincentTeo1116/VinExpenses).",
+        "The code, including the parser and its tests, is on [GitHub](https://github.com/VincentTeo1116/manaduit).",
       ] },
     ],
   },

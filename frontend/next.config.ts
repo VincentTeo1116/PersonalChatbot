@@ -60,6 +60,10 @@ const resumeFrameHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Old addresses of renamed projects, so links and search results that still point at them keep working.
+  async redirects() {
+    return [{ source: "/projects/vinexpenses", destination: "/projects/manaduit", permanent: true }];
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
